@@ -1,0 +1,39 @@
+{
+  "name": "Zirclaire",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare"
+  },
+  "dependencies": {
+    "@nuxt/ui": "^4.10.0",
+    "@nuxtjs/cloudinary": "^4.0.0",
+    "@nuxtjs/supabase": "^2.0.9",
+    "@tiptap/core": "^3.28.0",
+    "@tiptap/extension-bubble-menu": "^3.28.0",
+    "@tiptap/extension-code": "^3.28.0",
+    "@tiptap/extension-collaboration": "^3.28.0",
+    "@tiptap/extension-drag-handle": "^3.28.0",
+    "@tiptap/extension-drag-handle-vue-3": "^3.28.0",
+    "@tiptap/extension-floating-menu": "^3.28.0",
+    "@tiptap/extension-horizontal-rule": "^3.28.0",
+    "@tiptap/extension-image": "^3.28.0",
+    "@tiptap/extension-mention": "^3.28.0",
+    "@tiptap/extension-node-range": "^3.28.0",
+    "@tiptap/extension-placeholder": "^3.28.0",
+    "@tiptap/markdown": "^3.28.0",
+    "@tiptap/pm": "^3.28.0",
+    "@tiptap/starter-kit": "^3.28.0",
+    "@tiptap/suggestion": "^3.28.0",
+    "@tiptap/vue-3": "^3.28.0",
+    "nuxt": "^4.4.8",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^6.0.3",
+    "vue": "^3.5.39",
+    "vue-router": "^5.1.0"
+  }
+}

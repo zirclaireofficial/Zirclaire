@@ -1,0 +1,129 @@
+@import "tailwindcss";
+@import "@nuxt/ui";
+
+/* ---------------------------------------------------------------
+   Zirclaire theme
+   - neutral canvas (stone), black grounds, red is the accent,
+     green is reserved for success.
+   - Inter for UI, Fraunces for headings/brand (auto-provisioned
+     by @nuxt/fonts).
+---------------------------------------------------------------- */
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Fraunces", ui-serif, Georgia, serif;
+
+  /* Brand red ramp (500 = the brand red #B3242F) -> mapped to `primary` */
+  --color-brand-50: #fcf2f3;
+  --color-brand-100: #f9e0e1;
+  --color-brand-200: #f0bec1;
+  --color-brand-300: #e5949a;
+  --color-brand-400: #d25a63;
+  --color-brand-500: #b3242f;
+  --color-brand-600: #9c1f29;
+  --color-brand-700: #821a22;
+  --color-brand-800: #6b181e;
+  --color-brand-900: #5a181d;
+  --color-brand-950: #33090c;
+
+  /* Success green ramp (deep emerald, reserved) -> mapped to `success` */
+  --color-forest-50: #ecf5f0;
+  --color-forest-100: #cfe8db;
+  --color-forest-200: #9fd1b8;
+  --color-forest-300: #63b892;
+  --color-forest-400: #2f9670;
+  --color-forest-500: #0e6b4f;
+  --color-forest-600: #0b5a42;
+  --color-forest-700: #094835;
+  --color-forest-800: #073a2b;
+  --color-forest-900: #063024;
+  --color-forest-950: #021b14;
+}
+
+/* A small helper for serif brand/heading moments. */
+.font-serif {
+  font-family: var(--font-serif);
+}
+
+/* Subtle dotted canvas the app column sits on. */
+:root {
+  --zc-dot: rgba(23, 23, 23, 0.07);
+}
+.dark {
+  --zc-dot: rgba(255, 255, 255, 0.06);
+}
+.zc-canvas {
+  background-image: radial-gradient(var(--zc-dot) 1px, transparent 1px);
+  background-size: 18px 18px;
+}
+
+/* Textured surface for empty states / hero panels. */
+.zc-textured {
+  background-image: radial-gradient(var(--zc-dot) 1px, transparent 1px);
+  background-size: 16px 16px;
+}
+
+/* Serif heading with a short red accent underline. */
+.zc-title {
+  position: relative;
+  display: inline-block;
+  padding-bottom: 8px;
+}
+.zc-title::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 3px;
+  width: 30px;
+  border-radius: 2px;
+  background: var(--color-brand-500);
+}
+
+/* Red-tinted eyebrow label. */
+.zc-eyebrow {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-brand-600);
+}
+.dark .zc-eyebrow {
+  color: var(--color-brand-400);
+}
+
+/* Soft lift for the app column, so it floats off the canvas. */
+.zc-lift {
+  box-shadow: 0 1px 2px rgba(23, 23, 23, 0.04), 0 12px 40px rgba(23, 23, 23, 0.06);
+}
+.dark .zc-lift {
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 12px 40px rgba(0, 0, 0, 0.35);
+}
+
+/* Quiet press feedback on tappable things. */
+.zc-tap {
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease,
+    color 0.15s ease, border-color 0.15s ease;
+}
+.zc-tap:active {
+  transform: scale(0.96);
+}
+
+/* Reusable raised card with a gentle hover. */
+.zc-card {
+  border-radius: 0.85rem;
+  border: 1px solid var(--color-stone-200);
+  background: #fff;
+  transition: box-shadow 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
+}
+.dark .zc-card {
+  border-color: var(--color-stone-800);
+  background: var(--color-stone-900);
+}
+.zc-card-hover:hover {
+  border-color: var(--color-stone-300);
+  box-shadow: 0 1px 2px rgba(23, 23, 23, 0.04), 0 8px 24px rgba(23, 23, 23, 0.06);
+}
+.dark .zc-card-hover:hover {
+  border-color: var(--color-stone-700);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
