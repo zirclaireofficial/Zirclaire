@@ -40,6 +40,8 @@ const isAdmin = computed(() => me.value?.role === 'admin')
               aria-label="Sign out"
               @click="signOut"
             />
+            <!-- Signed out: the feed is public, so give visitors a way in. -->
+            <UButton v-else to="/login" color="primary" size="sm" label="Log in" class="zc-tap" />
           </div>
         </header>
 

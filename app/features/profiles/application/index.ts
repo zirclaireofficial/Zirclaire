@@ -9,6 +9,9 @@ export function createProfileUseCases(repo: ProfileRepository) {
 
     /** The signed-in member's own public-facing card. */
     viewById: (id: string) => repo.getById(id),
+
+    /** Admin directory — everyone on the platform and their role. */
+    allMembers: () => repo.listAllMembers(),
   }
 }
 

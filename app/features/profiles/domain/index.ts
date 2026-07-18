@@ -54,6 +54,36 @@ export function profilePath(memberId: string | null): string | null {
   return memberId ? `/u/${memberId}` : null
 }
 
+// --- Admin directory -------------------------------------------------------
+// The broker's view of everyone on the platform. This reads the `profiles`
+// table rather than the public view, because an admin legitimately needs the
+// email and approval state. RLS restricts it to admins.
+
+export interface MemberRow {
+  id: string
+  member_id: string | null
+  full_name: string
+  email: string
+  role: string
+  kyc_status: string
+  profile_picture: string | null
+  created_at: string
+}
+
+export function kycLabel(status: string): string {
+  return (
+    { pending: 'Pending review', approved: 'Approved', rejected: 'Rejected' } as Record<string, string>
+  )[status] ?? status
+}
+
+/** Group counts for the directory header. */
+export function countByRole(members: MemberRow[]): Record<string, number> {
+  return members.reduce<Record<string, number>>((acc, m) => {
+    acc[m.role] = (acc[m.role] ?? 0) + 1
+    return acc
+  }, {})
+}
+
 // --- Port: what infrastructure must provide --------------------------------
 
 export interface ProfileRepository {
@@ -61,4 +91,6 @@ export interface ProfileRepository {
   getByMemberId(memberId: string): Promise<PublicProfile | null>
   /** Look up by user id, e.g. for the signed-in member's own page. */
   getById(id: string): Promise<PublicProfile | null>
+  /** Admin only: every member on the platform, newest first. */
+  listAllMembers(): Promise<MemberRow[]>
 }

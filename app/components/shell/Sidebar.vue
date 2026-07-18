@@ -9,6 +9,7 @@ const { me, load } = useMe()
 watch(user, () => load(), { immediate: true })
 
 const isAdmin = computed(() => me.value?.role === 'admin')
+const quickOpen = ref(false)
 
 const items = computed(() =>
   isAdmin.value
@@ -17,6 +18,7 @@ const items = computed(() =>
         // the nav keeps only the places you go to browse, not to action.
         { to: '/admin', icon: 'i-lucide-layout-dashboard', label: 'Dashboard' },
         { to: '/', icon: 'i-lucide-home', label: 'Feed' },
+        { to: '/admin/members', icon: 'i-lucide-users', label: 'Members' },
         { to: '/admin/projects', icon: 'i-lucide-folder-kanban', label: 'All projects' },
         { to: '/profile', icon: 'i-lucide-user', label: 'Profile' },
       ]
@@ -72,6 +74,7 @@ function isActive(to: string) {
         label="Sign out"
         @click="signOut"
       />
+      <UButton v-else to="/login" color="primary" size="sm" label="Log in" class="zc-tap" />
     </div>
   </aside>
 </template>
