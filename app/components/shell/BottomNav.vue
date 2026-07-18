@@ -17,11 +17,12 @@ const right = [
   { to: '/profile', icon: 'i-lucide-user', label: 'Profile' },
 ]
 
+// KYC, funding and reports live on the dashboard as queues — the nav is for
+// browsing, not actioning.
 const adminItems = [
   { to: '/admin', icon: 'i-lucide-layout-dashboard', label: 'Home' },
-  { to: '/admin/kyc', icon: 'i-lucide-shield-check', label: 'KYC' },
-  { to: '/admin/funding', icon: 'i-lucide-banknote', label: 'Funding' },
-  { to: '/admin/moderation', icon: 'i-lucide-flag', label: 'Reports' },
+  { to: '/', icon: 'i-lucide-home', label: 'Feed' },
+  { to: '/admin/projects', icon: 'i-lucide-folder-kanban', label: 'Projects' },
   { to: '/profile', icon: 'i-lucide-user', label: 'Profile' },
 ]
 

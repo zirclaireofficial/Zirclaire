@@ -13,10 +13,11 @@ const isAdmin = computed(() => me.value?.role === 'admin')
 const items = computed(() =>
   isAdmin.value
     ? [
+        // KYC, funding and reports are queues reached from the dashboard —
+        // the nav keeps only the places you go to browse, not to action.
         { to: '/admin', icon: 'i-lucide-layout-dashboard', label: 'Dashboard' },
-        { to: '/admin/kyc', icon: 'i-lucide-shield-check', label: 'KYC review' },
-        { to: '/admin/funding', icon: 'i-lucide-banknote', label: 'Funding' },
-        { to: '/admin/moderation', icon: 'i-lucide-flag', label: 'Reports' },
+        { to: '/', icon: 'i-lucide-home', label: 'Feed' },
+        { to: '/admin/projects', icon: 'i-lucide-folder-kanban', label: 'All projects' },
         { to: '/profile', icon: 'i-lucide-user', label: 'Profile' },
       ]
     : [
@@ -38,9 +39,9 @@ function isActive(to: string) {
   <aside
     class="sticky top-0 hidden h-screen w-60 shrink-0 flex-col border-r border-stone-200 bg-white/70 px-3 py-5 backdrop-blur-md dark:border-stone-800 dark:bg-stone-900/70 lg:flex"
   >
-    <NuxtLink :to="isAdmin ? '/admin' : '/'" class="zc-tap mb-1 flex items-center gap-2 px-2">
-      <ShellLogo :size="34" />
-      <span class="font-serif text-xl tracking-tight">Zirclaire<span class="text-primary">.</span></span>
+    <NuxtLink :to="isAdmin ? '/admin' : '/'" class="zc-tap mb-1 flex items-center gap-2.5 px-2">
+      <ShellLogo :size="48" />
+      <span class="font-serif text-2xl tracking-tight">Zirclaire<span class="text-primary">.</span></span>
     </NuxtLink>
     <p v-if="isAdmin" class="zc-eyebrow mb-4 px-2">Admin console</p>
     <div v-else class="mb-4" />

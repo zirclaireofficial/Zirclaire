@@ -20,6 +20,10 @@ export function createProjectUseCases(repo: ProjectRepository) {
     /** Everyone who applied to one of my projects (requester view). */
     applicantsFor: (projectId: string) => repo.listApplicants(projectId),
 
+    /** Admin oversight — read-only views over every project. */
+    allProjects: (status?: string | null) => repo.listAllForAdmin(status),
+    projectDetail: (projectId: string) => repo.getAdminDetail(projectId),
+
     /** Apply to a live project (Service Providers). */
     apply: (projectId: string, coverNote?: string) =>
       repo.applyToProject(projectId, coverNote),

@@ -22,11 +22,11 @@ const isAdmin = computed(() => me.value?.role === 'admin')
 
         <!-- Mobile header (desktop uses the sidebar instead) -->
         <header
-          class="sticky top-0 z-20 flex h-14 items-center justify-between border-b border-stone-200 bg-white/85 px-4 backdrop-blur-md dark:border-stone-800 dark:bg-stone-900/85 lg:hidden"
+          class="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-stone-200 bg-white/85 px-4 backdrop-blur-md dark:border-stone-800 dark:bg-stone-900/85 lg:hidden"
         >
-          <NuxtLink :to="isAdmin ? '/admin' : '/'" class="zc-tap flex items-center gap-2">
-            <ShellLogo :size="30" />
-            <span class="font-serif text-xl tracking-tight">Zirclaire<span class="text-primary">.</span></span>
+          <NuxtLink :to="isAdmin ? '/admin' : '/'" class="zc-tap flex items-center gap-2.5">
+            <ShellLogo :size="42" />
+            <span class="font-serif text-2xl tracking-tight">Zirclaire<span class="text-primary">.</span></span>
             <UBadge v-if="isAdmin" color="primary" variant="soft" size="sm" class="ml-0.5">Admin</UBadge>
           </NuxtLink>
           <div class="flex items-center gap-1">

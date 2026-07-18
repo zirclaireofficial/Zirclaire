@@ -76,6 +76,15 @@ function requireAccount(): boolean {
     })
     return false
   }
+  // Admins moderate the feed rather than taking part in it.
+  if (me.value?.role === 'admin') {
+    toast.add({
+      title: 'Admins browse read-only',
+      description: 'Use the moderation queue to act on a post.',
+      color: 'neutral',
+    })
+    return false
+  }
   if (!mayInteract.value) {
     toast.add({ title: 'Pending approval', description: 'You can interact once an admin approves your account.', color: 'warning' })
     return false

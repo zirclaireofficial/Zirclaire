@@ -109,6 +109,76 @@ export function formatRemaining(project: { deadline_at: string | null }, now = D
   return `${hours} hours ${minutes} minutes`
 }
 
+// --- Admin oversight -------------------------------------------------------
+// The broker needs to see any project end to end: who's involved, where the
+// money is, and what's been delivered. Read-only — every action still happens
+// through its own dedicated, deliberate route.
+
+export interface PartyRef {
+  id: string
+  member_id: string | null
+  full_name: string | null
+  profile_picture: string | null
+}
+
+export interface AdminProjectRow extends Project {
+  requester: PartyRef | null
+  provider: PartyRef | null
+  applicant_count: number
+}
+
+export interface LedgerEntry {
+  id: string
+  entry_type: string
+  amount_usd: number
+  note: string | null
+  created_at: string
+}
+
+export interface DeliverableRef {
+  id: string
+  version: number
+  media_url: string
+  media_type: string | null
+  note: string | null
+  submitted_at: string
+}
+
+export interface ReviewRef {
+  id: string
+  decision: string
+  reason: string | null
+  created_at: string
+}
+
+export interface AttachmentRef {
+  id: string
+  media_url: string
+  media_type: string | null
+  label: string | null
+}
+
+export interface AdminProjectDetail extends AdminProjectRow {
+  applicants: Applicant[]
+  attachments: AttachmentRef[]
+  deliverables: DeliverableRef[]
+  reviews: ReviewRef[]
+  ledger: LedgerEntry[]
+  payments: PaymentClaim[]
+}
+
+/** Money currently held in escrow for a project — the ledger sums to it. */
+export function heldBalance(ledger: LedgerEntry[]): number {
+  return round2(ledger.reduce((sum, e) => sum + Number(e.amount_usd), 0))
+}
+
+/** Human label for a ledger entry type. */
+export function ledgerLabel(type: string): string {
+  return (
+    { fund: 'Funded by requester', commission: 'Platform commission', payout: 'Paid to provider', refund: 'Refunded to requester' } as Record<string, string>
+  )[type] ?? type
+}
+
 // --- Port: what infrastructure must provide. Defined here, implemented there. ---
 export interface ProjectRepository {
   listLiveFeed(): Promise<Project[]>
@@ -117,4 +187,9 @@ export interface ProjectRepository {
   listMineWithPayments(): Promise<ProjectWithPayments[]>
   listApplicants(projectId: string): Promise<Applicant[]>
   applyToProject(projectId: string, coverNote?: string): Promise<Application>
+
+  /** Admin oversight: every project, optionally filtered by status. */
+  listAllForAdmin(status?: string | null): Promise<AdminProjectRow[]>
+  /** Admin oversight: one project with everything attached to it. */
+  getAdminDetail(projectId: string): Promise<AdminProjectDetail | null>
 }

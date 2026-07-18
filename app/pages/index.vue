@@ -1,12 +1,8 @@
 <script setup lang="ts">
-import { useMe } from '~/features/auth/application/useMe'
 import PostList from '~/features/social/ui/PostList.vue'
 
-// Admins get the console, not the social feed.
-const user = useSupabaseUser()
-const { me, load } = useMe()
-watch(user, () => load(), { immediate: true })
-watch(me, (v) => { if (v?.role === 'admin') navigateTo('/admin') }, { immediate: true })
+// Admins can read the feed too (they moderate it), so there's no redirect
+// here — their nav points at the dashboard explicitly instead.
 
 // The feed is public, so it's worth being findable.
 useSeoMeta({

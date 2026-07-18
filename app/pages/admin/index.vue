@@ -24,7 +24,7 @@ const metrics = computed(() => [
   { to: '/admin/kyc', label: 'Pending KYC', value: stats.pendingKyc, icon: 'i-lucide-shield-check', action: true },
   { to: '/admin/funding', label: 'Awaiting funding', value: stats.awaitingFunding, icon: 'i-lucide-banknote', action: true },
   { to: '/admin/moderation', label: 'Open reports', value: stats.openReports, icon: 'i-lucide-flag', action: true },
-  { to: '/admin', label: 'Live projects', value: stats.liveProjects, icon: 'i-lucide-radio', action: false },
+  { to: '/admin/projects', label: 'Live projects', value: stats.liveProjects, icon: 'i-lucide-radio', action: false },
 ])
 </script>
 
@@ -98,6 +98,17 @@ const metrics = computed(() => [
             <UBadge v-if="stats.openReports" color="error" variant="soft" size="sm">{{ stats.openReports }}</UBadge>
             <UIcon name="i-lucide-chevron-right" class="size-5 text-stone-400" />
           </span>
+        </NuxtLink>
+
+        <NuxtLink to="/admin/projects" class="zc-card zc-card-hover zc-tap flex items-center justify-between p-4">
+          <span class="flex items-center gap-3">
+            <UIcon name="i-lucide-folder-kanban" class="size-5 text-primary" />
+            <span>
+              <span class="block font-medium">All projects</span>
+              <span class="block text-xs text-stone-500 dark:text-stone-400">Parties, applicants and the money trail</span>
+            </span>
+          </span>
+          <UIcon name="i-lucide-chevron-right" class="size-5 text-stone-400" />
         </NuxtLink>
       </div>
 
