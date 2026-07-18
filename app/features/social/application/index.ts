@@ -9,6 +9,10 @@ export function createSocialUseCases(repo: SocialRepository) {
     /** One page of the public feed, newest first. */
     browseFeed: (before?: string | null) => repo.listFeed({ before }),
 
+    /** A member's own posts and comments — used by profile pages. */
+    postsBy: (authorId: string) => repo.listPostsByAuthor(authorId),
+    repliesBy: (authorId: string) => repo.listCommentsByAuthor(authorId),
+
     /** Publish a post. Domain rules are checked before we hit the network. */
     publishPost: (input: CreatePostInput) => {
       if (!isPostPublishable(input.body, input.media.length)) {

@@ -104,6 +104,10 @@ export interface CreatePostInput {
 
 export interface SocialRepository {
   listFeed(opts: { before?: string | null; limit?: number }): Promise<FeedPage>
+  /** One member's posts — what a profile page's "Posts" tab shows. */
+  listPostsByAuthor(authorId: string): Promise<FeedPost[]>
+  /** One member's comments — the "Replies" tab. */
+  listCommentsByAuthor(authorId: string): Promise<FeedComment[]>
   createPost(input: CreatePostInput): Promise<Post>
   deletePost(postId: string): Promise<void>
 

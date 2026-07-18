@@ -89,23 +89,34 @@ function initials(name: string | null) {
         class="flex items-center gap-2.5 rounded-lg border border-stone-200 p-2.5 dark:border-stone-800"
         :class="a.status === 'approved' ? 'border-success/50 bg-success/5' : ''"
       >
-        <img
-          v-if="a.profile_picture"
-          :src="publicMediaUrl(a.profile_picture)"
-          :alt="a.full_name ?? ''"
-          class="size-9 shrink-0 rounded-full object-cover"
+        <!-- Applicant identity links to their public profile, so the requester
+             can look at the provider's work before committing to them. -->
+        <NuxtLink
+          :to="a.member_id ? `/u/${a.member_id}` : ''"
+          :class="a.member_id ? 'zc-tap' : 'pointer-events-none'"
+          class="flex min-w-0 flex-1 items-center gap-2.5"
         >
-        <div
-          v-else
-          class="flex size-9 shrink-0 items-center justify-center rounded-full bg-stone-200 text-xs font-medium dark:bg-stone-800"
-        >
-          {{ initials(a.full_name) }}
-        </div>
+          <img
+            v-if="a.profile_picture"
+            :src="publicMediaUrl(a.profile_picture)"
+            :alt="a.full_name ?? ''"
+            class="size-9 shrink-0 rounded-full object-cover"
+          >
+          <div
+            v-else
+            class="flex size-9 shrink-0 items-center justify-center rounded-full bg-stone-200 text-xs font-medium dark:bg-stone-800"
+          >
+            {{ initials(a.full_name) }}
+          </div>
 
-        <div class="min-w-0 flex-1">
-          <p class="truncate font-mono text-sm font-medium">{{ a.member_id ?? 'Pending ID' }}</p>
-          <p v-if="a.cover_note" class="truncate text-xs text-stone-500 dark:text-stone-400">{{ a.cover_note }}</p>
-        </div>
+          <div class="min-w-0 flex-1">
+            <p class="truncate font-mono text-sm font-medium hover:text-primary">
+              {{ a.member_id ?? 'Pending ID' }}
+            </p>
+            <p v-if="a.full_name" class="truncate text-xs text-stone-500 dark:text-stone-400">{{ a.full_name }}</p>
+            <p v-if="a.cover_note" class="truncate text-xs text-stone-400">{{ a.cover_note }}</p>
+          </div>
+        </NuxtLink>
 
         <UBadge v-if="a.status === 'approved'" color="success" variant="soft" size="sm" class="shrink-0">
           Awarded

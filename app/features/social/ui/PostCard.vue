@@ -6,11 +6,20 @@
 import { usePublicMedia } from '~/shared/lib/media'
 import type { FeedPost } from '~/features/social/domain'
 
-const props = defineProps<{
-  post: FeedPost
-  /** Current user id, or null when signed out. */
-  currentUserId: string | null
-}>()
+const props = withDefaults(
+  defineProps<{
+    post: FeedPost
+    /** Current user id, or null when signed out. */
+    currentUserId: string | null
+    /**
+     * When false the engagement row renders as plain counts instead of
+     * buttons. Used on profile pages, where nothing is wired to handle the
+     * events — a button that does nothing is worse than no button.
+     */
+    interactive?: boolean
+  }>(),
+  { interactive: true },
+)
 
 const emit = defineEmits<{
   favorite: [post: FeedPost]
@@ -76,17 +85,22 @@ const menuItems = computed(() => [
         {{ initials }}
       </div>
 
-      <!-- Member ID leads, as in the wireframe; the name sits underneath. -->
-      <div class="min-w-0 flex-1">
+      <!-- Member ID leads, as in the wireframe; the name sits underneath.
+           The byline links through to the author's public profile. -->
+      <NuxtLink
+        :to="post.author?.member_id ? `/u/${post.author.member_id}` : ''"
+        :class="post.author?.member_id ? 'zc-tap' : 'pointer-events-none'"
+        class="min-w-0 flex-1"
+      >
         <div class="flex items-center gap-1.5">
-          <span class="truncate font-mono text-sm font-medium">{{ post.author?.member_id ?? '—' }}</span>
+          <span class="truncate font-mono text-sm font-medium hover:text-primary">{{ post.author?.member_id ?? '—' }}</span>
           <UIcon name="i-lucide-badge-check" class="size-4 shrink-0 text-success" aria-label="Verified" />
           <UBadge color="primary" variant="soft" size="sm" class="shrink-0">{{ roleLabel }}</UBadge>
         </div>
         <p class="truncate text-xs text-stone-500 dark:text-stone-400">
           {{ post.author?.full_name ?? 'Member' }} · {{ timeAgo }}
         </p>
-      </div>
+      </NuxtLink>
 
       <UDropdownMenu :items="menuItems">
         <UButton icon="i-lucide-more-horizontal" color="neutral" variant="ghost" size="xs" aria-label="More" />
@@ -108,7 +122,7 @@ const menuItems = computed(() => [
       </button>
     </div>
 
-    <div class="mt-3 flex items-center gap-6 text-stone-500 dark:text-stone-400">
+    <div v-if="interactive" class="mt-3 flex items-center gap-6 text-stone-500 dark:text-stone-400">
       <button
         class="zc-tap flex items-center gap-1.5 text-sm transition hover:text-primary"
         :class="post.favorited ? 'text-primary' : ''"
@@ -132,6 +146,20 @@ const menuItems = computed(() => [
         <UIcon name="i-lucide-share-2" class="size-5" />
         {{ post.share_count }}
       </button>
+    </div>
+
+    <!-- Display-only counts (profile pages) -->
+    <div v-else class="mt-3 flex items-center gap-6 text-sm text-stone-500 dark:text-stone-400">
+      <span class="flex items-center gap-1.5">
+        <UIcon name="i-lucide-heart" class="size-5" :class="post.favorited ? 'fill-current text-primary' : ''" />
+        {{ post.favorite_count }}
+      </span>
+      <span class="flex items-center gap-1.5">
+        <UIcon name="i-lucide-message-circle" class="size-5" /> {{ post.comment_count }}
+      </span>
+      <span class="flex items-center gap-1.5">
+        <UIcon name="i-lucide-share-2" class="size-5" /> {{ post.share_count }}
+      </span>
     </div>
 
     <Teleport to="body">

@@ -101,6 +101,68 @@ export function createSupabaseSocialRepository(
       }
     },
 
+    async listPostsByAuthor(authorId: string): Promise<FeedPost[]> {
+      // feed_posts again, so profile pages honour the same visibility rule as
+      // the feed — a removed post disappears from both without special-casing.
+      const { data, error } = await supabase
+        .from('feed_posts')
+        .select('*')
+        .eq('author_id', authorId)
+        .order('created_at', { ascending: false })
+      if (error) throw error
+      const rows = (data ?? []) as Post[]
+      if (!rows.length) return []
+
+      const ids = rows.map((p) => p.id)
+      const [{ data: mediaRows }, authors, favorited] = await Promise.all([
+        supabase
+          .from('post_media')
+          .select('id, post_id, media_url, media_type, position')
+          .in('post_id', ids)
+          .order('position'),
+        fetchAuthors([authorId]),
+        (async () => {
+          const uid = await currentUserId()
+          if (!uid) return new Set<string>()
+          const { data } = await supabase
+            .from('post_favorites')
+            .select('post_id')
+            .eq('user_id', uid)
+            .in('post_id', ids)
+          return new Set((data ?? []).map((f) => f.post_id as string))
+        })(),
+      ])
+
+      const mediaByPost = new Map<string, PostMediaItem[]>()
+      for (const m of mediaRows ?? []) {
+        const list = mediaByPost.get(m.post_id as string) ?? []
+        list.push(m as unknown as PostMediaItem)
+        mediaByPost.set(m.post_id as string, list)
+      }
+
+      return rows.map((p) => ({
+        ...p,
+        author: authors.get(authorId) ?? null,
+        media: mediaByPost.get(p.id) ?? [],
+        favorited: favorited.has(p.id),
+      }))
+    },
+
+    async listCommentsByAuthor(authorId: string): Promise<FeedComment[]> {
+      // RLS only returns comments on posts the caller may see, so a reply on a
+      // removed post drops out on its own.
+      const { data, error } = await supabase
+        .from('comments')
+        .select('*')
+        .eq('author_id', authorId)
+        .order('created_at', { ascending: false })
+      if (error) throw error
+      const rows = (data ?? []) as Comment[]
+      if (!rows.length) return []
+      const authors = await fetchAuthors([authorId])
+      return rows.map((c) => ({ ...c, author: authors.get(authorId) ?? null }))
+    },
+
     async createPost(input: CreatePostInput): Promise<Post> {
       const uid = await currentUserId()
       if (!uid) throw new Error('Not authenticated')
