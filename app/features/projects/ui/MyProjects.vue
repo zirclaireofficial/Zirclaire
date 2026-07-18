@@ -1,6 +1,15 @@
 <script setup lang="ts">
 import { useProjects } from '~/features/projects/application/useProjects'
-import { fundingStateOf, canResumePayment, latestClaim, formatRemaining, canAward } from '~/features/projects/domain'
+import {
+  fundingStateOf,
+  canResumePayment,
+  latestClaim,
+  formatRemaining,
+  canAward,
+  hasApplicantList,
+  showsCountdown,
+  isStalled,
+} from '~/features/projects/domain'
 import type { ProjectWithPayments } from '~/features/projects/domain'
 import ProjectPaymentPanel from './ProjectPaymentPanel.vue'
 import ApplicantList from './ApplicantList.vue'
@@ -14,6 +23,10 @@ const loading = ref(true)
 async function load() {
   try {
     projects.value = await myProjectsWithPayments()
+  } catch (e) {
+    // Previously this failed silently and left stale data on screen.
+    const err = e as { message?: string }
+    toast.add({ title: 'Could not load your projects', description: err?.message, color: 'error' })
   } finally {
     loading.value = false
   }
@@ -122,6 +135,11 @@ function labelColor(p: ProjectWithPayments) {
       <p class="text-sm text-stone-500 dark:text-stone-400">Tap the Z to post your first one.</p>
     </div>
 
+    <!-- Search with no matches — previously this rendered an empty grid -->
+    <p v-else-if="!sorted.length" class="py-14 text-center text-sm text-stone-500 dark:text-stone-400">
+      No projects match “{{ search }}”.
+    </p>
+
     <div v-else class="grid gap-3 lg:grid-cols-2 xl:grid-cols-3">
       <article
         v-for="p in sorted"
@@ -138,24 +156,36 @@ function labelColor(p: ProjectWithPayments) {
 
         <div class="mt-2 flex items-center justify-between gap-2">
           <span class="text-sm tabular-nums text-stone-500 dark:text-stone-400">${{ p.budget_usd }}</span>
+          <!-- Only while applications are actually open; a closed project
+               showing "Ended" forever is just noise. -->
           <span
-            v-if="formatRemaining(p, now)"
+            v-if="showsCountdown(p)"
             class="shrink-0 text-xs tabular-nums"
-            :class="formatRemaining(p, now) === 'Ended' ? 'text-stone-400' : 'text-primary'"
+            :class="isStalled(p, now) ? 'text-stone-400' : 'text-primary'"
           >
             {{ formatRemaining(p, now) }}
           </span>
         </div>
 
-        <!-- Applicants, as in the wireframe: member ID + Approve / Reject -->
-        <div v-if="canAward(p)" class="mt-3 border-t border-stone-100 pt-3 dark:border-stone-800">
+        <!-- Applications closed with nobody chosen -->
+        <div
+          v-if="isStalled(p, now)"
+          class="mt-3 flex items-start gap-1.5 rounded-lg bg-primary/5 p-2.5 text-xs text-stone-600 dark:text-stone-300"
+        >
+          <UIcon name="i-lucide-alarm-clock" class="mt-0.5 size-3.5 shrink-0 text-primary" />
+          <span>Applications have closed and nobody's been awarded yet. Pick an applicant below, or contact the admin.</span>
+        </div>
+
+        <!-- Applicants, as in the wireframe: member ID + Approve / Reject.
+             Stays visible after awarding so you can see who you picked. -->
+        <div v-if="hasApplicantList(p)" class="mt-3 border-t border-stone-100 pt-3 dark:border-stone-800">
           <button
             class="zc-tap flex w-full items-center justify-between text-sm font-medium"
             @click="toggleApplicants(p.id)"
           >
             <span class="flex items-center gap-1.5">
               <UIcon name="i-lucide-users" class="size-4 text-primary" />
-              Applicants
+              {{ canAward(p) ? 'Applicants' : 'Awarded provider' }}
             </span>
             <UIcon
               name="i-lucide-chevron-down"

@@ -92,6 +92,38 @@ export function canAward(project: { status: string }): boolean {
   return project.status === 'live'
 }
 
+/**
+ * Does this project have an applicant list worth showing? True from the moment
+ * it goes live and stays true afterwards — once awarded, the requester still
+ * needs to see who they picked, not have the list disappear on them.
+ */
+export function hasApplicantList(project: { status: string }): boolean {
+  return [
+    'live',
+    'awarded',
+    'in_progress',
+    'submitted_work',
+    'in_review',
+    'revision_requested',
+    'finished',
+    'closed',
+  ].includes(project.status)
+}
+
+/** The countdown is only meaningful while applications are actually open. */
+export function showsCountdown(project: { status: string; deadline_at: string | null }): boolean {
+  return project.status === 'live' && !!project.deadline_at
+}
+
+/**
+ * Applications closed with nobody awarded — the requester's money is funded
+ * but the project is going nowhere. Needs surfacing rather than sitting quiet.
+ */
+export function isStalled(project: { status: string; deadline_at: string | null }, now = Date.now()): boolean {
+  if (project.status !== 'live' || !project.deadline_at) return false
+  return new Date(project.deadline_at).getTime() <= now
+}
+
 /** Time left before applications close, in ms. Null when there's no deadline. */
 export function msRemaining(project: { deadline_at: string | null }, now = Date.now()): number | null {
   if (!project.deadline_at) return null
