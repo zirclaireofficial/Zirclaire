@@ -20,12 +20,14 @@ export default defineEventHandler(async (event) => {
   if (!cfg) throw createError({ statusCode: 400, statusMessage: 'invalid or missing purpose' })
 
   // Purpose-specific authorization.
-  if (purpose === 'post' || purpose === 'deliverable' || purpose === 'project-attachment') {
+  const providerPurposes = ['post', 'deliverable', 'royalty-file', 'royalty-cover']
+  const gated = [...providerPurposes, 'project-attachment']
+  if (gated.includes(purpose)) {
     const profile = await getCallerProfile(event)
     if (profile.kyc_status !== 'approved') {
       throw createError({ statusCode: 403, statusMessage: 'Account not approved' })
     }
-    if ((purpose === 'post' || purpose === 'deliverable') && profile.role !== 'service_provider') {
+    if (providerPurposes.includes(purpose) && profile.role !== 'service_provider') {
       throw createError({ statusCode: 403, statusMessage: 'Providers only' })
     }
     if (purpose === 'project-attachment' && profile.role !== 'service_requester') {

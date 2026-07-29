@@ -13,6 +13,7 @@ import {
 import type { ProjectWithPayments } from '~/features/projects/domain'
 import ProjectPaymentPanel from './ProjectPaymentPanel.vue'
 import ApplicantList from './ApplicantList.vue'
+import MessageButton from '~/features/messaging/ui/MessageButton.vue'
 
 const { myProjectsWithPayments } = useProjects()
 const toast = useToast()
@@ -222,6 +223,11 @@ function labelColor(p: ProjectWithPayments) {
         >
           <UIcon name="i-lucide-clock" class="size-3.5 shrink-0" />
           <span>Payment <span class="font-mono">{{ latestClaim(p)?.reference }}</span> is awaiting admin verification.</span>
+        </div>
+
+        <!-- Message the awarded provider once there is one -->
+        <div v-if="p.awarded_provider_id" class="mt-3 border-t border-stone-100 pt-3 dark:border-stone-800">
+          <MessageButton :project-id="p.id" block label="Message provider" />
         </div>
       </article>
     </div>

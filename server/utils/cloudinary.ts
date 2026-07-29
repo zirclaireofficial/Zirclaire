@@ -22,6 +22,10 @@ export const MEDIA_PURPOSES = {
   post:                 { folder: 'zirclaire/posts',                private: false },
   deliverable:          { folder: 'zirclaire/deliverables',         private: true  },
   'project-attachment': { folder: 'zirclaire/project-attachments',  private: true  },
+  // The purchasable file — private, reachable only via a signed URL after a
+  // purchase check. The cover thumbnail uses the public 'profile'-style path.
+  'royalty-file':       { folder: 'zirclaire/royalties',           private: true  },
+  'royalty-cover':      { folder: 'zirclaire/royalty-covers',      private: false },
 } as const
 
 export type MediaPurpose = keyof typeof MEDIA_PURPOSES

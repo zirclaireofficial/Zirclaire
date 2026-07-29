@@ -17,19 +17,22 @@ export interface PublicProfile {
   created_at: string
 }
 
-export type ProfileTab = 'posts' | 'replies'
+export type ProfileTab = 'posts' | 'replies' | 'services' | 'royalties'
 
 /**
- * Which tabs a profile shows. Only providers can author posts, so a
- * requester's Posts tab would be permanently empty — we don't render it
- * rather than showing a dead tab.
+ * Which tabs a profile shows. Only providers can post, offer services and
+ * publish royalty works, so a requester only ever gets Replies — we don't
+ * render a tab that would be permanently empty for them.
  */
 export function tabsFor(role: string | null): ProfileTab[] {
-  return role === 'service_provider' ? ['posts', 'replies'] : ['replies']
+  return role === 'service_provider' ? ['posts', 'services', 'royalties', 'replies'] : ['replies']
 }
 
 export function tabLabel(tab: ProfileTab): string {
-  return tab === 'posts' ? 'Posts' : 'Replies'
+  if (tab === 'posts') return 'Posts'
+  if (tab === 'services') return 'Services'
+  if (tab === 'royalties') return 'Royalties'
+  return 'Replies'
 }
 
 export function roleLabel(role: string | null): string {

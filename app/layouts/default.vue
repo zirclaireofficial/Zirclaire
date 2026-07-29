@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useAuth } from '~/features/auth/application/useAuth'
 import { useMe } from '~/features/auth/application/useMe'
-const { user, signOut } = useAuth()
+const { user } = useAuth()
 const { me, load } = useMe()
 watch(user, () => load(), { immediate: true })
 const isAdmin = computed(() => me.value?.role === 'admin')
@@ -31,14 +31,15 @@ const isAdmin = computed(() => me.value?.role === 'admin')
           </NuxtLink>
           <div class="flex items-center gap-1">
             <ShellThemeToggle />
+            <!-- Inbox lives here now; sign out moved to the profile page. -->
             <UButton
               v-if="user"
-              icon="i-lucide-log-out"
+              to="/messages"
+              icon="i-lucide-message-square"
               color="neutral"
               variant="ghost"
               size="sm"
-              aria-label="Sign out"
-              @click="signOut"
+              aria-label="Inbox"
             />
             <!-- Signed out: the feed is public, so give visitors a way in. -->
             <UButton v-else to="/login" color="primary" size="sm" label="Log in" class="zc-tap" />

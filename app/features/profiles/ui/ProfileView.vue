@@ -7,11 +7,19 @@
 // budgets, no KYC. That stays true until we deliberately decide otherwise.
 
 import { useSocial } from '~/features/social/application/useSocial'
+import { useRoyalties } from '~/features/royalties/application/useRoyalties'
+import { useServices } from '~/features/services/application/useServices'
 import { usePublicMedia } from '~/shared/lib/media'
 import { tabsFor, tabLabel, roleLabel, memberSince, initialsOf, profilePath } from '~/features/profiles/domain'
 import type { PublicProfile, ProfileTab } from '~/features/profiles/domain'
 import type { FeedPost, FeedComment } from '~/features/social/domain'
+import type { StoreItem } from '~/features/royalties/domain'
+import type { StoreService } from '~/features/services/domain'
 import PostCard from '~/features/social/ui/PostCard.vue'
+import RoyaltyCard from '~/features/royalties/ui/RoyaltyCard.vue'
+import RoyaltyDetail from '~/features/royalties/ui/RoyaltyDetail.vue'
+import ServiceCard from '~/features/services/ui/ServiceCard.vue'
+import ServiceDetail from '~/features/services/ui/ServiceDetail.vue'
 
 const props = defineProps<{
   profile: PublicProfile
@@ -22,6 +30,8 @@ const props = defineProps<{
 }>()
 
 const { postsBy, repliesBy } = useSocial()
+const { itemsByCreator } = useRoyalties()
+const { servicesByProvider } = useServices()
 const { publicMediaUrl } = usePublicMedia()
 const toast = useToast()
 
@@ -30,17 +40,26 @@ const active = ref<ProfileTab>(tabs.value[0] ?? 'replies')
 
 const posts = ref<FeedPost[]>([])
 const replies = ref<FeedComment[]>([])
+const works = ref<StoreItem[]>([])
+const services = ref<StoreService[]>([])
+const selectedWork = ref<StoreItem | null>(null)
+const selectedService = ref<StoreService | null>(null)
 const loading = ref(true)
 
 async function load() {
   loading.value = true
   try {
-    const [p, r] = await Promise.all([
+    const provider = tabs.value.includes('services')
+    const [p, r, w, s] = await Promise.all([
       tabs.value.includes('posts') ? postsBy(props.profile.id) : Promise.resolve([]),
       repliesBy(props.profile.id),
+      tabs.value.includes('royalties') ? itemsByCreator(props.profile.id) : Promise.resolve([]),
+      provider ? servicesByProvider(props.profile.id) : Promise.resolve([]),
     ])
     posts.value = p
     replies.value = r
+    works.value = w
+    services.value = s
   } catch (e) {
     const err = e as { message?: string }
     toast.add({ title: 'Could not load activity', description: err?.message, color: 'error' })
@@ -153,6 +172,34 @@ function ago(iso: string) {
           :interactive="false"
         />
       </div>
+    </template>
+
+    <!-- Services (a provider's offerings) -->
+    <template v-else-if="active === 'services'">
+      <div v-if="!services.length" class="py-14 text-center">
+        <p class="text-sm text-stone-500 dark:text-stone-400">
+          {{ owner ? "You haven't offered any services yet." : 'No services offered yet.' }}
+        </p>
+        <UButton v-if="owner" to="/services/publish" color="primary" size="sm" label="Offer a service" class="zc-tap mt-3" />
+      </div>
+      <div v-else class="grid grid-cols-2 gap-3 sm:grid-cols-3">
+        <ServiceCard v-for="s in services" :key="s.id" :service="s" @open="selectedService = $event" />
+      </div>
+      <ServiceDetail v-if="selectedService" :service="selectedService" @close="selectedService = null" @ordered="load" />
+    </template>
+
+    <!-- Royalties (a provider's published works) -->
+    <template v-else-if="active === 'royalties'">
+      <div v-if="!works.length" class="py-14 text-center">
+        <p class="text-sm text-stone-500 dark:text-stone-400">
+          {{ owner ? "You haven't published any works yet." : 'No published works yet.' }}
+        </p>
+        <UButton v-if="owner" to="/royalties/publish" color="primary" size="sm" label="Publish a work" class="zc-tap mt-3" />
+      </div>
+      <div v-else class="grid grid-cols-2 gap-3 sm:grid-cols-3">
+        <RoyaltyCard v-for="w in works" :key="w.id" :item="w" @open="selectedWork = $event" />
+      </div>
+      <RoyaltyDetail v-if="selectedWork" :item="selectedWork" @close="selectedWork = null" @purchased="load" />
     </template>
 
     <!-- Replies -->

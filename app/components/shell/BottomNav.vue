@@ -8,12 +8,15 @@ watch(user, () => load(), { immediate: true })
 
 const isAdmin = computed(() => me.value?.role === 'admin')
 
+// Mobile bottom bar is tight (5 slots incl. the Z). Feed, Projects, Services
+// and Profile live here; Royalties is one tap away via the Services store
+// header and the desktop sidebar.
 const left = [
   { to: '/', icon: 'i-lucide-home', label: 'Feed' },
-  { to: '/projects', icon: 'i-lucide-briefcase', label: 'Projects' },
+  { to: '/projects', icon: 'i-lucide-folder-kanban', label: 'Projects' },
 ]
 const right = [
-  { to: '/messages', icon: 'i-lucide-send', label: 'Chat' },
+  { to: '/services', icon: 'i-lucide-briefcase', label: 'Services' },
   { to: '/profile', icon: 'i-lucide-user', label: 'Profile' },
 ]
 

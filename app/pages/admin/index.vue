@@ -4,27 +4,29 @@ definePageMeta({ middleware: 'admin' })
 
 const supabase = useSupabaseClient<Database>()
 const loading = ref(true)
-const stats = reactive({ pendingKyc: 0, awaitingFunding: 0, openReports: 0, liveProjects: 0, members: 0, closed: 0 })
+const stats = reactive({ pendingKyc: 0, awaitingFunding: 0, openReports: 0, pendingServices: 0, pendingRoyalties: 0, liveProjects: 0, members: 0, closed: 0 })
 
 onMounted(async () => {
   const c = (q: PromiseLike<{ count: number | null }>) => q.then((r) => r.count ?? 0)
-  const [k, f, r, l, m, cl] = await Promise.all([
+  const [k, f, r, sv, ro, l, m, cl] = await Promise.all([
     c(supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('kyc_status', 'pending')),
     c(supabase.from('projects').select('id', { count: 'exact', head: true }).eq('status', 'submitted')),
     c(supabase.from('reports').select('id', { count: 'exact', head: true }).eq('status', 'open')),
+    c((supabase as any).from('services').select('id', { count: 'exact', head: true }).eq('status', 'pending')),
+    c((supabase as any).from('royalty_items').select('id', { count: 'exact', head: true }).eq('status', 'pending')),
     c(supabase.from('projects').select('id', { count: 'exact', head: true }).eq('status', 'live')),
     c(supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('kyc_status', 'approved')),
     c(supabase.from('projects').select('id', { count: 'exact', head: true }).eq('status', 'closed')),
   ])
-  Object.assign(stats, { pendingKyc: k, awaitingFunding: f, openReports: r, liveProjects: l, members: m, closed: cl })
+  Object.assign(stats, { pendingKyc: k, awaitingFunding: f, openReports: r, pendingServices: sv, pendingRoyalties: ro, liveProjects: l, members: m, closed: cl })
   loading.value = false
 })
 
 const metrics = computed(() => [
   { to: '/admin/kyc', label: 'Pending KYC', value: stats.pendingKyc, icon: 'i-lucide-shield-check', action: true },
   { to: '/admin/funding', label: 'Awaiting funding', value: stats.awaitingFunding, icon: 'i-lucide-banknote', action: true },
-  { to: '/admin/moderation', label: 'Open reports', value: stats.openReports, icon: 'i-lucide-flag', action: true },
-  { to: '/admin/projects', label: 'Live projects', value: stats.liveProjects, icon: 'i-lucide-radio', action: false },
+  { to: '/admin/services', label: 'Service reviews', value: stats.pendingServices, icon: 'i-lucide-briefcase', action: true },
+  { to: '/admin/royalties', label: 'Royalty reviews', value: stats.pendingRoyalties, icon: 'i-lucide-book-open-text', action: true },
 ])
 </script>
 
@@ -96,6 +98,34 @@ const metrics = computed(() => [
           </span>
           <span class="flex items-center gap-2">
             <UBadge v-if="stats.openReports" color="error" variant="soft" size="sm">{{ stats.openReports }}</UBadge>
+            <UIcon name="i-lucide-chevron-right" class="size-5 text-stone-400" />
+          </span>
+        </NuxtLink>
+
+        <NuxtLink to="/admin/services" class="zc-card zc-card-hover zc-tap flex items-center justify-between p-4">
+          <span class="flex items-center gap-3">
+            <UIcon name="i-lucide-briefcase" class="size-5 text-primary" />
+            <span>
+              <span class="block font-medium">Service approvals</span>
+              <span class="block text-xs text-stone-500 dark:text-stone-400">Review service listings</span>
+            </span>
+          </span>
+          <span class="flex items-center gap-2">
+            <UBadge v-if="stats.pendingServices" color="primary" variant="soft" size="sm">{{ stats.pendingServices }}</UBadge>
+            <UIcon name="i-lucide-chevron-right" class="size-5 text-stone-400" />
+          </span>
+        </NuxtLink>
+
+        <NuxtLink to="/admin/royalties" class="zc-card zc-card-hover zc-tap flex items-center justify-between p-4">
+          <span class="flex items-center gap-3">
+            <UIcon name="i-lucide-book-open-text" class="size-5 text-primary" />
+            <span>
+              <span class="block font-medium">Royalty approvals</span>
+              <span class="block text-xs text-stone-500 dark:text-stone-400">Review published works</span>
+            </span>
+          </span>
+          <span class="flex items-center gap-2">
+            <UBadge v-if="stats.pendingRoyalties" color="primary" variant="soft" size="sm">{{ stats.pendingRoyalties }}</UBadge>
             <UIcon name="i-lucide-chevron-right" class="size-5 text-stone-400" />
           </span>
         </NuxtLink>

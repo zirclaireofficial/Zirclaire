@@ -1,0 +1,69 @@
+// messaging/application — repository wiring, privileged actions (opening a
+// project thread, starting/claiming support), and the realtime helper.
+
+import type { Database } from '~/shared/types/database'
+import { authedFetch } from '~/shared/lib/authedFetch'
+import { createSupabaseMessagingRepository } from '../infrastructure'
+import { canSend } from '../domain'
+import type { Message } from '../domain'
+
+export function useMessaging() {
+  const supabase = useSupabaseClient<Database>()
+  const repo = createSupabaseMessagingRepository(supabase)
+
+  function sendMessage(conversationId: string, body: string) {
+    if (!canSend(body)) throw new Error('Write something first.')
+    return repo.sendMessage(conversationId, body)
+  }
+
+  /** Get-or-create the buyer↔provider thread for a project/order (server). */
+  function openProjectThread(projectId: string) {
+    return authedFetch<{ conversation: { id: string } }>('/api/messages/open-project', {
+      method: 'POST',
+      body: { projectId },
+    })
+  }
+
+  /** Get-or-create the caller's service-desk thread (server). */
+  function openSupportThread() {
+    return authedFetch<{ conversation: { id: string } }>('/api/messages/open-support', { method: 'POST' })
+  }
+
+  /**
+   * Live messages for one conversation. Returns an unsubscribe function.
+   * Supabase realtime pushes new rows; RLS still applies to the stream.
+   */
+  function subscribe(conversationId: string, onInsert: (m: Message) => void) {
+    const channel = supabase
+      .channel(`conversation:${conversationId}`)
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'messages', filter: `conversation_id=eq.${conversationId}` },
+        (payload) => onInsert(payload.new as Message),
+      )
+      .subscribe()
+    return () => { supabase.removeChannel(channel) }
+  }
+
+  return {
+    listConversations: () => repo.listConversations(),
+    listMessages: (id: string) => repo.listMessages(id),
+    markRead: (id: string) => repo.markRead(id),
+    supportQueue: () => repo.supportQueue(),
+    sendMessage,
+    openProjectThread,
+    openSupportThread,
+    subscribe,
+  }
+}
+
+/** Admin-only: claim a support thread out of the shared queue. */
+export function useSupportModeration() {
+  function claim(conversationId: string) {
+    return authedFetch<{ conversation: { id: string } }>('/api/messages/claim-support', {
+      method: 'POST',
+      body: { conversationId },
+    })
+  }
+  return { claim }
+}

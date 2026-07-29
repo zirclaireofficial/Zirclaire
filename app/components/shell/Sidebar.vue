@@ -1,15 +1,12 @@
 <script setup lang="ts">
-import { useAuth } from '~/features/auth/application/useAuth'
 import { useMe } from '~/features/auth/application/useMe'
 
 const route = useRoute()
 const user = useSupabaseUser()
-const { signOut } = useAuth()
 const { me, load } = useMe()
 watch(user, () => load(), { immediate: true })
 
 const isAdmin = computed(() => me.value?.role === 'admin')
-const quickOpen = ref(false)
 
 const items = computed(() =>
   isAdmin.value
@@ -20,13 +17,16 @@ const items = computed(() =>
         { to: '/', icon: 'i-lucide-home', label: 'Feed' },
         { to: '/admin/members', icon: 'i-lucide-users', label: 'Members' },
         { to: '/admin/projects', icon: 'i-lucide-folder-kanban', label: 'All projects' },
+        { to: '/admin/services', icon: 'i-lucide-briefcase', label: 'Service approvals' },
+        { to: '/admin/royalties', icon: 'i-lucide-book-open-text', label: 'Royalty approvals' },
         { to: '/profile', icon: 'i-lucide-user', label: 'Profile' },
       ]
     : [
         { to: '/', icon: 'i-lucide-home', label: 'Feed' },
-        { to: '/projects', icon: 'i-lucide-briefcase', label: 'Projects' },
+        { to: '/projects', icon: 'i-lucide-folder-kanban', label: 'Projects' },
+        { to: '/services', icon: 'i-lucide-briefcase', label: 'Services' },
+        { to: '/royalties', icon: 'i-lucide-book-open-text', label: 'Royalties' },
         { to: '/create', icon: 'i-lucide-plus', label: 'Create' },
-        { to: '/messages', icon: 'i-lucide-send', label: 'Messages' },
         { to: '/profile', icon: 'i-lucide-user', label: 'Profile' },
       ],
 )
@@ -65,14 +65,15 @@ function isActive(to: string) {
 
     <div class="mt-auto flex items-center justify-between border-t border-stone-200 px-1 pt-3 dark:border-stone-800">
       <ShellThemeToggle />
+      <!-- Inbox lives here now; sign out moved to the profile page. -->
       <UButton
         v-if="user"
-        icon="i-lucide-log-out"
+        to="/messages"
+        icon="i-lucide-message-square"
         color="neutral"
         variant="ghost"
         size="sm"
-        label="Sign out"
-        @click="signOut"
+        label="Inbox"
       />
       <UButton v-else to="/login" color="primary" size="sm" label="Log in" class="zc-tap" />
     </div>

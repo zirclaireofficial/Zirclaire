@@ -22,9 +22,39 @@ watch(user, () => load(), { immediate: true })
       </div>
     </template>
 
-    <!-- Service Provider: create a post -->
+    <!-- Service Provider: create a post, or jump to publishing a work -->
     <template v-else-if="me?.role === 'service_provider'">
-      <PostComposer v-if="me.kyc_status === 'approved'" />
+      <template v-if="me.kyc_status === 'approved'">
+        <PostComposer />
+        <div class="mt-4 space-y-2">
+          <NuxtLink
+            to="/services/publish"
+            class="zc-tap flex items-center justify-between rounded-xl border border-stone-200 p-4 transition hover:border-primary/50 dark:border-stone-800"
+          >
+            <span class="flex items-center gap-3">
+              <UIcon name="i-lucide-briefcase" class="size-5 text-primary" />
+              <span>
+                <span class="block text-sm font-medium">List a MyService</span>
+                <span class="block text-xs text-stone-500 dark:text-stone-400">Three-tier pricing buyers can order from</span>
+              </span>
+            </span>
+            <UIcon name="i-lucide-chevron-right" class="size-5 text-stone-400" />
+          </NuxtLink>
+          <NuxtLink
+            to="/royalties/publish"
+            class="zc-tap flex items-center justify-between rounded-xl border border-stone-200 p-4 transition hover:border-primary/50 dark:border-stone-800"
+          >
+            <span class="flex items-center gap-3">
+              <UIcon name="i-lucide-book-open-text" class="size-5 text-primary" />
+              <span>
+                <span class="block text-sm font-medium">Publish a work</span>
+                <span class="block text-xs text-stone-500 dark:text-stone-400">Sell a novel, research or journal</span>
+              </span>
+            </span>
+            <UIcon name="i-lucide-chevron-right" class="size-5 text-stone-400" />
+          </NuxtLink>
+        </div>
+      </template>
       <div v-else class="flex flex-col items-center gap-2 py-24 text-center">
         <div class="flex size-12 items-center justify-center rounded-full bg-stone-100 dark:bg-stone-800">
           <UIcon name="i-lucide-clock" class="size-6 text-stone-400" />
