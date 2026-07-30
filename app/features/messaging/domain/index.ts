@@ -33,15 +33,21 @@ export interface ConversationSummary {
   unread: boolean
 }
 
-/** A thread awaiting an admin in the support queue. */
+/** A support ticket — used by both the live queue and the open/closed log. */
 export interface SupportTicket {
   id: string
   ticket_number: number | null
   created_by: string | null
   last_message_at: string | null
   assigned_admin_id: string | null
+  closed_at: string | null
   requester: PartyRef | null
+  handler: PartyRef | null // the admin handling it, once claimed
   preview: string | null
+}
+
+export function isTicketOpen(t: SupportTicket): boolean {
+  return !t.closed_at
 }
 
 /** A thread in the master's oversight list (any type, any participants). */

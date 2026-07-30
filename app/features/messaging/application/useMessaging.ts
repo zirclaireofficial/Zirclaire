@@ -58,7 +58,7 @@ export function useMessaging() {
   }
 }
 
-/** Admin-only: claim a support thread out of the shared queue. */
+/** Staff: claim a support thread out of the shared queue, or close a ticket. */
 export function useSupportModeration() {
   function claim(conversationId: string) {
     return authedFetch<{ conversation: { id: string } }>('/api/messages/claim-support', {
@@ -66,5 +66,11 @@ export function useSupportModeration() {
       body: { conversationId },
     })
   }
-  return { claim }
+  function close(conversationId: string) {
+    return authedFetch<{ conversation: { id: string } }>('/api/messages/close-ticket', {
+      method: 'POST',
+      body: { conversationId },
+    })
+  }
+  return { claim, close }
 }

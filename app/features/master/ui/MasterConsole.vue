@@ -199,7 +199,10 @@ const projectStatuses = computed(() => Object.entries(data.value?.projects.bySta
           <span class="ml-2 font-semibold tabular-nums">{{ count }}</span>
         </div>
       </div>
-      <UButton to="/admin/projects" color="neutral" variant="soft" size="sm" icon="i-lucide-folder-kanban" label="All projects" class="zc-tap mt-3" />
+      <div class="mt-3 flex flex-wrap gap-2">
+        <UButton to="/admin/projects" color="neutral" variant="soft" size="sm" icon="i-lucide-folder-kanban" label="All projects" class="zc-tap" />
+        <UButton to="/admin/tickets" color="neutral" variant="soft" size="sm" icon="i-lucide-ticket" label="Support tickets" class="zc-tap" />
+      </div>
     </section>
 
     <!-- AUDIT LOG -->

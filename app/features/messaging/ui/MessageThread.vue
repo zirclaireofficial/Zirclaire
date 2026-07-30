@@ -90,10 +90,11 @@ function time(iso: string) {
   <div class="flex h-full flex-col">
     <div class="flex items-center gap-3 border-b border-stone-200 px-4 py-3 dark:border-stone-800">
       <slot name="back" />
-      <div class="min-w-0">
+      <div class="min-w-0 flex-1">
         <p class="truncate font-medium leading-tight">{{ title }}</p>
         <p v-if="subtitle" class="truncate text-xs text-stone-500 dark:text-stone-400">{{ subtitle }}</p>
       </div>
+      <slot name="actions" />
     </div>
 
     <div ref="scroller" class="flex-1 space-y-2 overflow-y-auto p-4">

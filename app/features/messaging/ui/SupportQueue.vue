@@ -9,7 +9,7 @@ import type { SupportTicket } from '~/features/messaging/domain'
 import MessageThread from './MessageThread.vue'
 
 const { supportQueue } = useMessaging()
-const { claim } = useSupportModeration()
+const { claim, close } = useSupportModeration()
 const { publicMediaUrl } = usePublicMedia()
 const user = useSupabaseUser()
 const toast = useToast()
@@ -20,6 +20,7 @@ const tickets = ref<SupportTicket[]>([])
 const loading = ref(true)
 const openId = ref<string | null>(null)
 const claiming = ref<string | null>(null)
+const closing = ref<string | null>(null)
 
 async function load() {
   loading.value = true
@@ -35,8 +36,24 @@ async function load() {
 onMounted(load)
 
 const openTicket = computed(() => tickets.value.find((t) => t.id === openId.value) ?? null)
-const mine = computed(() => tickets.value.filter((t) => t.assigned_admin_id === currentUserId.value))
-const unclaimed = computed(() => tickets.value.filter((t) => !t.assigned_admin_id))
+// The live desk only deals with OPEN tickets; closed ones live in the log.
+const mine = computed(() => tickets.value.filter((t) => t.assigned_admin_id === currentUserId.value && !t.closed_at))
+const unclaimed = computed(() => tickets.value.filter((t) => !t.assigned_admin_id && !t.closed_at))
+
+async function onClose(t: SupportTicket) {
+  closing.value = t.id
+  try {
+    await close(t.id)
+    toast.add({ title: `Ticket #${t.ticket_number} closed`, color: 'success' })
+    openId.value = null
+    await load()
+  } catch (e) {
+    const err = e as { data?: { statusMessage?: string } }
+    toast.add({ title: 'Could not close', description: err?.data?.statusMessage, color: 'error' })
+  } finally {
+    closing.value = null
+  }
+}
 
 async function onClaim(t: SupportTicket) {
   claiming.value = t.id
@@ -134,6 +151,18 @@ function initials(name: string | null | undefined) {
         >
           <template #back>
             <UButton icon="i-lucide-arrow-left" color="neutral" variant="ghost" size="sm" aria-label="Back" class="lg:hidden" @click="openId = null" />
+          </template>
+          <template #actions>
+            <UButton
+              color="success"
+              variant="soft"
+              size="xs"
+              icon="i-lucide-check-check"
+              label="Close ticket"
+              class="zc-tap"
+              :loading="closing === openTicket.id"
+              @click="onClose(openTicket)"
+            />
           </template>
         </MessageThread>
       </div>

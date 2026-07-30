@@ -118,14 +118,17 @@ export function createSupabaseMessagingRepository(client: SupabaseClient<Databas
       // RLS: an admin sees support threads that are unclaimed or theirs.
       const { data, error } = await supabase
         .from('conversations')
-        .select('id, ticket_number, created_by, assigned_admin_id, last_message_at')
+        .select('id, ticket_number, created_by, assigned_admin_id, closed_at, last_message_at')
         .eq('type', 'support')
         .order('last_message_at', { ascending: true, nullsFirst: true })
       if (error) throw error
       const rows = data ?? []
       if (!rows.length) return []
 
-      const requesters = await fetchParties(rows.map((r: any) => r.created_by))
+      const parties = await fetchParties([
+        ...rows.map((r: any) => r.created_by),
+        ...rows.map((r: any) => r.assigned_admin_id),
+      ].filter(Boolean) as string[])
       const preview = await latestPreviews(rows.map((r: any) => r.id))
 
       return rows.map((r: any) => ({
@@ -134,7 +137,9 @@ export function createSupabaseMessagingRepository(client: SupabaseClient<Databas
         created_by: r.created_by ?? null,
         last_message_at: r.last_message_at ?? null,
         assigned_admin_id: r.assigned_admin_id ?? null,
-        requester: r.created_by ? requesters.get(r.created_by) ?? null : null,
+        closed_at: r.closed_at ?? null,
+        requester: r.created_by ? parties.get(r.created_by) ?? null : null,
+        handler: r.assigned_admin_id ? parties.get(r.assigned_admin_id) ?? null : null,
         preview: preview.get(r.id) ?? null,
       }))
     },

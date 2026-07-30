@@ -79,6 +79,17 @@ const adminSections: Section[] = [
     actions: [
       { name: 'Claim a ticket', detail: 'Assigns the ticket to you and removes it from the shared queue. The first admin to claim it keeps it.' },
       { name: 'Reply', detail: 'Message the member directly to resolve the issue.' },
+      { name: 'Close', detail: 'Marks the ticket resolved. It moves from Open to Closed in your ticket log. You can only close tickets assigned to you.' },
+    ],
+  },
+  {
+    icon: 'i-lucide-ticket',
+    heading: 'Support tickets',
+    where: 'Dashboard → Support tickets',
+    description: 'Your ticket log, split into Open and Closed. Only your own tickets appear here.',
+    actions: [
+      { name: 'Open a ticket', detail: 'Opens the conversation. If it is still open you can reply and then close it.' },
+      { name: 'Open / Closed tabs', detail: 'Switch between tickets you are still handling and ones you have resolved.' },
     ],
   },
   {
@@ -150,6 +161,16 @@ const masterSections: Section[] = [
     description: 'Read every conversation on the platform.',
     actions: [
       { name: 'Read any thread', detail: 'Open any service-desk ticket or project thread. Read-only — you cannot post in another person’s thread.' },
+    ],
+  },
+  {
+    icon: 'i-lucide-ticket',
+    heading: 'All support tickets',
+    where: 'Master console → Support tickets',
+    description: 'Every ticket from every admin, open and closed. Read-only.',
+    actions: [
+      { name: 'Open / Closed tabs', detail: 'See which tickets are still being handled and which are resolved, across all agents.' },
+      { name: 'Open a ticket', detail: 'Read the full exchange and see which agent is handling it. You observe only — you cannot reply or close.' },
     ],
   },
   {

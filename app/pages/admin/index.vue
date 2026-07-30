@@ -130,6 +130,17 @@ const metrics = computed(() => [
           </span>
         </NuxtLink>
 
+        <NuxtLink to="/admin/tickets" class="zc-card zc-card-hover zc-tap flex items-center justify-between p-4">
+          <span class="flex items-center gap-3">
+            <UIcon name="i-lucide-ticket" class="size-5 text-primary" />
+            <span>
+              <span class="block font-medium">Support tickets</span>
+              <span class="block text-xs text-stone-500 dark:text-stone-400">Your open and closed tickets</span>
+            </span>
+          </span>
+          <UIcon name="i-lucide-chevron-right" class="size-5 text-stone-400" />
+        </NuxtLink>
+
         <NuxtLink to="/admin/projects" class="zc-card zc-card-hover zc-tap flex items-center justify-between p-4">
           <span class="flex items-center gap-3">
             <UIcon name="i-lucide-folder-kanban" class="size-5 text-primary" />
