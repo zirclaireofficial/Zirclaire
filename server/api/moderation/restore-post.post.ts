@@ -3,9 +3,10 @@
 // One of the safe, fully reversible moderation actions.
 
 import { serviceClient, requireStaff } from '../../utils/auth'
+import { logAction } from '../../utils/audit'
 
 export default defineEventHandler(async (event) => {
-  await requireStaff(event)
+  const actor = await requireStaff(event)
   const { postId } = await readBody(event)
   if (!postId) throw createError({ statusCode: 400, statusMessage: 'postId is required' })
 
@@ -18,5 +19,6 @@ export default defineEventHandler(async (event) => {
     .select()
     .single()
   if (error) throw createError({ statusCode: 400, statusMessage: error.message })
+  await logAction(event, actor, { action: 'post.restore', target_type: 'post', target_id: postId, summary: 'Restored a removed post' })
   return { post: data }
 })

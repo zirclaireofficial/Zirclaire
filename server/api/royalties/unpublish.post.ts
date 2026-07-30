@@ -4,9 +4,10 @@
 // again re-lists it.
 
 import { serviceClient, requireStaff } from '../../utils/auth'
+import { logAction } from '../../utils/audit'
 
 export default defineEventHandler(async (event) => {
-  await requireStaff(event)
+  const actor = await requireStaff(event)
   const { itemId } = await readBody(event)
   if (!itemId) throw createError({ statusCode: 400, statusMessage: 'itemId is required' })
 
@@ -19,5 +20,6 @@ export default defineEventHandler(async (event) => {
     .select()
     .single()
   if (error) throw createError({ statusCode: 400, statusMessage: error.message })
+  await logAction(event, actor, { action: 'royalty.unpublish', target_type: 'royalty', target_id: itemId, summary: `Un-published royalty work "${data.title}"` })
   return { item: data }
 })

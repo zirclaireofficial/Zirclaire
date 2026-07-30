@@ -2,10 +2,11 @@
 // The admin verifies the SR's payment, funds escrow, and pushes the project
 // live — the whole "money secured → goes to the feed" step in one action.
 
-import { serviceClient, requireAdmin } from '../../../utils/auth'
+import { serviceClient, requireStaff } from '../../../utils/auth'
+import { logAction } from '../../../utils/audit'
 
 export default defineEventHandler(async (event) => {
-  const admin = await requireAdmin(event)
+  const admin = await requireStaff(event)
   const { projectId } = await readBody(event)
   if (!projectId) throw createError({ statusCode: 400, statusMessage: 'projectId is required' })
 
@@ -50,5 +51,12 @@ export default defineEventHandler(async (event) => {
   })
   if (liveErr) throw createError({ statusCode: 400, statusMessage: liveErr.message })
 
+  await logAction(event, admin, {
+    action: 'project.fund_and_launch',
+    target_type: 'project',
+    target_id: projectId,
+    summary: `Funded & launched "${project.title}" ($${project.budget_usd})`,
+    detail: { amount: project.budget_usd },
+  })
   return { project: data }
 })

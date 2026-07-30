@@ -3,10 +3,11 @@
 // database trigger that generates the localized member_id (e.g. MYRSR00001),
 // so the returned profile already carries it.
 
-import { serviceClient, requireAdmin } from '../../utils/auth'
+import { serviceClient, requireStaff } from '../../utils/auth'
+import { logAction } from '../../utils/audit'
 
 export default defineEventHandler(async (event) => {
-  const admin = await requireAdmin(event)
+  const actor = await requireStaff(event)
   const { profileId } = await readBody(event)
   if (!profileId) throw createError({ statusCode: 400, statusMessage: 'profileId is required' })
 
@@ -15,7 +16,7 @@ export default defineEventHandler(async (event) => {
     .from('profiles')
     .update({
       kyc_status: 'approved',
-      kyc_reviewed_by: admin.id,
+      kyc_reviewed_by: actor.id,
       kyc_reviewed_at: new Date().toISOString(),
     })
     .eq('id', profileId)
@@ -24,5 +25,11 @@ export default defineEventHandler(async (event) => {
     .single()
 
   if (error) throw createError({ statusCode: 400, statusMessage: `Approve failed (is it still pending?): ${error.message}` })
+  await logAction(event, actor, {
+    action: 'kyc.approve',
+    target_type: 'profile',
+    target_id: profileId,
+    summary: `Approved ${data.full_name} (${data.member_id})`,
+  })
   return { profile: data }
 })

@@ -4,7 +4,8 @@ import { useMe } from '~/features/auth/application/useMe'
 const { user, signOut } = useAuth()
 const { me, load } = useMe()
 watch(user, () => load(), { immediate: true })
-const isAdmin = computed(() => me.value?.role === 'admin')
+const isAdmin = computed(() => me.value?.role === 'admin' || me.value?.role === 'master')
+const isMaster = computed(() => me.value?.role === 'master')
 const isSuspended = computed(() => me.value?.is_suspended === true)
 </script>
 
@@ -25,10 +26,10 @@ const isSuspended = computed(() => me.value?.is_suspended === true)
         <header
           class="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-stone-200 bg-white/85 px-4 backdrop-blur-md dark:border-stone-800 dark:bg-stone-900/85 lg:hidden"
         >
-          <NuxtLink :to="isAdmin ? '/admin' : '/'" class="zc-tap flex items-center gap-2.5">
+          <NuxtLink :to="isMaster ? '/master' : isAdmin ? '/admin' : '/'" class="zc-tap flex items-center gap-2.5">
             <ShellLogo :size="42" />
             <span class="font-serif text-2xl tracking-tight">Zirclaire<span class="text-primary">.</span></span>
-            <UBadge v-if="isAdmin" color="primary" variant="soft" size="sm" class="ml-0.5">Admin</UBadge>
+            <UBadge v-if="isAdmin" color="primary" variant="soft" size="sm" class="ml-0.5">{{ isMaster ? 'Master' : 'Admin' }}</UBadge>
           </NuxtLink>
           <div class="flex items-center gap-1">
             <ShellThemeToggle />

@@ -1,10 +1,11 @@
 // POST /api/kyc/reject   { profileId, reason }
 // Admin rejects a pending profile, recording the reason. No member_id is issued.
 
-import { serviceClient, requireAdmin } from '../../utils/auth'
+import { serviceClient, requireStaff } from '../../utils/auth'
+import { logAction } from '../../utils/audit'
 
 export default defineEventHandler(async (event) => {
-  const admin = await requireAdmin(event)
+  const actor = await requireStaff(event)
   const { profileId, reason } = await readBody(event)
   if (!profileId) throw createError({ statusCode: 400, statusMessage: 'profileId is required' })
 
@@ -14,7 +15,7 @@ export default defineEventHandler(async (event) => {
     .update({
       kyc_status: 'rejected',
       kyc_reject_reason: reason ?? null,
-      kyc_reviewed_by: admin.id,
+      kyc_reviewed_by: actor.id,
       kyc_reviewed_at: new Date().toISOString(),
     })
     .eq('id', profileId)
@@ -23,5 +24,11 @@ export default defineEventHandler(async (event) => {
     .single()
 
   if (error) throw createError({ statusCode: 400, statusMessage: `Reject failed (is it still pending?): ${error.message}` })
+  await logAction(event, actor, {
+    action: 'kyc.reject',
+    target_type: 'profile',
+    target_id: profileId,
+    summary: `Rejected ${data.full_name}${reason ? ` — ${reason}` : ''}`,
+  })
   return { profile: data }
 })

@@ -6,6 +6,7 @@
 // suspend admins. Nobody may suspend a master.
 
 import { serviceClient, requireStaff } from '../../utils/auth'
+import { logAction } from '../../utils/audit'
 
 export default defineEventHandler(async (event) => {
   const actor = await requireStaff(event)
@@ -42,5 +43,12 @@ export default defineEventHandler(async (event) => {
     .select('id, is_suspended, suspended_reason')
     .single()
   if (error) throw createError({ statusCode: 400, statusMessage: error.message })
+  await logAction(event, actor, {
+    action: 'member.suspend',
+    target_type: 'profile',
+    target_id: userId,
+    summary: `Suspended a ${target.role}${reason ? ` — ${reason}` : ''}`,
+    detail: { reason: reason || null },
+  })
   return { profile: data }
 })

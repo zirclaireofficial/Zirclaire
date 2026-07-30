@@ -1,10 +1,11 @@
 // POST /api/services/reject   { serviceId, reason }   (Admin)
 // Declines a pending service listing, recording the reason.
 
-import { serviceClient, requireAdmin } from '../../utils/auth'
+import { serviceClient, requireStaff } from '../../utils/auth'
+import { logAction } from '../../utils/audit'
 
 export default defineEventHandler(async (event) => {
-  const admin = await requireAdmin(event)
+  const actor = await requireStaff(event)
   const { serviceId, reason } = await readBody(event)
   if (!serviceId) throw createError({ statusCode: 400, statusMessage: 'serviceId is required' })
 
@@ -13,7 +14,7 @@ export default defineEventHandler(async (event) => {
     .from('services')
     .update({
       status: 'rejected',
-      reviewed_by: admin.id,
+      reviewed_by: actor.id,
       reviewed_at: new Date().toISOString(),
       reject_reason: reason || null,
     })
@@ -22,5 +23,11 @@ export default defineEventHandler(async (event) => {
     .select()
     .single()
   if (error) throw createError({ statusCode: 400, statusMessage: error.message })
+  await logAction(event, actor, {
+    action: 'service.reject',
+    target_type: 'service',
+    target_id: serviceId,
+    summary: `Rejected service "${data.title}"${reason ? ` — ${reason}` : ''}`,
+  })
   return { service: data }
 })

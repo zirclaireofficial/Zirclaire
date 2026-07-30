@@ -6,7 +6,9 @@ const user = useSupabaseUser()
 const { me, load } = useMe()
 watch(user, () => load(), { immediate: true })
 
-const isAdmin = computed(() => me.value?.role === 'admin')
+// Master rides the admin console for now (it's a superset of admin).
+const isAdmin = computed(() => me.value?.role === 'admin' || me.value?.role === 'master')
+const isMaster = computed(() => me.value?.role === 'master')
 
 // Mobile bottom bar is tight (5 slots incl. the Z). Feed, Projects, Services
 // and Profile live here; Royalties is one tap away via the Services store
@@ -23,10 +25,17 @@ const right = [
 // KYC, funding and reports live on the dashboard as queues — the nav is for
 // browsing. The admin's Z opens the member directory, since the broker has
 // nothing to create.
-const adminLeft = [
-  { to: '/admin', icon: 'i-lucide-layout-dashboard', label: 'Home' },
-  { to: '/', icon: 'i-lucide-home', label: 'Feed' },
-]
+const adminLeft = computed(() =>
+  isMaster.value
+    ? [
+        { to: '/master', icon: 'i-lucide-shield', label: 'Master' },
+        { to: '/admin', icon: 'i-lucide-layout-dashboard', label: 'Console' },
+      ]
+    : [
+        { to: '/admin', icon: 'i-lucide-layout-dashboard', label: 'Home' },
+        { to: '/', icon: 'i-lucide-home', label: 'Feed' },
+      ],
+)
 const adminRight = [
   { to: '/admin/projects', icon: 'i-lucide-folder-kanban', label: 'Projects' },
   { to: '/profile', icon: 'i-lucide-user', label: 'Profile' },

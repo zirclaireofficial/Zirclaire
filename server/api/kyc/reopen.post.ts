@@ -4,9 +4,10 @@
 // that's suspension, a separate action).
 
 import { serviceClient, requireStaff } from '../../utils/auth'
+import { logAction } from '../../utils/audit'
 
 export default defineEventHandler(async (event) => {
-  await requireStaff(event)
+  const actor = await requireStaff(event)
   const { profileId } = await readBody(event)
   if (!profileId) throw createError({ statusCode: 400, statusMessage: 'profileId is required' })
 
@@ -19,5 +20,6 @@ export default defineEventHandler(async (event) => {
     .select('id, kyc_status')
     .single()
   if (error) throw createError({ statusCode: 400, statusMessage: error.message })
+  await logAction(event, actor, { action: 'kyc.reopen', target_type: 'profile', target_id: profileId, summary: 'Re-opened a rejected KYC application' })
   return { profile: data }
 })
