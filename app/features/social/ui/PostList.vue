@@ -4,6 +4,7 @@
 // updates; PostCard just renders and emits.
 
 import { useSocial } from '~/features/social/application/useSocial'
+import { useModeration } from '~/features/social/application/useModeration'
 import { useMe } from '~/features/auth/application/useMe'
 import { canInteract, canCreatePost } from '~/features/social/domain'
 import type { FeedPost } from '~/features/social/domain'
@@ -12,6 +13,7 @@ import CommentSheet from './CommentSheet.vue'
 import ReportDialog from './ReportDialog.vue'
 
 const { browseFeed, toggleFavorite, sharePost, removeOwnPost } = useSocial()
+const { removePost } = useModeration()
 const user = useSupabaseUser()
 const { me, load: loadMe } = useMe()
 const toast = useToast()
@@ -21,6 +23,8 @@ watch(user, () => loadMe(), { immediate: true })
 const currentUserId = computed(() => (user.value as { sub?: string } | null)?.sub ?? null)
 const mayInteract = computed(() => canInteract(me.value?.role ?? null, me.value?.kyc_status ?? null))
 const mayPost = computed(() => canCreatePost(me.value?.role ?? null, me.value?.kyc_status ?? null))
+// Staff can moderate straight from the feed.
+const isStaff = computed(() => me.value?.role === 'admin' || me.value?.role === 'master')
 
 const posts = ref<FeedPost[]>([])
 const cursor = ref<string | null>(null)
@@ -144,6 +148,18 @@ async function onRemove(post: FeedPost) {
   }
 }
 
+// Staff removing someone else's post (moderation). Logged server-side.
+async function onModerate(post: FeedPost) {
+  try {
+    await removePost(post.id)
+    posts.value = posts.value.filter((p) => p.id !== post.id)
+    toast.add({ title: 'Post removed', description: 'It no longer appears on the feed.', color: 'neutral' })
+  } catch (e) {
+    const err = e as { data?: { statusMessage?: string }; message?: string }
+    toast.add({ title: 'Could not remove the post', description: err?.data?.statusMessage ?? err?.message, color: 'error' })
+  }
+}
+
 function onCommentCounted(delta: number) {
   if (commenting.value) commenting.value.comment_count += delta
 }
@@ -199,11 +215,13 @@ function onCommentCounted(delta: number) {
         :key="p.id"
         :post="p"
         :current-user-id="currentUserId"
+        :can-moderate="isStaff"
         @favorite="onFavorite"
         @comment="onComment"
         @share="onShare"
         @report="onReport"
         @remove="onRemove"
+        @moderate="onModerate"
       />
 
       <div class="pt-1 text-center">

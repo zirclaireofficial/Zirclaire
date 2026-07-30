@@ -17,8 +17,10 @@ const props = withDefaults(
      * events — a button that does nothing is worse than no button.
      */
     interactive?: boolean
+    /** Staff (admin/master) may remove any post straight from the feed. */
+    canModerate?: boolean
   }>(),
-  { interactive: true },
+  { interactive: true, canModerate: false },
 )
 
 const emit = defineEmits<{
@@ -27,6 +29,7 @@ const emit = defineEmits<{
   share: [post: FeedPost]
   report: [post: FeedPost]
   remove: [post: FeedPost]
+  moderate: [post: FeedPost]
 }>()
 
 const { thumbUrl, publicMediaUrl } = usePublicMedia()
@@ -62,11 +65,19 @@ const gridCols = computed(() =>
 
 const lightbox = ref<string | null>(null)
 
-const menuItems = computed(() => [
-  isMine.value
-    ? [{ label: 'Delete post', icon: 'i-lucide-trash-2', onSelect: () => emit('remove', props.post) }]
-    : [{ label: 'Report post', icon: 'i-lucide-flag', onSelect: () => emit('report', props.post) }],
-])
+const menuItems = computed(() => {
+  const group: { label: string; icon: string; onSelect: () => void }[] = []
+  if (isMine.value) {
+    group.push({ label: 'Delete post', icon: 'i-lucide-trash-2', onSelect: () => emit('remove', props.post) })
+  } else {
+    group.push({ label: 'Report post', icon: 'i-lucide-flag', onSelect: () => emit('report', props.post) })
+  }
+  // Staff moderation — remove anyone's post from the feed.
+  if (props.canModerate && !isMine.value) {
+    group.push({ label: 'Remove post (moderate)', icon: 'i-lucide-shield-x', onSelect: () => emit('moderate', props.post) })
+  }
+  return [group]
+})
 </script>
 
 <template>
