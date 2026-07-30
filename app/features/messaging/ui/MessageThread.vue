@@ -102,17 +102,18 @@ function time(iso: string) {
       </div>
 
       <p v-else-if="!messages.length" class="py-10 text-center text-sm text-stone-500 dark:text-stone-400">
-        No messages yet. Say hello.
+        No messages yet.
       </p>
 
       <template v-for="m in messages" :key="m.id">
-        <!-- Automated (bot) message — centered notice, not a chat bubble -->
-        <div v-if="m.is_system" class="flex justify-center">
-          <div class="max-w-[85%] rounded-xl bg-stone-100 px-3 py-2 text-center text-[13px] leading-relaxed text-stone-600 dark:bg-stone-800/60 dark:text-stone-300">
-            <span class="mb-0.5 flex items-center justify-center gap-1 text-[10px] font-medium uppercase tracking-wide text-stone-400">
-              <UIcon name="i-lucide-bot" class="size-3" /> Service desk
-            </span>
-            {{ m.body }}
+        <!-- Service desk (bot) — an incoming message on the left, labelled. -->
+        <div v-if="m.is_system" class="flex flex-col items-start">
+          <span class="mb-0.5 ml-1 flex items-center gap-1 text-[10px] font-medium uppercase tracking-wide text-stone-400">
+            <UIcon name="i-lucide-headset" class="size-3" /> Service desk
+          </span>
+          <div class="max-w-[78%] rounded-2xl rounded-bl-md bg-stone-100 px-3.5 py-2 text-[15px] leading-relaxed text-stone-900 dark:bg-stone-800 dark:text-stone-100">
+            <p class="whitespace-pre-wrap">{{ m.body }}</p>
+            <p class="mt-0.5 text-[10px] text-stone-400">{{ time(m.created_at) }}</p>
           </div>
         </div>
 

@@ -85,14 +85,13 @@ begin
   if v_user_msgs = 1 then
     insert into messages (conversation_id, sender_id, body, is_system) values (
       new.conversation_id, null,
-      'Welcome to the Zirclaire service desk. Please describe your issue in as much detail as you can — what happened, what you were trying to do, and any project or order it relates to.',
+      'Please describe your issue in as much detail as possible.',
       true
     );
   elsif v_user_msgs = 2 then
     insert into messages (conversation_id, sender_id, body, is_system) values (
       new.conversation_id, null,
-      'Thanks — your request has been logged as ticket #' || coalesce(v_conv.ticket_number::text, '—') ||
-      '. An agent will review it and be with you shortly. Feel free to add any more details here in the meantime.',
+      'Logged as ticket #' || coalesce(v_conv.ticket_number::text, '—') || '. An agent will be with you shortly.',
       true
     );
   end if;
