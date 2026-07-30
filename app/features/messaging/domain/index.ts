@@ -13,8 +13,9 @@ export interface PartyRef {
 export interface Message {
   id: string
   conversation_id: string
-  sender_id: string
+  sender_id: string | null // null for automated (bot) messages
   body: string
+  is_system: boolean
   created_at: string
 }
 
@@ -35,11 +36,29 @@ export interface ConversationSummary {
 /** A thread awaiting an admin in the support queue. */
 export interface SupportTicket {
   id: string
+  ticket_number: number | null
   created_by: string | null
   last_message_at: string | null
   assigned_admin_id: string | null
   requester: PartyRef | null
   preview: string | null
+}
+
+/** A thread in the master's oversight list (any type, any participants). */
+export interface OversightThread {
+  id: string
+  type: ConversationType
+  ticket_number: number | null
+  project_title: string | null
+  assigned_admin_id: string | null
+  last_message_at: string | null
+  participants: PartyRef[]
+  preview: string | null
+}
+
+/** Human-facing ticket label, e.g. "#1042". */
+export function ticketLabel(n: number | null): string {
+  return n ? `#${n}` : '#—'
 }
 
 // --- Rules -----------------------------------------------------------------
@@ -69,4 +88,6 @@ export interface MessagingRepository {
   markRead(conversationId: string): Promise<void>
   /** Admin: the shared support queue (unclaimed + own claimed). */
   supportQueue(): Promise<SupportTicket[]>
+  /** Master: every conversation on the platform, for oversight. */
+  oversight(): Promise<OversightThread[]>
 }

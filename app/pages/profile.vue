@@ -66,22 +66,21 @@ watch(user, load, { immediate: true })
       <div class="space-y-2 border-t border-stone-200 pt-5 dark:border-stone-800">
         <p class="text-[11px] uppercase tracking-wide text-stone-400">Account</p>
 
-        <template v-if="me?.role === 'admin'">
-          <NuxtLink to="/admin/kyc" class="zc-card zc-card-hover zc-tap flex items-center justify-between p-4">
-            <span class="flex items-center gap-3">
-              <UIcon name="i-lucide-shield-check" class="size-5 text-primary" />
-              <span class="font-medium">KYC review</span>
+        <!-- Staff get the guide to their controls here. -->
+        <NuxtLink
+          v-if="me?.role === 'admin' || me?.role === 'master'"
+          to="/guide"
+          class="zc-card zc-card-hover zc-tap flex items-center justify-between p-4"
+        >
+          <span class="flex items-center gap-3">
+            <UIcon name="i-lucide-book-marked" class="size-5 text-primary" />
+            <span>
+              <span class="block font-medium">Guide</span>
+              <span class="block text-xs text-stone-500 dark:text-stone-400">What your controls do</span>
             </span>
-            <UIcon name="i-lucide-chevron-right" class="size-5 text-stone-400" />
-          </NuxtLink>
-          <NuxtLink to="/admin/funding" class="zc-card zc-card-hover zc-tap flex items-center justify-between p-4">
-            <span class="flex items-center gap-3">
-              <UIcon name="i-lucide-banknote" class="size-5 text-primary" />
-              <span class="font-medium">Project funding</span>
-            </span>
-            <UIcon name="i-lucide-chevron-right" class="size-5 text-stone-400" />
-          </NuxtLink>
-        </template>
+          </span>
+          <UIcon name="i-lucide-chevron-right" class="size-5 text-stone-400" />
+        </NuxtLink>
 
         <UButton color="error" variant="soft" icon="i-lucide-log-out" label="Sign out" class="zc-tap" @click="signOut" />
       </div>

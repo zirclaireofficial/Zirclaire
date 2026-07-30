@@ -80,10 +80,23 @@ function onOpen(id: string) {
   <div class="grid gap-4 lg:grid-cols-[20rem_1fr]">
     <!-- Thread list -->
     <div :class="openId ? 'hidden lg:block' : ''">
-      <div class="mb-3 flex items-center justify-between">
-        <h1 class="zc-title font-serif text-2xl leading-tight">Inbox</h1>
-        <UButton size="xs" color="neutral" variant="soft" icon="i-lucide-life-buoy" label="Service desk" :loading="openingDesk" class="zc-tap" @click="contactDesk" />
-      </div>
+      <h1 class="zc-title mb-3 font-serif text-2xl leading-tight">Inbox</h1>
+
+      <!-- Helpdesk entry — always available -->
+      <button
+        class="zc-card zc-card-hover zc-tap mb-3 flex w-full items-center gap-3 p-3 text-left"
+        @click="contactDesk"
+      >
+        <div class="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/10">
+          <UIcon v-if="!openingDesk" name="i-lucide-life-buoy" class="size-5 text-primary" />
+          <UIcon v-else name="i-lucide-loader" class="size-5 animate-spin text-primary" />
+        </div>
+        <div class="min-w-0 flex-1">
+          <p class="text-sm font-medium">Need help?</p>
+          <p class="text-xs text-stone-500 dark:text-stone-400">Contact the Zirclaire service desk</p>
+        </div>
+        <UIcon name="i-lucide-chevron-right" class="size-5 shrink-0 text-stone-400" />
+      </button>
 
       <div v-if="loading" class="space-y-2">
         <div v-for="i in 3" :key="i" class="zc-card h-16 animate-pulse" />

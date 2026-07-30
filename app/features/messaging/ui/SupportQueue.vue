@@ -4,6 +4,7 @@
 
 import { useMessaging, useSupportModeration } from '~/features/messaging/application/useMessaging'
 import { usePublicMedia } from '~/shared/lib/media'
+import { ticketLabel } from '~/features/messaging/domain'
 import type { SupportTicket } from '~/features/messaging/domain'
 import MessageThread from './MessageThread.vue'
 
@@ -84,11 +85,14 @@ function initials(name: string | null | undefined) {
                 <img v-if="t.requester?.profile_picture" :src="publicMediaUrl(t.requester.profile_picture)" :alt="t.requester.full_name ?? ''" class="size-9 shrink-0 rounded-full object-cover" >
                 <div v-else class="flex size-9 shrink-0 items-center justify-center rounded-full bg-stone-200 text-xs font-medium dark:bg-stone-800">{{ initials(t.requester?.full_name) }}</div>
                 <div class="min-w-0 flex-1">
-                  <p class="truncate text-sm font-medium">{{ t.requester?.full_name ?? 'Member' }}</p>
+                  <div class="flex items-center gap-1.5">
+                    <span class="font-mono text-xs font-medium text-primary">{{ ticketLabel(t.ticket_number) }}</span>
+                    <p class="truncate text-sm font-medium">{{ t.requester?.full_name ?? 'Member' }}</p>
+                  </div>
                   <p class="truncate text-xs text-stone-500 dark:text-stone-400">{{ t.preview || 'New request' }}</p>
                 </div>
               </div>
-              <UButton class="zc-tap mt-2" color="primary" size="xs" block label="Claim" :loading="claiming === t.id" @click="onClaim(t)" />
+              <UButton class="zc-tap mt-2" color="primary" size="xs" block :label="`Claim ${ticketLabel(t.ticket_number)}`" :loading="claiming === t.id" @click="onClaim(t)" />
             </div>
           </div>
 
@@ -106,7 +110,10 @@ function initials(name: string | null | undefined) {
               <img v-if="t.requester?.profile_picture" :src="publicMediaUrl(t.requester.profile_picture)" :alt="t.requester.full_name ?? ''" class="size-9 shrink-0 rounded-full object-cover" >
               <div v-else class="flex size-9 shrink-0 items-center justify-center rounded-full bg-stone-200 text-xs font-medium dark:bg-stone-800">{{ initials(t.requester?.full_name) }}</div>
               <div class="min-w-0 flex-1">
-                <p class="truncate text-sm font-medium">{{ t.requester?.full_name ?? 'Member' }}</p>
+                <div class="flex items-center gap-1.5">
+                  <span class="font-mono text-xs font-medium text-primary">{{ ticketLabel(t.ticket_number) }}</span>
+                  <p class="truncate text-sm font-medium">{{ t.requester?.full_name ?? 'Member' }}</p>
+                </div>
                 <p class="truncate text-xs text-stone-500 dark:text-stone-400">{{ t.preview || '—' }}</p>
               </div>
             </button>

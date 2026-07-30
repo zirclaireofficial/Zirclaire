@@ -50,6 +50,7 @@ export function useMessaging() {
     listMessages: (id: string) => repo.listMessages(id),
     markRead: (id: string) => repo.markRead(id),
     supportQueue: () => repo.supportQueue(),
+    oversight: () => repo.oversight(),
     sendMessage,
     openProjectThread,
     openSupportThread,

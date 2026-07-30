@@ -48,7 +48,8 @@ function isActive(to: string) {
 </script>
 
 <template>
-  <nav class="fixed inset-x-0 bottom-0 z-20 lg:hidden">
+  <!-- Master uses the hamburger menu in the header instead of a bottom bar. -->
+  <nav v-if="!isMaster" class="fixed inset-x-0 bottom-0 z-20 lg:hidden">
     <!-- Admin: same shape as members, but the Z opens triage, not a form -->
     <div
       v-if="isAdmin"

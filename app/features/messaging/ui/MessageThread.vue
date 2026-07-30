@@ -12,6 +12,8 @@ const props = defineProps<{
   title: string
   /** Optional subtitle, e.g. the project title or member ID. */
   subtitle?: string | null
+  /** Master oversight: read the thread without a composer. */
+  readOnly?: boolean
 }>()
 
 const { listMessages, sendMessage, markRead, subscribe } = useMessaging()
@@ -103,27 +105,37 @@ function time(iso: string) {
         No messages yet. Say hello.
       </p>
 
-      <div
-        v-for="m in messages"
-        :key="m.id"
-        class="flex"
-        :class="m.sender_id === currentUserId ? 'justify-end' : 'justify-start'"
-      >
-        <div
-          class="max-w-[78%] rounded-2xl px-3.5 py-2 text-[15px] leading-relaxed"
-          :class="m.sender_id === currentUserId
-            ? 'rounded-br-md bg-primary text-white'
-            : 'rounded-bl-md bg-stone-100 text-stone-900 dark:bg-stone-800 dark:text-stone-100'"
-        >
-          <p class="whitespace-pre-wrap">{{ m.body }}</p>
-          <p class="mt-0.5 text-[10px]" :class="m.sender_id === currentUserId ? 'text-white/70' : 'text-stone-400'">
-            {{ time(m.created_at) }}
-          </p>
+      <template v-for="m in messages" :key="m.id">
+        <!-- Automated (bot) message — centered notice, not a chat bubble -->
+        <div v-if="m.is_system" class="flex justify-center">
+          <div class="max-w-[85%] rounded-xl bg-stone-100 px-3 py-2 text-center text-[13px] leading-relaxed text-stone-600 dark:bg-stone-800/60 dark:text-stone-300">
+            <span class="mb-0.5 flex items-center justify-center gap-1 text-[10px] font-medium uppercase tracking-wide text-stone-400">
+              <UIcon name="i-lucide-bot" class="size-3" /> Service desk
+            </span>
+            {{ m.body }}
+          </div>
         </div>
-      </div>
+
+        <div v-else class="flex" :class="m.sender_id === currentUserId ? 'justify-end' : 'justify-start'">
+          <div
+            class="max-w-[78%] rounded-2xl px-3.5 py-2 text-[15px] leading-relaxed"
+            :class="m.sender_id === currentUserId
+              ? 'rounded-br-md bg-primary text-white'
+              : 'rounded-bl-md bg-stone-100 text-stone-900 dark:bg-stone-800 dark:text-stone-100'"
+          >
+            <p class="whitespace-pre-wrap">{{ m.body }}</p>
+            <p class="mt-0.5 text-[10px]" :class="m.sender_id === currentUserId ? 'text-white/70' : 'text-stone-400'">
+              {{ time(m.created_at) }}
+            </p>
+          </div>
+        </div>
+      </template>
     </div>
 
-    <div class="border-t border-stone-200 p-3 dark:border-stone-800">
+    <div v-if="readOnly" class="border-t border-stone-200 p-3 text-center text-xs text-stone-400 dark:border-stone-800">
+      <UIcon name="i-lucide-eye" class="mr-1 inline size-3.5" /> Oversight — read only
+    </div>
+    <div v-else class="border-t border-stone-200 p-3 dark:border-stone-800">
       <div class="flex items-end gap-2">
         <UTextarea
           v-model="body"

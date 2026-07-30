@@ -10,6 +10,7 @@ import type {
   ConversationSummary,
   Message,
   SupportTicket,
+  OversightThread,
   PartyRef,
 } from '../domain'
 
@@ -84,7 +85,7 @@ export function createSupabaseMessagingRepository(client: SupabaseClient<Databas
     async listMessages(conversationId: string): Promise<Message[]> {
       const { data, error } = await supabase
         .from('messages')
-        .select('id, conversation_id, sender_id, body, created_at')
+        .select('id, conversation_id, sender_id, body, is_system, created_at')
         .eq('conversation_id', conversationId)
         .order('created_at', { ascending: true })
       if (error) throw error
@@ -97,7 +98,7 @@ export function createSupabaseMessagingRepository(client: SupabaseClient<Databas
       const { data, error } = await supabase
         .from('messages')
         .insert({ conversation_id: conversationId, sender_id: uid, body: body.trim() })
-        .select('id, conversation_id, sender_id, body, created_at')
+        .select('id, conversation_id, sender_id, body, is_system, created_at')
         .single()
       if (error) throw error
       return data as Message
@@ -117,7 +118,7 @@ export function createSupabaseMessagingRepository(client: SupabaseClient<Databas
       // RLS: an admin sees support threads that are unclaimed or theirs.
       const { data, error } = await supabase
         .from('conversations')
-        .select('id, created_by, assigned_admin_id, last_message_at')
+        .select('id, ticket_number, created_by, assigned_admin_id, last_message_at')
         .eq('type', 'support')
         .order('last_message_at', { ascending: true, nullsFirst: true })
       if (error) throw error
@@ -125,19 +126,11 @@ export function createSupabaseMessagingRepository(client: SupabaseClient<Databas
       if (!rows.length) return []
 
       const requesters = await fetchParties(rows.map((r: any) => r.created_by))
-      // A small preview: the latest message per thread.
-      const { data: msgs } = await supabase
-        .from('messages')
-        .select('conversation_id, body, created_at')
-        .in('conversation_id', rows.map((r: any) => r.id))
-        .order('created_at', { ascending: false })
-      const preview = new Map<string, string>()
-      for (const m of msgs ?? []) {
-        if (!preview.has(m.conversation_id as string)) preview.set(m.conversation_id as string, m.body as string)
-      }
+      const preview = await latestPreviews(rows.map((r: any) => r.id))
 
       return rows.map((r: any) => ({
         id: r.id,
+        ticket_number: r.ticket_number ?? null,
         created_by: r.created_by ?? null,
         last_message_at: r.last_message_at ?? null,
         assigned_admin_id: r.assigned_admin_id ?? null,
@@ -145,5 +138,60 @@ export function createSupabaseMessagingRepository(client: SupabaseClient<Databas
         preview: preview.get(r.id) ?? null,
       }))
     },
+
+    async oversight(): Promise<OversightThread[]> {
+      // Master RLS returns every conversation. Resolve participants + a preview
+      // so the master can scan the whole board.
+      const { data: convos, error } = await supabase
+        .from('conversations')
+        .select('id, type, ticket_number, project_id, assigned_admin_id, last_message_at')
+        .order('last_message_at', { ascending: false, nullsFirst: false })
+      if (error) throw error
+      const rows = convos ?? []
+      if (!rows.length) return []
+
+      const ids = rows.map((c: any) => c.id)
+      const [{ data: parts }, { data: projects }, preview] = await Promise.all([
+        supabase.from('conversation_participants').select('conversation_id, user_id').in('conversation_id', ids),
+        supabase.from('projects').select('id, title').in('id', rows.map((c: any) => c.project_id).filter(Boolean)),
+        latestPreviews(ids),
+      ])
+      const partyIds = [...new Set((parts ?? []).map((p: any) => p.user_id))] as string[]
+      const parties = await fetchParties(partyIds)
+      const projectTitle = new Map((projects ?? []).map((p: any) => [p.id, p.title]))
+      const byConvo = new Map<string, PartyRef[]>()
+      for (const p of parts ?? []) {
+        const list = byConvo.get(p.conversation_id as string) ?? []
+        const ref = parties.get(p.user_id as string)
+        if (ref) list.push(ref)
+        byConvo.set(p.conversation_id as string, list)
+      }
+
+      return rows.map((c: any) => ({
+        id: c.id,
+        type: c.type,
+        ticket_number: c.ticket_number ?? null,
+        project_title: c.project_id ? projectTitle.get(c.project_id) ?? null : null,
+        assigned_admin_id: c.assigned_admin_id ?? null,
+        last_message_at: c.last_message_at ?? null,
+        participants: byConvo.get(c.id) ?? [],
+        preview: preview.get(c.id) ?? null,
+      }))
+    },
+  }
+
+  /** Latest message body per conversation, for list previews. */
+  async function latestPreviews(convoIds: string[]): Promise<Map<string, string>> {
+    const preview = new Map<string, string>()
+    if (!convoIds.length) return preview
+    const { data } = await supabase
+      .from('messages')
+      .select('conversation_id, body, created_at')
+      .in('conversation_id', convoIds)
+      .order('created_at', { ascending: false })
+    for (const m of data ?? []) {
+      if (!preview.has(m.conversation_id as string)) preview.set(m.conversation_id as string, m.body as string)
+    }
+    return preview
   }
 }

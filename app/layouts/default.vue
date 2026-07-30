@@ -43,8 +43,10 @@ const isSuspended = computed(() => me.value?.is_suspended === true)
               size="sm"
               aria-label="Inbox"
             />
+            <!-- Master has no bottom bar; the full nav is in this menu. -->
+            <ShellMasterMobileMenu v-if="isMaster" />
             <!-- Signed out: the feed is public, so give visitors a way in. -->
-            <UButton v-else to="/login" color="primary" size="sm" label="Log in" class="zc-tap" />
+            <UButton v-if="!user" to="/login" color="primary" size="sm" label="Log in" class="zc-tap" />
           </div>
         </header>
 
