@@ -4,10 +4,12 @@
 import type { Database } from '~/shared/types/database'
 
 export type Me = {
-  role: 'service_requester' | 'service_provider' | 'admin'
+  role: 'service_requester' | 'service_provider' | 'admin' | 'master'
   kyc_status: 'pending' | 'approved' | 'rejected'
   member_id: string | null
   full_name: string
+  is_suspended: boolean
+  suspended_reason: string | null
 }
 
 export function useMe() {
@@ -26,7 +28,7 @@ export function useMe() {
     loading.value = true
     const { data } = await supabase
       .from('profiles')
-      .select('role, kyc_status, member_id, full_name')
+      .select('role, kyc_status, member_id, full_name, is_suspended, suspended_reason')
       .eq('id', uid)
       .maybeSingle()
     me.value = (data as Me) ?? null

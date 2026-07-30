@@ -39,7 +39,7 @@ export function createSupabaseProfileRepository(
       // only; anyone else gets just their own row back, so this can't leak.
       const { data, error } = await supabase
         .from('profiles')
-        .select('id, member_id, full_name, email, role, kyc_status, profile_picture, created_at')
+        .select('id, member_id, full_name, email, role, kyc_status, profile_picture, is_suspended, suspended_reason, created_at')
         .order('created_at', { ascending: false })
       if (error) throw error
       return (data ?? []) as MemberRow[]

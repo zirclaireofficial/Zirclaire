@@ -70,7 +70,21 @@ export interface MemberRow {
   role: string
   kyc_status: string
   profile_picture: string | null
+  is_suspended: boolean
+  suspended_reason: string | null
   created_at: string
+}
+
+/**
+ * Can `actor` suspend `target`? Admins reach members; masters also reach
+ * admins; a master is untouchable, and nobody suspends themselves. Mirrors the
+ * server rule so the UI only offers what will actually work.
+ */
+export function canSuspend(actorRole: string, actorId: string, target: MemberRow): boolean {
+  if (target.id === actorId) return false
+  if (target.role === 'master') return false
+  if (target.role === 'admin') return actorRole === 'master'
+  return actorRole === 'admin' || actorRole === 'master'
 }
 
 export function kycLabel(status: string): string {

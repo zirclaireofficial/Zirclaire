@@ -11,5 +11,6 @@ export default defineNuxtRouteMiddleware(async () => {
   const supabase = useSupabaseClient<Database>()
   const { data } = await supabase.from('profiles').select('role').eq('id', uid!).maybeSingle()
 
-  if (data?.role !== 'admin') return navigateTo('/')
+  // Master is above admin, so it passes the admin gate too.
+  if (data?.role !== 'admin' && data?.role !== 'master') return navigateTo('/')
 })

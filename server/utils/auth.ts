@@ -57,3 +57,21 @@ export async function requireAdmin(event: H3Event) {
   }
   return profile
 }
+
+/** Require admin OR master (staff). Returns the caller's profile. */
+export async function requireStaff(event: H3Event) {
+  const profile = await getCallerProfile(event)
+  if (profile.role !== 'admin' && profile.role !== 'master') {
+    throw createError({ statusCode: 403, statusMessage: 'Staff only' })
+  }
+  return profile
+}
+
+/** Require the caller to be the master, or 403. */
+export async function requireMaster(event: H3Event) {
+  const profile = await getCallerProfile(event)
+  if (profile.role !== 'master') {
+    throw createError({ statusCode: 403, statusMessage: 'Master only' })
+  }
+  return profile
+}

@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { useAuth } from '~/features/auth/application/useAuth'
 import { useMe } from '~/features/auth/application/useMe'
-const { user } = useAuth()
+const { user, signOut } = useAuth()
 const { me, load } = useMe()
 watch(user, () => load(), { immediate: true })
 const isAdmin = computed(() => me.value?.role === 'admin')
+const isSuspended = computed(() => me.value?.is_suspended === true)
 </script>
 
 <template>
@@ -54,5 +55,26 @@ const isAdmin = computed(() => me.value?.role === 'admin')
 
     <!-- Mobile bottom nav -->
     <ShellBottomNav />
+
+    <!-- Suspension notice — blocks the app for a suspended account, with the
+         reason. Their content is already hidden server-side; this tells them. -->
+    <Teleport to="body">
+      <div v-if="isSuspended" class="fixed inset-0 z-[60] flex items-center justify-center bg-stone-950/80 p-4 backdrop-blur-sm">
+        <div class="w-full max-w-md rounded-2xl bg-white p-6 text-center dark:bg-stone-900">
+          <div class="mx-auto mb-3 flex size-14 items-center justify-center rounded-full bg-error/10">
+            <UIcon name="i-lucide-shield-alert" class="size-7 text-error" />
+          </div>
+          <h1 class="font-serif text-xl">Your account is suspended</h1>
+          <p class="mt-2 text-sm text-stone-600 dark:text-stone-300">
+            While suspended, you can't post, comment, apply or order, and your profile and content are hidden from others.
+          </p>
+          <div v-if="me?.suspended_reason" class="mt-4 rounded-xl bg-stone-50 p-3 text-left text-sm dark:bg-stone-800/60">
+            <span class="font-medium">Reason:</span> {{ me.suspended_reason }}
+          </div>
+          <p class="mt-4 text-xs text-stone-400">If you think this is a mistake, contact support.</p>
+          <UButton color="neutral" variant="soft" class="mt-4" icon="i-lucide-log-out" label="Sign out" @click="signOut" />
+        </div>
+      </div>
+    </Teleport>
   </div>
 </template>

@@ -1,6 +1,5 @@
-// POST /api/moderation/remove-comment   { commentId }   (Admin)
-// Soft-removes a comment (status -> 'removed'), hiding it from everyone but its
-// author and staff. Reversible via restore-comment — nothing is destroyed.
+// POST /api/moderation/restore-comment   { commentId }   (admin or master)
+// Reverses a comment removal — status back to 'active'.
 
 import { serviceClient, requireStaff } from '../../utils/auth'
 
@@ -10,7 +9,11 @@ export default defineEventHandler(async (event) => {
   if (!commentId) throw createError({ statusCode: 400, statusMessage: 'commentId is required' })
 
   const db = serviceClient(event)
-  const { error } = await db.from('comments').update({ status: 'removed' }).eq('id', commentId)
+  const { error } = await db
+    .from('comments')
+    .update({ status: 'active' })
+    .eq('id', commentId)
+    .eq('status', 'removed')
   if (error) throw createError({ statusCode: 400, statusMessage: error.message })
   return { ok: true }
 })
