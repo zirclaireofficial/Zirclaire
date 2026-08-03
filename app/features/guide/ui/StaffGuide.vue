@@ -75,7 +75,7 @@ const adminSections: Section[] = [
     icon: 'i-lucide-life-buoy',
     heading: 'Service desk',
     where: 'Inbox icon → the queue',
-    description: 'Handle member support tickets. New tickets carry a ticket number and sit in a shared queue.',
+    description: 'Handle member support tickets. An AI assistant answers common questions first and escalates anything it can’t handle to this queue. Each ticket has a number and sits in a shared queue until claimed.',
     actions: [
       { name: 'Claim a ticket', detail: 'Assigns the ticket to you and removes it from the shared queue. The first admin to claim it keeps it.' },
       { name: 'Reply', detail: 'Message the member directly to resolve the issue.' },

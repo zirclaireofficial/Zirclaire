@@ -29,6 +29,14 @@ export function useMessaging() {
     return authedFetch<{ conversation: { id: string } }>('/api/messages/open-support', { method: 'POST' })
   }
 
+  /** Ask the AI assistant to respond in a support thread (best-effort). */
+  function botReply(conversationId: string) {
+    return authedFetch<{ action?: string; skipped?: boolean }>('/api/ai/support-reply', {
+      method: 'POST',
+      body: { conversationId },
+    })
+  }
+
   /**
    * Live messages for one conversation. Returns an unsubscribe function.
    * Supabase realtime pushes new rows; RLS still applies to the stream.
@@ -54,6 +62,7 @@ export function useMessaging() {
     sendMessage,
     openProjectThread,
     openSupportThread,
+    botReply,
     subscribe,
   }
 }

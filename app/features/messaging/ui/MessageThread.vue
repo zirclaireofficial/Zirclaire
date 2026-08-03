@@ -16,6 +16,8 @@ const props = defineProps<{
   readOnly?: boolean
 }>()
 
+const emit = defineEmits<{ sent: [conversationId: string] }>()
+
 const { listMessages, sendMessage, markRead, subscribe } = useMessaging()
 const { publicMediaUrl } = usePublicMedia()
 const toast = useToast()
@@ -72,6 +74,7 @@ async function send() {
     const m = await sendMessage(props.conversationId, text)
     messages.value.push(m)
     scrollToEnd()
+    emit('sent', props.conversationId)
   } catch (e) {
     const err = e as { message?: string }
     body.value = text // restore on failure

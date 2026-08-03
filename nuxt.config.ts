@@ -39,5 +39,7 @@ export default defineNuxtConfig({
     // Used later by the Cloudinary Node SDK to sign uploads in /server routes.
     cloudinaryApiKey: process.env.CLOUDINARY_API_KEY,
     cloudinaryApiSecret: process.env.CLOUDINARY_API_SECRET,
+    // DeepSeek — called only from /server routes, never exposed to the client.
+    deepseekApiKey: process.env.DEEPSEEK_API_KEY,
   },
 })

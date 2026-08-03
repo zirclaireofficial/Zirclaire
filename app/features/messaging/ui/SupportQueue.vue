@@ -36,6 +36,7 @@ async function load() {
 onMounted(load)
 
 const openTicket = computed(() => tickets.value.find((t) => t.id === openId.value) ?? null)
+const openIsMine = computed(() => !!openTicket.value && openTicket.value.assigned_admin_id === currentUserId.value)
 // The live desk only deals with OPEN tickets; closed ones live in the log.
 const mine = computed(() => tickets.value.filter((t) => t.assigned_admin_id === currentUserId.value && !t.closed_at))
 const unclaimed = computed(() => tickets.value.filter((t) => !t.assigned_admin_id && !t.closed_at))
@@ -96,9 +97,15 @@ function initials(name: string | null | undefined) {
           <!-- Unclaimed queue -->
           <p class="zc-eyebrow mb-2">Waiting ({{ unclaimed.length }})</p>
           <p v-if="!unclaimed.length" class="mb-4 text-sm text-stone-500 dark:text-stone-400">Nothing waiting.</p>
+          <p class="-mt-1 mb-2 text-xs text-stone-400">Open a ticket to read the assistant’s conversation before claiming.</p>
           <div v-else class="mb-4 space-y-2">
-            <div v-for="t in unclaimed" :key="t.id" class="zc-card p-3">
-              <div class="flex items-center gap-2.5">
+            <div
+              v-for="t in unclaimed"
+              :key="t.id"
+              class="zc-card p-3"
+              :class="openId === t.id ? 'ring-1 ring-primary' : ''"
+            >
+              <button class="zc-tap flex w-full items-center gap-2.5 text-left" @click="openId = t.id">
                 <img v-if="t.requester?.profile_picture" :src="publicMediaUrl(t.requester.profile_picture)" :alt="t.requester.full_name ?? ''" class="size-9 shrink-0 rounded-full object-cover" >
                 <div v-else class="flex size-9 shrink-0 items-center justify-center rounded-full bg-stone-200 text-xs font-medium dark:bg-stone-800">{{ initials(t.requester?.full_name) }}</div>
                 <div class="min-w-0 flex-1">
@@ -108,7 +115,7 @@ function initials(name: string | null | undefined) {
                   </div>
                   <p class="truncate text-xs text-stone-500 dark:text-stone-400">{{ t.preview || 'New request' }}</p>
                 </div>
-              </div>
+              </button>
               <UButton class="zc-tap mt-2" color="primary" size="xs" block :label="`Claim ${ticketLabel(t.ticket_number)}`" :loading="claiming === t.id" @click="onClaim(t)" />
             </div>
           </div>
@@ -147,13 +154,26 @@ function initials(name: string | null | undefined) {
           :conversation-id="openTicket.id"
           :current-user-id="currentUserId"
           :title="openTicket.requester?.full_name ?? 'Member'"
-          :subtitle="openTicket.requester?.member_id"
+          :subtitle="openIsMine ? openTicket.requester?.member_id : 'Waiting — read-only until you claim'"
+          :read-only="!openIsMine"
         >
           <template #back>
             <UButton icon="i-lucide-arrow-left" color="neutral" variant="ghost" size="sm" aria-label="Back" class="lg:hidden" @click="openId = null" />
           </template>
           <template #actions>
+            <!-- Not yet claimed: read the bot conversation, then claim to reply. -->
             <UButton
+              v-if="!openIsMine"
+              color="primary"
+              size="xs"
+              icon="i-lucide-hand"
+              label="Claim"
+              class="zc-tap"
+              :loading="claiming === openTicket.id"
+              @click="onClaim(openTicket)"
+            />
+            <UButton
+              v-else
               color="success"
               variant="soft"
               size="xs"

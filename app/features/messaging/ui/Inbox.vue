@@ -8,10 +8,18 @@ import { conversationTitle } from '~/features/messaging/domain'
 import type { ConversationSummary } from '~/features/messaging/domain'
 import MessageThread from './MessageThread.vue'
 
-const { listConversations, openSupportThread } = useMessaging()
+const { listConversations, openSupportThread, botReply } = useMessaging()
 const { publicMediaUrl } = usePublicMedia()
 const user = useSupabaseUser()
 const toast = useToast()
+
+// After the member sends in their support thread, ask the assistant to reply.
+// Best-effort: the bot's message arrives over realtime. It self-limits (does
+// nothing once a human has claimed or it has escalated).
+function onSent(conversationId: string) {
+  const c = conversations.value.find((x) => x.id === conversationId)
+  if (c?.type === 'support') botReply(conversationId).catch(() => {})
+}
 
 const currentUserId = computed(() => (user.value as { sub?: string } | null)?.sub ?? '')
 
@@ -152,6 +160,7 @@ function onOpen(id: string) {
         :current-user-id="currentUserId"
         :title="conversationTitle(openConversation)"
         :subtitle="openConversation.type === 'support' ? 'Service desk' : openConversation.project_title"
+        @sent="onSent"
       >
         <template #back>
           <UButton icon="i-lucide-arrow-left" color="neutral" variant="ghost" size="sm" aria-label="Back" class="lg:hidden" @click="openId = null" />
