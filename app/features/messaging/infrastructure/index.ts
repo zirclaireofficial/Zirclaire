@@ -11,6 +11,7 @@ import type {
   Message,
   SupportTicket,
   OversightThread,
+  SupportTicketThread,
   PartyRef,
 } from '../domain'
 
@@ -183,6 +184,44 @@ export function createSupabaseMessagingRepository(client: SupabaseClient<Databas
         preview: preview.get(c.id) ?? null,
       }))
     },
+
+    myTickets,
+  }
+
+  async function myTickets(): Promise<SupportTicketThread[]> {
+    const uid = await currentUserId()
+    if (!uid) return []
+    // The member's own tickets, oldest first (so the continuous view reads top
+    // to bottom). RLS lets them read their own support conversations.
+    const { data: convos, error } = await supabase
+      .from('conversations')
+      .select('id, ticket_number, closed_at, created_at')
+      .eq('type', 'support')
+      .eq('created_by', uid)
+      .order('created_at', { ascending: true })
+    if (error) throw error
+    const rows = convos ?? []
+    if (!rows.length) return []
+
+    const ids = rows.map((c: any) => c.id)
+    const { data: msgs } = await supabase
+      .from('messages')
+      .select('id, conversation_id, sender_id, body, is_system, created_at')
+      .in('conversation_id', ids)
+      .order('created_at', { ascending: true })
+    const byConvo = new Map<string, Message[]>()
+    for (const m of msgs ?? []) {
+      const list = byConvo.get(m.conversation_id as string) ?? []
+      list.push(m as Message)
+      byConvo.set(m.conversation_id as string, list)
+    }
+    return rows.map((c: any) => ({
+      id: c.id,
+      ticket_number: c.ticket_number ?? null,
+      closed_at: c.closed_at ?? null,
+      created_at: c.created_at,
+      messages: byConvo.get(c.id) ?? [],
+    }))
   }
 
   /** Latest message body per conversation, for list previews. */

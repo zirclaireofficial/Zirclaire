@@ -30,6 +30,14 @@ export default defineEventHandler(async (event) => {
     .single()
   if (error) throw createError({ statusCode: 400, statusMessage: error.message })
 
+  // Tell the member the ticket is closed and how to get more help.
+  await db.from('messages').insert({
+    conversation_id: conversationId,
+    sender_id: null,
+    is_system: true,
+    body: `Ticket #${convo.ticket_number ?? '—'} has been closed. If your issue isn’t fully resolved or you need anything else, just send another message and we’ll open a new ticket for you.`,
+  })
+
   await logAction(event, actor, {
     action: 'ticket.close',
     target_type: 'conversation',

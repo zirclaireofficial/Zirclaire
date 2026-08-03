@@ -7,33 +7,30 @@ import { usePublicMedia } from '~/shared/lib/media'
 import { conversationTitle } from '~/features/messaging/domain'
 import type { ConversationSummary } from '~/features/messaging/domain'
 import MessageThread from './MessageThread.vue'
+import SupportChat from './SupportChat.vue'
 
-const { listConversations, openSupportThread, botReply } = useMessaging()
+const { listConversations } = useMessaging()
 const { publicMediaUrl } = usePublicMedia()
 const user = useSupabaseUser()
 const toast = useToast()
 
-// After the member sends in their support thread, ask the assistant to reply.
-// Best-effort: the bot's message arrives over realtime. It self-limits (does
-// nothing once a human has claimed or it has escalated).
-function onSent(conversationId: string) {
-  const c = conversations.value.find((x) => x.id === conversationId)
-  if (c?.type === 'support') botReply(conversationId).catch(() => {})
-}
+// The continuous service-desk view (all the member's tickets in one chat).
+const showSupport = ref(false)
 
 const currentUserId = computed(() => (user.value as { sub?: string } | null)?.sub ?? '')
 
 const conversations = ref<ConversationSummary[]>([])
 const loading = ref(true)
 const openId = ref<string | null>(null)
-const openingDesk = ref(false)
 
 const route = useRoute()
 
 async function load() {
   loading.value = true
   try {
-    conversations.value = await listConversations()
+    // Support tickets are shown as one continuous "Service desk" chat via the
+    // helpdesk card, so they're kept out of this per-thread list.
+    conversations.value = (await listConversations()).filter((c) => c.type !== 'support')
     // Opened via a "Message" button: ?c=<conversationId>
     const c = route.query.c as string | undefined
     if (c && conversations.value.some((x) => x.id === c)) openId.value = c
@@ -63,20 +60,6 @@ function ago(iso: string | null) {
   return `${Math.floor(h / 24)}d`
 }
 
-async function contactDesk() {
-  openingDesk.value = true
-  try {
-    const res = await openSupportThread()
-    await load()
-    openId.value = res.conversation.id
-  } catch (e) {
-    const err = e as { data?: { statusMessage?: string } }
-    toast.add({ title: 'Could not open the service desk', description: err?.data?.statusMessage, color: 'error' })
-  } finally {
-    openingDesk.value = false
-  }
-}
-
 function onOpen(id: string) {
   openId.value = id
   const c = conversations.value.find((x) => x.id === id)
@@ -90,14 +73,14 @@ function onOpen(id: string) {
     <div :class="openId ? 'hidden lg:block' : ''">
       <h1 class="zc-title mb-3 font-serif text-2xl leading-tight">Inbox</h1>
 
-      <!-- Helpdesk entry — always available -->
+      <!-- Helpdesk entry — opens the continuous service-desk chat -->
       <button
         class="zc-card zc-card-hover zc-tap mb-3 flex w-full items-center gap-3 p-3 text-left"
-        @click="contactDesk"
+        :class="showSupport ? 'ring-1 ring-primary' : ''"
+        @click="showSupport = true; openId = null"
       >
         <div class="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/10">
-          <UIcon v-if="!openingDesk" name="i-lucide-life-buoy" class="size-5 text-primary" />
-          <UIcon v-else name="i-lucide-loader" class="size-5 animate-spin text-primary" />
+          <UIcon name="i-lucide-life-buoy" class="size-5 text-primary" />
         </div>
         <div class="min-w-0 flex-1">
           <p class="text-sm font-medium">Need help?</p>
@@ -128,10 +111,7 @@ function onOpen(id: string) {
           :class="openId === c.id ? 'bg-primary/10' : 'hover:bg-stone-100 dark:hover:bg-stone-800'"
           @click="onOpen(c.id)"
         >
-          <div v-if="c.type === 'support'" class="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/10">
-            <UIcon name="i-lucide-life-buoy" class="size-5 text-primary" />
-          </div>
-          <img v-else-if="c.counterpart?.profile_picture" :src="publicMediaUrl(c.counterpart.profile_picture)" :alt="c.counterpart.full_name ?? ''" class="size-10 shrink-0 rounded-full object-cover" >
+          <img v-if="c.counterpart?.profile_picture" :src="publicMediaUrl(c.counterpart.profile_picture)" :alt="c.counterpart.full_name ?? ''" class="size-10 shrink-0 rounded-full object-cover" >
           <div v-else class="flex size-10 shrink-0 items-center justify-center rounded-full bg-stone-200 text-xs font-medium dark:bg-stone-800">
             {{ initials(c.counterpart?.full_name) }}
           </div>
@@ -141,26 +121,31 @@ function onOpen(id: string) {
               <span class="truncate font-medium">{{ conversationTitle(c) }}</span>
               <span class="shrink-0 text-[11px] text-stone-400">{{ ago(c.last_message_at) }}</span>
             </div>
-            <p class="truncate text-xs text-stone-500 dark:text-stone-400">
-              {{ c.type === 'support' ? 'Service desk' : c.project_title || 'Project' }}
-            </p>
+            <p class="truncate text-xs text-stone-500 dark:text-stone-400">{{ c.project_title || 'Project' }}</p>
           </div>
           <span v-if="c.unread" class="size-2 shrink-0 rounded-full bg-primary" />
         </button>
       </div>
     </div>
 
-    <!-- Open thread -->
+    <!-- Service desk (continuous chat) -->
     <div
-      v-if="openConversation"
+      v-if="showSupport"
+      class="fixed inset-0 z-40 bg-white dark:bg-stone-900 lg:static lg:z-auto lg:h-[calc(100vh-6rem)] lg:rounded-2xl lg:border lg:border-stone-200 lg:dark:border-stone-800"
+    >
+      <SupportChat @back="showSupport = false" />
+    </div>
+
+    <!-- Open project thread -->
+    <div
+      v-else-if="openConversation"
       class="fixed inset-0 z-40 bg-white dark:bg-stone-900 lg:static lg:z-auto lg:h-[calc(100vh-6rem)] lg:rounded-2xl lg:border lg:border-stone-200 lg:dark:border-stone-800"
     >
       <MessageThread
         :conversation-id="openConversation.id"
         :current-user-id="currentUserId"
         :title="conversationTitle(openConversation)"
-        :subtitle="openConversation.type === 'support' ? 'Service desk' : openConversation.project_title"
-        @sent="onSent"
+        :subtitle="openConversation.project_title"
       >
         <template #back>
           <UButton icon="i-lucide-arrow-left" color="neutral" variant="ghost" size="sm" aria-label="Back" class="lg:hidden" @click="openId = null" />

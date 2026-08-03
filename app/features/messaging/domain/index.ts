@@ -50,6 +50,16 @@ export function isTicketOpen(t: SupportTicket): boolean {
   return !t.closed_at
 }
 
+/** One of the member's own tickets, with its messages — for the continuous
+ *  service-desk view where tickets are shown in sequence, divided by a line. */
+export interface SupportTicketThread {
+  id: string
+  ticket_number: number | null
+  closed_at: string | null
+  created_at: string
+  messages: Message[]
+}
+
 /** A thread in the master's oversight list (any type, any participants). */
 export interface OversightThread {
   id: string
@@ -96,4 +106,6 @@ export interface MessagingRepository {
   supportQueue(): Promise<SupportTicket[]>
   /** Master: every conversation on the platform, for oversight. */
   oversight(): Promise<OversightThread[]>
+  /** The member's own support tickets, each with its messages (continuous view). */
+  myTickets(): Promise<SupportTicketThread[]>
 }

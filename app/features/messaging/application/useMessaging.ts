@@ -37,6 +37,15 @@ export function useMessaging() {
     })
   }
 
+  /** Send a service-desk message — the server routes it to the member's open
+   *  ticket, or opens a new one if their last ticket is closed. */
+  function supportSend(body: string) {
+    return authedFetch<{ conversationId: string; ticketNumber: number | null }>('/api/messages/support-send', {
+      method: 'POST',
+      body: { body },
+    })
+  }
+
   /**
    * Live messages for one conversation. Returns an unsubscribe function.
    * Supabase realtime pushes new rows; RLS still applies to the stream.
@@ -59,10 +68,12 @@ export function useMessaging() {
     markRead: (id: string) => repo.markRead(id),
     supportQueue: () => repo.supportQueue(),
     oversight: () => repo.oversight(),
+    myTickets: () => repo.myTickets(),
     sendMessage,
     openProjectThread,
     openSupportThread,
     botReply,
+    supportSend,
     subscribe,
   }
 }

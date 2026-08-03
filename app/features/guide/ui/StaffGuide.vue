@@ -79,7 +79,7 @@ const adminSections: Section[] = [
     actions: [
       { name: 'Claim a ticket', detail: 'Assigns the ticket to you and removes it from the shared queue. The first admin to claim it keeps it.' },
       { name: 'Reply', detail: 'Message the member directly to resolve the issue.' },
-      { name: 'Close', detail: 'Marks the ticket resolved. It moves from Open to Closed in your ticket log. You can only close tickets assigned to you.' },
+      { name: 'Close', detail: 'Marks the ticket resolved and tells the member. It moves to Closed in your ticket log. If the member messages again afterwards, it opens a new ticket rather than reopening this one. You can only close tickets assigned to you.' },
     ],
   },
   {
