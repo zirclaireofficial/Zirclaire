@@ -95,9 +95,9 @@ function initials(name: string | null | undefined) {
 
         <template v-else>
           <!-- Unclaimed queue -->
-          <p class="zc-eyebrow mb-2">Waiting ({{ unclaimed.length }})</p>
+          <p class="zc-eyebrow mb-1">Waiting ({{ unclaimed.length }})</p>
+          <p v-if="unclaimed.length" class="mb-2 text-xs text-stone-400">Open a ticket to read the assistant’s conversation before claiming.</p>
           <p v-if="!unclaimed.length" class="mb-4 text-sm text-stone-500 dark:text-stone-400">Nothing waiting.</p>
-          <p class="-mt-1 mb-2 text-xs text-stone-400">Open a ticket to read the assistant’s conversation before claiming.</p>
           <div v-else class="mb-4 space-y-2">
             <div
               v-for="t in unclaimed"
