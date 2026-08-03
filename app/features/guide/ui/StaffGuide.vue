@@ -86,10 +86,11 @@ const adminSections: Section[] = [
     icon: 'i-lucide-ticket',
     heading: 'Support tickets',
     where: 'Dashboard → Support tickets',
-    description: 'Your ticket log, split into Open and Closed. Only your own tickets appear here.',
+    description: 'The ticket log, with Unclaimed / Open / Closed / All tabs. You see unclaimed tickets and the ones assigned to you.',
     actions: [
-      { name: 'Open a ticket', detail: 'Opens the conversation. If it is still open you can reply and then close it.' },
-      { name: 'Open / Closed tabs', detail: 'Switch between tickets you are still handling and ones you have resolved.' },
+      { name: 'Unclaimed', detail: 'Tickets with no agent yet — the bot may still be chatting, or it has escalated and is waiting. Open one to read it, then Claim to take it.' },
+      { name: 'Open', detail: 'Tickets you have claimed and are still handling. Reply, then Close when resolved.' },
+      { name: 'Closed / All', detail: 'Closed shows resolved tickets; All shows every ticket you can see.' },
     ],
   },
   {
@@ -167,10 +168,10 @@ const masterSections: Section[] = [
     icon: 'i-lucide-ticket',
     heading: 'All support tickets',
     where: 'Master console → Support tickets',
-    description: 'Every ticket from every admin, open and closed. Read-only.',
+    description: 'Every ticket from every agent, across Unclaimed / Open / Closed / All. Read-only.',
     actions: [
-      { name: 'Open / Closed tabs', detail: 'See which tickets are still being handled and which are resolved, across all agents.' },
-      { name: 'Open a ticket', detail: 'Read the full exchange and see which agent is handling it. You observe only — you cannot reply or close.' },
+      { name: 'Tabs', detail: 'Unclaimed (no agent yet, incl. bot-handled), Open (being handled), Closed (resolved), or All.' },
+      { name: 'Open a ticket', detail: 'Read the full exchange, including the bot’s messages, and see which agent is handling it. You observe only — you cannot reply or close.' },
     ],
   },
   {

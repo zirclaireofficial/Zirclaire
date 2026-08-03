@@ -1,16 +1,20 @@
 <script setup lang="ts">
-// The support ticket log. Open/closed tabs.
-//  - Admin: only their own tickets. Can open to reply, and close open ones.
-//  - Master: every ticket from every admin, read-only (cannot participate).
+// The support ticket log. Tabs: Unclaimed / Open / Closed / All.
+//   - Unclaimed = no agent yet (the bot may still be chatting, or it has
+//     escalated and is waiting). Not closed.
+//   - Open      = claimed by an agent, not closed.
+//   - Closed    = resolved.
+// Admin sees unclaimed tickets plus their own; master sees everything (RLS).
+// Admin can claim an unclaimed ticket and close their own; master is read-only.
 
 import { useMessaging, useSupportModeration } from '~/features/messaging/application/useMessaging'
 import { useMe } from '~/features/auth/application/useMe'
-import { ticketLabel, isTicketOpen } from '~/features/messaging/domain'
+import { ticketLabel } from '~/features/messaging/domain'
 import type { SupportTicket } from '~/features/messaging/domain'
 import MessageThread from './MessageThread.vue'
 
 const { supportQueue } = useMessaging()
-const { close } = useSupportModeration()
+const { claim, close } = useSupportModeration()
 const { me } = useMe()
 const user = useSupabaseUser()
 const toast = useToast()
@@ -18,11 +22,12 @@ const toast = useToast()
 const currentUserId = computed(() => (user.value as { sub?: string } | null)?.sub ?? '')
 const isMaster = computed(() => me.value?.role === 'master')
 
+type Tab = 'unclaimed' | 'open' | 'closed' | 'all'
 const all = ref<SupportTicket[]>([])
 const loading = ref(true)
-const tab = ref<'open' | 'closed'>('open')
+const tab = ref<Tab>('unclaimed')
 const openId = ref<string | null>(null)
-const closing = ref<string | null>(null)
+const busy = ref<string | null>(null)
 
 async function load() {
   loading.value = true
@@ -37,22 +42,48 @@ async function load() {
 }
 onMounted(load)
 
-// Admin sees only their own; master sees all.
-const scoped = computed(() =>
-  isMaster.value ? all.value : all.value.filter((t) => t.assigned_admin_id === currentUserId.value),
-)
-const visible = computed(() =>
-  scoped.value.filter((t) => (tab.value === 'open' ? isTicketOpen(t) : !isTicketOpen(t))),
-)
-const openCount = computed(() => scoped.value.filter(isTicketOpen).length)
-const closedCount = computed(() => scoped.value.filter((t) => !isTicketOpen(t)).length)
+// Categories (RLS has already scoped `all` to what this staff member may see).
+const unclaimed = computed(() => all.value.filter((t) => !t.assigned_admin_id && !t.closed_at))
+const open = computed(() => all.value.filter((t) => t.assigned_admin_id && !t.closed_at))
+const closed = computed(() => all.value.filter((t) => t.closed_at))
+
+const visible = computed(() => {
+  if (tab.value === 'unclaimed') return unclaimed.value
+  if (tab.value === 'open') return open.value
+  if (tab.value === 'closed') return closed.value
+  return all.value
+})
+
+const tabs = computed(() => [
+  { key: 'unclaimed' as Tab, label: 'Unclaimed', count: unclaimed.value.length },
+  { key: 'open' as Tab, label: 'Open', count: open.value.length },
+  { key: 'closed' as Tab, label: 'Closed', count: closed.value.length },
+  { key: 'all' as Tab, label: 'All', count: all.value.length },
+])
 
 const openTicket = computed(() => all.value.find((t) => t.id === openId.value) ?? null)
-// Master never participates; admin can reply only while the ticket is open.
-const threadReadOnly = computed(() => isMaster.value || (openTicket.value ? !isTicketOpen(openTicket.value) : true))
+const openIsMine = computed(() => !!openTicket.value && openTicket.value.assigned_admin_id === currentUserId.value)
+const openIsUnclaimed = computed(() => !!openTicket.value && !openTicket.value.assigned_admin_id && !openTicket.value.closed_at)
+// Reply only if it's an admin's own, still-open ticket.
+const threadReadOnly = computed(() => isMaster.value || !openIsMine.value || !!openTicket.value?.closed_at)
+
+async function onClaim(t: SupportTicket) {
+  busy.value = t.id
+  try {
+    await claim(t.id)
+    await load()
+    openId.value = t.id
+  } catch (e) {
+    const err = e as { data?: { statusMessage?: string } }
+    toast.add({ title: 'Could not claim', description: err?.data?.statusMessage ?? 'Someone may have taken it first.', color: 'error' })
+    await load()
+  } finally {
+    busy.value = null
+  }
+}
 
 async function onClose(t: SupportTicket) {
-  closing.value = t.id
+  busy.value = t.id
   try {
     await close(t.id)
     toast.add({ title: `Ticket #${t.ticket_number} closed`, color: 'success' })
@@ -62,10 +93,15 @@ async function onClose(t: SupportTicket) {
     const err = e as { data?: { statusMessage?: string } }
     toast.add({ title: 'Could not close', description: err?.data?.statusMessage, color: 'error' })
   } finally {
-    closing.value = null
+    busy.value = null
   }
 }
 
+function statusOf(t: SupportTicket) {
+  if (t.closed_at) return { label: 'Closed', color: 'neutral' }
+  if (t.assigned_admin_id) return { label: 'Open', color: 'primary' }
+  return { label: 'Unclaimed', color: 'warning' }
+}
 function ago(iso: string | null) {
   if (!iso) return ''
   const m = Math.floor((Date.now() - new Date(iso).getTime()) / 60000)
@@ -83,25 +119,20 @@ function ago(iso: string | null) {
       <div>
         <h1 class="zc-title font-serif text-2xl leading-tight">Support tickets</h1>
         <p class="mt-1 text-sm text-stone-500 dark:text-stone-400">
-          {{ isMaster ? 'Every ticket, all agents. Read-only.' : 'Tickets assigned to you.' }}
+          {{ isMaster ? 'Every ticket, all agents. Read-only.' : 'Unclaimed tickets and the ones you handle.' }}
         </p>
       </div>
     </div>
 
-    <div class="flex gap-1.5">
+    <div class="flex flex-wrap gap-1.5">
       <button
+        v-for="t in tabs"
+        :key="t.key"
         class="zc-tap rounded-full border px-3 py-1 text-xs transition"
-        :class="tab === 'open' ? 'border-primary bg-primary/10 font-medium text-primary' : 'border-stone-200 text-stone-500 dark:border-stone-800 dark:text-stone-400'"
-        @click="tab = 'open'; openId = null"
+        :class="tab === t.key ? 'border-primary bg-primary/10 font-medium text-primary' : 'border-stone-200 text-stone-500 dark:border-stone-800 dark:text-stone-400'"
+        @click="tab = t.key; openId = null"
       >
-        Open ({{ openCount }})
-      </button>
-      <button
-        class="zc-tap rounded-full border px-3 py-1 text-xs transition"
-        :class="tab === 'closed' ? 'border-primary bg-primary/10 font-medium text-primary' : 'border-stone-200 text-stone-500 dark:border-stone-800 dark:text-stone-400'"
-        @click="tab = 'closed'; openId = null"
-      >
-        Closed ({{ closedCount }})
+        {{ t.label }} ({{ t.count }})
       </button>
     </div>
 
@@ -111,7 +142,7 @@ function ago(iso: string | null) {
           <div v-for="i in 3" :key="i" class="zc-card h-16 animate-pulse" />
         </div>
         <p v-else-if="!visible.length" class="py-10 text-center text-sm text-stone-500 dark:text-stone-400">
-          No {{ tab }} tickets.
+          No {{ tab === 'all' ? '' : tab }} tickets.
         </p>
         <div v-else class="space-y-1.5">
           <button
@@ -130,12 +161,11 @@ function ago(iso: string | null) {
                   <span class="font-mono text-xs font-medium text-primary">{{ ticketLabel(t.ticket_number) }}</span>
                   <span class="truncate text-sm font-medium">{{ t.requester?.full_name ?? 'Member' }}</span>
                 </span>
-                <span class="shrink-0 text-[11px] text-stone-400">{{ ago(t.last_message_at) }}</span>
+                <UBadge :color="(statusOf(t).color as any)" variant="soft" size="sm" class="shrink-0">{{ statusOf(t).label }}</UBadge>
               </div>
               <p class="truncate text-xs text-stone-500 dark:text-stone-400">{{ t.preview || '—' }}</p>
-              <p v-if="isMaster" class="mt-0.5 text-[11px] text-stone-400">
-                {{ t.handler ? `Agent: ${t.handler.full_name}` : 'Unclaimed' }}
-                <span v-if="t.closed_at"> · closed</span>
+              <p class="mt-0.5 text-[11px] text-stone-400">
+                {{ t.handler ? `Agent: ${t.handler.full_name}` : 'No agent yet' }} · {{ ago(t.last_message_at) }}
               </p>
             </div>
           </button>
@@ -144,13 +174,13 @@ function ago(iso: string | null) {
 
       <div
         v-if="openTicket"
-        class="fixed inset-0 z-40 bg-white dark:bg-stone-900 lg:static lg:z-auto lg:h-[calc(100vh-11rem)] lg:rounded-2xl lg:border lg:border-stone-200 lg:dark:border-stone-800"
+        class="fixed inset-0 z-40 bg-white dark:bg-stone-900 lg:static lg:z-auto lg:h-[calc(100vh-12rem)] lg:rounded-2xl lg:border lg:border-stone-200 lg:dark:border-stone-800"
       >
         <MessageThread
           :conversation-id="openTicket.id"
           :current-user-id="currentUserId"
           :title="`${ticketLabel(openTicket.ticket_number)} · ${openTicket.requester?.full_name ?? 'Member'}`"
-          :subtitle="openTicket.closed_at ? 'Closed' : openTicket.requester?.member_id"
+          :subtitle="openTicket.closed_at ? 'Closed' : openIsUnclaimed ? 'Unclaimed — read-only until you claim' : openTicket.requester?.member_id"
           :read-only="threadReadOnly"
         >
           <template #back>
@@ -158,14 +188,24 @@ function ago(iso: string | null) {
           </template>
           <template #actions>
             <UButton
-              v-if="!isMaster && !openTicket.closed_at"
+              v-if="!isMaster && openIsUnclaimed"
+              color="primary"
+              size="xs"
+              icon="i-lucide-hand"
+              label="Claim"
+              class="zc-tap"
+              :loading="busy === openTicket.id"
+              @click="onClaim(openTicket)"
+            />
+            <UButton
+              v-else-if="!isMaster && openIsMine && !openTicket.closed_at"
               color="success"
               variant="soft"
               size="xs"
               icon="i-lucide-check-check"
               label="Close"
               class="zc-tap"
-              :loading="closing === openTicket.id"
+              :loading="busy === openTicket.id"
               @click="onClose(openTicket)"
             />
           </template>

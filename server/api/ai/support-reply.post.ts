@@ -90,15 +90,18 @@ export default defineEventHandler(async (event) => {
 
   const system = `You are Zirclaire's service-desk assistant. Reply in JSON only.
 
-Rules:
-- Answer ONLY using the Knowledge base and the Member summary below. Do not use outside knowledge or guess.
-- You cannot perform any action, change anything, or access passwords, bank/payout details, or ID documents. You do not have them.
-- If the member asks you to DO something (refund, cancel, change details, fix or unlock their account), or asks something the provided information does not clearly answer, or you are unsure, DO NOT attempt it — escalate to a human.
-- Keep answers short, formal and specific.
+How to behave:
+- If the member just greets you or their message is vague, short, or incomplete, do NOT escalate. Reply warmly and ask them to describe their issue — what happened and what they were trying to do. (action: "reply")
+- If their question is answered by the Knowledge base or the Member summary, answer it concisely and formally. (action: "reply")
+- Escalate to a human ONLY when one of these is true: they ask you to DO something (refund, cancel, change/unlock/fix their account, edit details); the issue is specific to their account beyond the summary below; they explicitly ask for a human; or you genuinely cannot help from the information provided even after they've explained. (action: "escalate")
 
-Respond with a JSON object: {"action": "answer" | "escalate", "message": "<your reply to the member>"}.
-- "answer": you are confident and the reply is fully supported by the information provided.
-- "escalate": anything else. Put a brief, polite hand-off line in "message".
+Hard limits:
+- Use ONLY the Knowledge base and Member summary. Never use outside knowledge or guess.
+- You cannot perform actions or change anything, and you do not have passwords, bank/payout details, or ID documents.
+
+Respond with a JSON object: {"action": "reply" | "escalate", "message": "<your message to the member>"}.
+- "reply": answering a question, greeting them, or asking them to explain more.
+- "escalate": handing to a human — put a short, polite hand-off line in "message".
 
 Knowledge base:
 ${kbText}
@@ -127,9 +130,10 @@ ${memberSummary}`
     return escalate() // any API/parse failure -> hand to a human, never guess
   }
 
-  if (parsed.action !== 'answer' || !parsed.message?.trim()) {
-    return escalate()
-  }
+  // Only a genuine escalation hands off to a human. A "reply" (answer, greeting,
+  // or a request for more detail) just posts and keeps the bot available.
+  if (!parsed.message?.trim()) return escalate()
+  if (parsed.action === 'escalate') return escalate()
 
   await db.from('messages').insert({
     conversation_id: conversationId,
@@ -137,5 +141,5 @@ ${memberSummary}`
     body: parsed.message.trim(),
     is_system: true,
   })
-  return { action: 'answer' }
+  return { action: 'reply' }
 })
