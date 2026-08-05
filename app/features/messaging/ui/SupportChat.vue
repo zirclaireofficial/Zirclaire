@@ -33,11 +33,38 @@ const activeTicket = computed(() => {
   return last && !last.closed_at ? last : null
 })
 
+// True if a message id is already somewhere in local state (dedup against the
+// realtime echo of a message we already appended).
+function hasMessage(id: string) {
+  return tickets.value.some((t) => t.messages.some((m) => m.id === id))
+}
+
+// Append a message to its ticket group, creating the group if it's a brand-new
+// ticket. Safe: only ever called with a server-confirmed message (real id).
+function appendMessage(m: Message, ticketNumber?: number | null) {
+  if (hasMessage(m.id)) return
+  const t = tickets.value.find((x) => x.id === m.conversation_id)
+  if (t) {
+    t.messages.push(m)
+  } else {
+    tickets.value.push({
+      id: m.conversation_id,
+      ticket_number: ticketNumber ?? null,
+      closed_at: null,
+      created_at: m.created_at,
+      messages: [m],
+    })
+    resubscribe() // a new ticket became the active one
+  }
+  scrollToEnd()
+}
+
 function resubscribe() {
   unsub?.()
   unsub = null
   if (activeTicket.value) {
-    unsub = subscribe(activeTicket.value.id, () => load())
+    // On an incoming message, append it (dedup by id) rather than reloading.
+    unsub = subscribe(activeTicket.value.id, (m) => appendMessage(m))
   }
 }
 
@@ -63,8 +90,10 @@ async function send() {
   body.value = ''
   try {
     const res = await supportSend(text)
-    await load()
-    botReply(res.conversationId).then(() => load()).catch(() => {})
+    // Show it immediately (server already saved it), no reload.
+    appendMessage(res.message, res.ticketNumber)
+    // The bot replies asynchronously; its message arrives over realtime.
+    botReply(res.conversationId).catch(() => {})
   } catch (e) {
     body.value = text
     const err = e as { message?: string }

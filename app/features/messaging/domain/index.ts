@@ -40,6 +40,7 @@ export interface SupportTicket {
   created_by: string | null
   last_message_at: string | null
   assigned_admin_id: string | null
+  escalated_at: string | null
   closed_at: string | null
   requester: PartyRef | null
   handler: PartyRef | null // the admin handling it, once claimed
@@ -48,6 +49,28 @@ export interface SupportTicket {
 
 export function isTicketOpen(t: SupportTicket): boolean {
   return !t.closed_at
+}
+
+/** Lifecycle stage of a support ticket, for labels and filtering.
+ *  bot        — no agent yet, the assistant is handling it (not escalated).
+ *  unclaimed  — the assistant escalated; it's waiting for an agent.
+ *  open       — an agent has claimed it.
+ *  closed     — resolved. */
+export type TicketStage = 'bot' | 'unclaimed' | 'open' | 'closed'
+
+export function ticketStage(t: SupportTicket): TicketStage {
+  if (t.closed_at) return 'closed'
+  if (t.assigned_admin_id) return 'open'
+  if (t.escalated_at) return 'unclaimed'
+  return 'bot'
+}
+
+export function stageLabel(s: TicketStage): string {
+  return { bot: 'Bot', unclaimed: 'Unclaimed', open: 'Open', closed: 'Closed' }[s]
+}
+
+export function stageColor(s: TicketStage): string {
+  return { bot: 'info', unclaimed: 'warning', open: 'primary', closed: 'neutral' }[s]
 }
 
 /** One of the member's own tickets, with its messages — for the continuous

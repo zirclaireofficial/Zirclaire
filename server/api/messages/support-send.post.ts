@@ -17,12 +17,12 @@ export default defineEventHandler(async (event) => {
   const { data: convo, error: cErr } = await db.rpc('start_support_conversation', { p_actor: user.id })
   if (cErr || !convo) throw createError({ statusCode: 400, statusMessage: cErr?.message ?? 'Could not open a ticket' })
 
-  const { error: mErr } = await db.from('messages').insert({
-    conversation_id: convo.id,
-    sender_id: user.id,
-    body: String(body).trim(),
-  })
+  const { data: message, error: mErr } = await db
+    .from('messages')
+    .insert({ conversation_id: convo.id, sender_id: user.id, body: String(body).trim() })
+    .select('id, conversation_id, sender_id, body, is_system, created_at')
+    .single()
   if (mErr) throw createError({ statusCode: 400, statusMessage: mErr.message })
 
-  return { conversationId: convo.id, ticketNumber: convo.ticket_number }
+  return { conversationId: convo.id, ticketNumber: convo.ticket_number, message }
 })

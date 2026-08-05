@@ -9,8 +9,8 @@
 
 import { useMessaging, useSupportModeration } from '~/features/messaging/application/useMessaging'
 import { useMe } from '~/features/auth/application/useMe'
-import { ticketLabel } from '~/features/messaging/domain'
-import type { SupportTicket } from '~/features/messaging/domain'
+import { ticketLabel, ticketStage, stageLabel, stageColor } from '~/features/messaging/domain'
+import type { SupportTicket, TicketStage } from '~/features/messaging/domain'
 import MessageThread from './MessageThread.vue'
 
 const { supportQueue } = useMessaging()
@@ -22,7 +22,7 @@ const toast = useToast()
 const currentUserId = computed(() => (user.value as { sub?: string } | null)?.sub ?? '')
 const isMaster = computed(() => me.value?.role === 'master')
 
-type Tab = 'unclaimed' | 'open' | 'closed' | 'all'
+type Tab = TicketStage | 'all'
 const all = ref<SupportTicket[]>([])
 const loading = ref(true)
 const tab = ref<Tab>('unclaimed')
@@ -42,22 +42,15 @@ async function load() {
 }
 onMounted(load)
 
-// Categories (RLS has already scoped `all` to what this staff member may see).
-const unclaimed = computed(() => all.value.filter((t) => !t.assigned_admin_id && !t.closed_at))
-const open = computed(() => all.value.filter((t) => t.assigned_admin_id && !t.closed_at))
-const closed = computed(() => all.value.filter((t) => t.closed_at))
-
-const visible = computed(() => {
-  if (tab.value === 'unclaimed') return unclaimed.value
-  if (tab.value === 'open') return open.value
-  if (tab.value === 'closed') return closed.value
-  return all.value
-})
+// Categories by lifecycle stage (RLS has already scoped `all`).
+const byStage = (s: TicketStage) => all.value.filter((t) => ticketStage(t) === s)
+const visible = computed(() => (tab.value === 'all' ? all.value : byStage(tab.value as TicketStage)))
 
 const tabs = computed(() => [
-  { key: 'unclaimed' as Tab, label: 'Unclaimed', count: unclaimed.value.length },
-  { key: 'open' as Tab, label: 'Open', count: open.value.length },
-  { key: 'closed' as Tab, label: 'Closed', count: closed.value.length },
+  { key: 'bot' as Tab, label: 'Bot', count: byStage('bot').length },
+  { key: 'unclaimed' as Tab, label: 'Unclaimed', count: byStage('unclaimed').length },
+  { key: 'open' as Tab, label: 'Open', count: byStage('open').length },
+  { key: 'closed' as Tab, label: 'Closed', count: byStage('closed').length },
   { key: 'all' as Tab, label: 'All', count: all.value.length },
 ])
 
@@ -71,12 +64,14 @@ async function onClaim(t: SupportTicket) {
   busy.value = t.id
   try {
     await claim(t.id)
-    await load()
+    // Reflect locally (moves it to Open) without a reload.
+    t.assigned_admin_id = currentUserId.value
+    t.handler = { id: currentUserId.value, member_id: me.value?.member_id ?? null, full_name: me.value?.full_name ?? 'You', profile_picture: null }
     openId.value = t.id
   } catch (e) {
     const err = e as { data?: { statusMessage?: string } }
     toast.add({ title: 'Could not claim', description: err?.data?.statusMessage ?? 'Someone may have taken it first.', color: 'error' })
-    await load()
+    await load() // someone beat us — refresh to the truth
   } finally {
     busy.value = null
   }
@@ -86,9 +81,9 @@ async function onClose(t: SupportTicket) {
   busy.value = t.id
   try {
     await close(t.id)
+    t.closed_at = new Date().toISOString() // moves it to Closed, no reload
     toast.add({ title: `Ticket #${t.ticket_number} closed`, color: 'success' })
     openId.value = null
-    await load()
   } catch (e) {
     const err = e as { data?: { statusMessage?: string } }
     toast.add({ title: 'Could not close', description: err?.data?.statusMessage, color: 'error' })
@@ -98,9 +93,8 @@ async function onClose(t: SupportTicket) {
 }
 
 function statusOf(t: SupportTicket) {
-  if (t.closed_at) return { label: 'Closed', color: 'neutral' }
-  if (t.assigned_admin_id) return { label: 'Open', color: 'primary' }
-  return { label: 'Unclaimed', color: 'warning' }
+  const s = ticketStage(t)
+  return { label: stageLabel(s), color: stageColor(s) }
 }
 function ago(iso: string | null) {
   if (!iso) return ''

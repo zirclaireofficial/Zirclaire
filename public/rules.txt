@@ -1,0 +1,993 @@
+TERMS OF SERVICE, PAYMENT POLICY, AND USER AGREEMENT
+1. Definitions
+1.1. “Platform” refers to the website, application, and services operated by the Platform Administrator.
+1.2. “Service Provider” refers to a registered user offering services through the Platform.
+1.3. “Service Requester” refers to a registered user purchasing services through the Platform.
+1.4. “Project” refers to any service engagement agreed upon between a Service Provider and a Service Requester through the Platform.
+1.5. “Project Fund” refers to the total amount paid by the Service Requester for a Project.
+2. Account Registration Requirements
+2.1 Service Provider Requirements
+Before creating an account on the Platform, every Service Provider must:
+a) Maintain an active Touch ’n Go (TNG) account;
+b) Provide accurate personal information and verification documents requested by the Platform;
+c) Agree to all Platform policies and procedures.
+The Platform reserves the right to reject or suspend any account that fails to comply with these requirements.
+2.2 Service Requester Requirements
+Before creating an account on the Platform, every Service Requester must:
+a) Maintain an active Binary Account approved by the Platform;
+b) Provide accurate registration information;
+c) Accept these Terms and Conditions.
+SECTION 3 – PROJECT CREATION AND MANAGEMENT
+3.1 Creation of Projects
+A Service Requester may create and publish one or more Projects through the Platform. There shall be no maximum limit on the number of Projects that a Service Requester may create, provided that each Project complies with these Terms and all applicable Platform policies.
+Each Project shall include, at a minimum:
+a. A clear title and description of the services required;
+b. The scope of work and expected deliverables;
+c. The Project Duration, including the commencement date and completion deadline;
+d. The applicable Standard Operating Procedures (SOPs), specifications, technical requirements, or acceptance criteria;
+e. The total Project Fund payable for the Project; and
+f. Any other information required by the Platform.
+The Platform reserves the right to reject, suspend, remove, or modify any Project listing that is incomplete, misleading, unlawful, fraudulent, or otherwise inconsistent with these Terms.
+3.2 Project Funding Requirement
+Every Project shall be fully funded before it becomes available for acceptance by a Service Provider.
+The Service Requester shall deposit one hundred percent (100%) of the Project Fund using the approved Binary Account designated by the Platform.
+No Project shall commence until the full Project Fund has been successfully received and confirmed by the Platform.
+3.3 Escrow of Project Funds
+Upon successful receipt of the Project Fund, the Platform shall hold the Project Fund in escrow until:
+a. the Project is successfully completed;
+b. the Project is cancelled;
+c. the Project expires as an Unclosed Project;
+d. a refund becomes payable; or
+e. a dispute has been fully resolved in accordance with these Terms.
+Neither the Service Provider nor the Service Requester shall have access to the escrowed Project Fund except as provided under these Terms.
+3.4 Acceptance of Projects
+A Service Provider may accept a Project only through the Platform.
+Upon acceptance of a Project:
+a. the Project shall become an Active Project;
+b. the Project Duration shall commence;
+c. the Service Provider shall become responsible for completing the Project in accordance with the agreed scope, timeline, SOPs, and these Terms.
+3.5 Project Communication
+All communications relating to a Project should be conducted through the Platform’s messaging or communication system wherever reasonably possible.
+The Platform may rely upon communications conducted through the Platform as evidence during dispute resolution.
+Communications conducted outside the Platform shall be at the Users’ own risk and may not be recognised during dispute investigations.
+3.6 Modification of Projects
+Any modification to the Project scope, deliverables, completion deadline, or Project Fund shall require the mutual agreement of both the Service Provider and the Service Requester through the Platform.
+The Platform may refuse any modification that would violate these Terms or compromise the integrity of the Platform.
+3.7 Prohibited Projects
+Users shall not create, offer, request, or perform Projects that:
+a. violate any applicable law or regulation;
+b. infringe intellectual property rights;
+c. involve fraudulent, deceptive, or misleading conduct;
+d. involve money laundering, terrorist financing, or other financial crimes;
+e. promote hate, violence, discrimination, or unlawful activities;
+f. require the disclosure of confidential information without lawful authority; or
+g. otherwise violate the Platform’s policies.
+The Platform may immediately remove any prohibited Project without prior notice.
+SECTION 4 – SERVICE PROVIDER PROJECT CAPACITY
+4.1 Maximum Active Projects
+To maintain service quality and timely completion, a Service Provider may undertake a maximum of three (3) Active Projects simultaneously.
+An Active Project is any Project that has been accepted by the Service Provider and has not been completed, cancelled, refunded, expired, or otherwise closed.
+4.2 Automatic Project Slot Availability
+Upon the completion, cancellation, refund, expiration, or closure of an Active Project, the corresponding Project slot shall automatically become available.
+The Service Provider may immediately accept another Project, provided that the total number of Active Projects does not exceed three (3).
+For example:
+a. If a Service Provider has accepted three (3) Active Projects, no additional Projects may be accepted.
+b. If two (2) of those Projects are completed or otherwise closed, the Service Provider may accept two (2) additional Projects.
+4.3 Restriction on Additional Projects
+The Platform shall automatically prevent a Service Provider from accepting a fourth (4th) Active Project while already managing three (3) Active Projects.
+Any attempt to circumvent this limitation may result in suspension or termination of the Service Provider’s account.
+4.4 Service Requester Project Capacity
+There shall be no restriction on the number of Projects that a Service Requester may create or fund, provided that:
+a. each Project complies with these Terms;
+b. each Project is fully funded before publication;
+c. the Service Requester remains in good standing with the Platform; and
+d. all Projects are lawful and do not violate the rights of any person.
+4.5 Platform Authority
+The Platform reserves the right to increase, reduce, suspend, or otherwise modify the maximum number of Active Projects permitted for any Service Provider where reasonably necessary for:
+a. risk management;
+b. quality assurance;
+c. performance monitoring;
+d. fraud prevention;
+e. account verification status;
+f. operational requirements; or
+g. compliance with applicable laws or regulations.
+The Platform shall endeavour to notify affected Users of any such modification where reasonably practicable.
+4.6 Abuse Prevention
+Users shall not manipulate, duplicate, divide, or otherwise structure Projects or accounts for the purpose of circumventing the Project capacity limits or any other restrictions imposed by the Platform.
+Where the Platform reasonably determines that such conduct has occurred, it may suspend, terminate, or restrict the relevant account(s), remove Projects, withhold payments pending investigation, or take any other action permitted under these Terms.
+SECTION 5 – PAYMENT, ESCROW AND FUND MANAGEMENT POLICY
+5.1 Mandatory Project Funding
+As a condition precedent to the commencement of any Project, the Service Requester shall deposit one hundred percent (100%) of the Project Fund into the Platform using the approved Binary Account designated by the Platform.
+The Project shall not become available for acceptance by any Service Provider until the Platform has successfully received and verified the full Project Fund.
+5.2 Escrow of Project Funds
+All Project Funds received by the Platform shall be held in escrow for the benefit of the Project until one of the following events occurs:
+a. Successful completion of the Project;
+b. Approved cancellation of the Project;
+c. Classification of the Project as an Unclosed Project;
+d. Completion of dispute resolution under these Terms; or
+e. Any other lawful disposition authorised by these Terms or applicable law.
+The Project Fund shall remain under the sole custody and control of the Platform during the escrow period.
+5.3 Restriction on Withdrawal
+Neither the Service Provider nor the Service Requester shall have any right to withdraw, transfer, assign, pledge, or otherwise deal with the escrowed Project Fund except in accordance with these Terms.
+5.4 Payment Release
+Subject to compliance with these Terms, the Platform shall release Project Funds only after:
+a. the Project has been successfully completed;
+b. any permitted revision has been completed;
+c. the Project has been accepted by the Service Requester; or
+d. the Platform has determined that the Project has been satisfactorily completed following a dispute review.
+5.5 Approved Payment Method
+Payments to the Service Provider shall be made only to the Touch ’n Go account registered and verified with the Platform.
+The Platform may require additional identity verification before processing any payment.
+5.6 Refunds
+Refunds shall be processed only in accordance with these Terms.
+Where a refund is approved, the Platform shall return the refundable amount to the original payment source where reasonably practicable or to another payment method approved by the Platform.
+5.7 Transaction Records
+The Platform shall maintain records of deposits, transfers, refunds, deductions, payment releases, and other financial transactions for a reasonable period in accordance with applicable laws and operational requirements.
+Users may access transaction records made available through their Platform account.
+5.8 No Interest
+Unless otherwise required by applicable law, Project Funds held by the Platform shall not accrue interest payable to either the Service Provider or the Service Requester.
+SECTION 6 – MONETARY POLICY
+6.1 Transaction Review and Approval
+All deposits, withdrawals, transfers, refunds, payment releases, and other monetary transactions conducted through the Platform shall be subject to review by the Platform.
+The Platform reserves the right to approve, delay, suspend, reject, reverse, or cancel any monetary transaction where it reasonably considers such action necessary due to:
+a. compliance with these Terms;
+b. internal company policies;
+c. fraud prevention;
+d. security verification;
+e. risk management;
+f. operational requirements;
+g. payment processor requirements;
+h. banking institution policies;
+i. digital wallet requirements;
+j. technical or system failures; or
+k. compliance with applicable laws, regulations, or lawful directions issued by competent authorities.
+The Platform shall not be liable for delays caused by financial institutions, payment processors, government authorities, technical failures, or events beyond its reasonable control.
+6.2 Platform Service Fee
+Upon successful completion of a Project, the Platform shall first deduct its service fee equal to twenty percent (20%) of the total Project Fund.
+The remaining eighty percent (80%) shall constitute the Service Provider’s gross payable amount.
+6.3 Currency Conversion and Foreign Exchange Adjustment
+Where Project Funds are received, held, converted, or transferred in different currencies, the amount ultimately received by the Service Provider may differ due to:
+a. foreign exchange fluctuations;
+b. exchange rate spread;
+c. banking conversion rates;
+d. payment processor conversion rates;
+e. digital wallet conversion charges;
+f. settlement costs;
+g. currency rounding adjustments; or
+h. other financial institution charges.
+The Platform may deduct the actual foreign exchange and currency conversion costs incurred in processing the payment, provided that such deduction shall not exceed United States Dollars Thirty Cents (USD 0.30) for every United States Dollar One (USD 1.00) of the Service Provider’s payable amount, or such lower amount as may be required by applicable law.
+Such adjustment:
+a. shall be applied only after deduction of the Platform’s twenty percent (20%) service fee;
+b. shall not constitute an additional Platform commission;
+c. shall apply only to the Service Provider’s payable amount;
+d. shall reflect actual or reasonably estimated foreign exchange and payment processing costs.
+The Service Provider acknowledges that the final payment received may vary due to currency exchange rates, payment processor requirements, financial institution policies, and applicable legal requirements.
+6.4 Order of Payment Distribution
+Unless otherwise required by law, the Project Fund shall be distributed in the following order:
+Step 1:
+The Platform receives one hundred percent (100%) of the Project Fund into escrow.
+Step 2:
+The Platform deducts its twenty percent (20%) service fee.
+Step 3:
+The remaining eighty percent (80%) becomes the Service Provider’s payable amount.
+Step 4:
+Where applicable, any permitted foreign exchange adjustment under Section 6.3 shall be deducted.
+Step 5:
+The remaining balance shall be transferred to the Service Provider’s verified Touch ’n Go account.
+6.5 Taxes
+Each User shall be solely responsible for all taxes, duties, levies, reporting obligations, and other governmental charges arising from the use of the Platform or receipt of payments unless otherwise required by applicable law.
+6.6 Financial Compliance
+The Platform may request additional documentation to satisfy anti-fraud, anti-money laundering (AML), counter-terrorism financing (CTF), sanctions screening, tax reporting, or other legal and regulatory requirements.
+Failure to comply with such requests may result in delayed payments, suspension of transactions, restriction of account privileges, or termination of the User’s account.
+6.7 Reservation of Rights
+The Platform reserves the right to modify its payment procedures, supported payment methods, financial controls, and operational processes where reasonably necessary to maintain security, regulatory compliance, operational efficiency, or the integrity of the Platform.
+Where practicable, material changes shall be communicated to Users before taking effect.
+SECTION 7 – PROJECT EXECUTION
+7.1 Commencement of Work
+A Service Provider shall commence work only after:
+a. accepting the Project through the Platform; and
+b. confirmation that one hundred percent (100%) of the Project Fund has been received and secured in escrow by the Platform.
+7.2 Performance Obligations
+The Service Provider shall perform all obligations under the Project in accordance with:
+a. the agreed Project scope;
+b. the Project Duration;
+c. the Standard Operating Procedures (SOPs); and
+d. any additional written instructions agreed through the Platform.
+7.3 Good Faith Performance
+All Service Providers shall perform their duties in good faith, with reasonable skill, care, and diligence consistent with industry standards applicable to the type of service provided.
+7.4 Delivery of Work
+Upon completion of the Project, the Service Provider shall submit all deliverables through the Platform within the Project Duration or any approved extension.
+Submission shall constitute official delivery for the purpose of review, acceptance, or dispute evaluation.
+7.5 Late Delivery
+Where a Service Provider fails to deliver within the Project Duration:
+a. the Project shall be subject to Platform review;
+b. the Platform may determine whether the Project is still valid, completed, or failed; and
+c. penalties or refunds may apply in accordance with these Terms.
+SECTION 8 – REVISION POLICY
+8.1 Single Revision Entitlement
+The Service Requester shall be entitled to one (1) revision only per Project.
+This revision must:
+a. relate directly to the original agreed scope;
+b. not constitute a change in Project scope; and
+c. be submitted within the Platform-defined review period.
+8.2 Revision Execution
+The Service Provider must complete the requested revision within a reasonable timeframe as determined by the Platform or as agreed by both parties.
+8.3 Finality of Revision
+After the completion of the single permitted revision:
+a. the Project shall be considered final; and
+b. no further revisions shall be requested unless mutually agreed and supported by additional payment.
+8.4 Abuse of Revision System
+The Platform may reject revision requests if they are:
+a. outside the original scope;
+b. excessive or unreasonable;
+c. intended to delay Project closure; or
+d. made in bad faith.
+SECTION 9 – PROJECT COMPLETION AND ACCEPTANCE
+9.1 Completion Criteria
+A Project shall be deemed completed when all of the following conditions are met:
+a. all agreed deliverables have been submitted;
+b. the Service Provider has fulfilled the Project scope;
+c. the permitted revision (if any) has been completed; and
+d. the deliverables comply with applicable SOPs.
+9.2 Review by Service Requester
+Upon delivery, the Service Requester shall review the submitted work within the review period defined by the Platform.
+The Service Requester may:
+a. accept the Project; or
+b. request the single permitted revision; or
+c. raise a dispute supported by evidence.
+9.3 Subjective Dissatisfaction
+Where the Service Provider has complied with the agreed scope, SOPs, and revision requirements, the Service Requester shall not unreasonably reject the Project based solely on personal preference or subjective dissatisfaction.
+9.4 Platform Determination of Completion
+The Platform reserves the right to determine whether a Project is completed based on:
+a. the original Project scope;
+b. submitted deliverables;
+c. communication records;
+d. SOP compliance;
+e. revision history; and
+f. any supporting evidence.
+9.5 Forced Completion (Admin Override Protection)
+Where a Service Provider has:
+a. completed the agreed scope of work;
+b. complied with SOP requirements; and
+c. completed the permitted revision (if applicable);
+and the Service Requester refuses acceptance without valid grounds, the Platform may declare the Project as successfully completed and release payment accordingly.
+9.6 Release of Funds After Completion
+Upon successful completion determination, the Project Fund shall be released in accordance with the Payment and Monetary Policy:
+a. eighty percent (80%) to the Service Provider; and
+b. twenty percent (20%) retained by the Platform as service fee.
+9.7 Evidence Requirement
+All completion disputes shall be supported by evidence, including but not limited to:
+a. submitted deliverables;
+b. communication records;
+c. revision requests;
+d. Project specifications; and
+e. SOP documentation.
+Failure to provide evidence may affect dispute outcomes.
+SECTION 10 – CANCELLATION POLICY
+10.1 General Cancellation Rule
+A Service Requester may request cancellation of a Project only in accordance with this Section and subject to approval by the Platform.
+All cancellation requests shall be subject to Platform review and verification before approval.
+10.2 Time-Based Cancellation Restriction
+A cancellation request shall only be eligible if:
+a. it is submitted at least forty-eight (48) hours before the Project deadline; and
+b. the Project has not reached substantial completion.
+Cancellation requests submitted within the final forty-eight (48) hours before the Project deadline shall not be permitted unless otherwise approved by the Platform due to exceptional circumstances.
+10.3 Work Progress Restriction
+A Project shall not be eligible for cancellation if:
+a. the Service Provider has completed more than fifty percent (50%) of the agreed scope of work; or
+b. deliverables have already been submitted for review; or
+c. the Service Provider has substantially fulfilled the Project requirements.
+In such cases, the Project shall continue until completion unless otherwise determined by the Platform.
+10.4 Approved Cancellation Refund Structure
+Where a cancellation request is approved by the Platform:
+a. five percent (5%) of the total Project Fund shall be deducted as an administrative and processing fee;
+b. ninety-five percent (95%) of the Project Fund shall be refunded to the Service Requester;
+c. refunds shall be processed through the original payment method or any approved alternative method.
+10.5 Cancellation Abuse Prevention
+The Platform reserves the right to reject cancellation requests where it reasonably determines that the request is:
+a. made in bad faith;
+b. intended to avoid payment obligations;
+c. used to exploit Service Providers after substantial work has been completed; or
+d. inconsistent with the agreed Project scope and SOP.
+10.6 Platform Override Authority
+Notwithstanding any provision in this Section, the Platform may:
+a. approve or deny any cancellation request;
+b. convert a cancellation request into a dispute resolution case; or
+c. determine that a Project must proceed to completion where fairness and evidence support such action.
+All decisions made by the Platform shall be final and binding unless otherwise required by law.
+SECTION 11 – UNCLOSED PROJECT POLICY
+11.1 Definition of Unclosed Project
+A Project shall be considered an “Unclosed Project” when the Project Duration has fully expired without final acceptance or closure by the Service Requester.
+The Project Duration shall begin from the moment the Project is accepted by the Service Provider and shall end automatically upon reaching the stated deadline.
+11.2 Automatic Expiry Rule
+Upon expiry of the Project Duration:
+a. the Project shall automatically be classified as an Unclosed Project;
+b. the Platform shall initiate review of the Project status; and
+c. the escrowed funds shall be held pending determination of completion or refund eligibility.
+11.3 No Submission Scenario
+Where the Service Provider has not submitted any deliverables before the Project expires:
+a. the Project shall be considered failed or unfulfilled;
+b. five percent (5%) of the Project Fund shall be deducted as administrative fee; and
+c. ninety-five percent (95%) shall be refunded to the Service Requester.
+11.4 Submission Before Expiry
+Where the Service Provider has submitted deliverables before the Project deadline:
+a. the Platform shall review the submission;
+b. determine whether the deliverables meet the agreed scope and SOP; and
+c. decide whether the Project is completed or disputed.
+11.5 Completed Work Before Expiry
+Where the Platform determines that the Service Provider has:
+a. fully completed the Project scope;
+b. complied with SOP requirements; and
+c. submitted acceptable deliverables before expiry;
+then the Project shall not be treated as unclosed and shall proceed to payment distribution under the completion policy.
+11.6 Platform Determination
+The Platform shall have full authority to determine whether a Project is:
+a. completed;
+b. unclosed;
+c. disputed; or
+d. failed.
+Such determination shall be based on evidence, Project scope, SOP compliance, and communication records.
+11.7 Abuse Prevention
+The Platform reserves the right to prevent misuse of the expiry system, including but not limited to:
+a. intentional delay tactics;
+b. manipulation of deadlines;
+c. repeated failure to complete Projects; or
+d. fraudulent submissions.
+The Platform may impose penalties, suspensions, or restrictions where abuse is identified.
+SECTION 12 – PAYMENT DISTRIBUTION POLICY
+12.1 General Distribution Rule
+Upon successful completion of a Project, the total Project Fund shall be distributed in accordance with this Section and the Monetary Policy.
+12.2 Platform Service Fee
+The Platform shall first deduct a service fee equal to twenty percent (20%) of the total Project Fund.
+This fee is non-refundable and represents the Platform’s service charge for facilitating the Project, escrow management, payment processing, dispute handling, and platform usage.
+12.3 Service Provider Payment
+After deduction of the Platform service fee, the remaining eighty percent (80%) of the Project Fund shall constitute the Service Provider’s gross payable amount, subject to applicable adjustments under the Monetary Policy.
+12.4 Currency Adjustment Application
+Any permitted foreign exchange adjustment or currency conversion cost under the Monetary Policy shall be applied only after deduction of the Platform service fee and only to the Service Provider’s payable amount.
+12.5 Conditions for Payment Release
+The Service Provider shall only receive payment when all of the following conditions are satisfied:
+a. the Project has been marked as completed by the Platform or accepted by the Service Requester;
+b. the Service Provider has delivered all agreed deliverables;
+c. any permitted revision has been completed; and
+d. no active dispute is pending.
+12.6 Disputed Funds
+Where a dispute is active:
+a. the Project Fund shall remain in escrow;
+b. no payment shall be released to any party; and
+c. the Platform shall determine the final distribution after review.
+12.7 Finality of Distribution
+Once payment has been released in accordance with this Policy:
+a. the transaction shall be deemed final and complete;
+b. the Platform shall have no obligation to reverse or modify the payment except where required by law; and
+c. Users waive any claim against the Platform relating to completed payment distribution, except in cases of fraud or manifest error.
+12.8 No Additional Claims
+Upon completion and payment distribution:
+a. the Service Provider shall have no further claim to the Project Fund; and
+b. the Service Requester shall be deemed to have satisfied payment obligations for the Project.
+SECTION 13 – FAILURE TO COMPLETE PROJECT
+13.1 Definition of Failure
+A Service Provider shall be considered to have failed to complete a Project where:
+a. the Service Provider does not deliver the agreed deliverables within the Project Duration;
+b. the Service Provider abandons the Project without valid justification;
+c. the Service Provider refuses or fails to perform the agreed scope of work; or
+d. the Platform determines, based on evidence, that the Service Provider has materially breached the Project requirements.
+13.2 Refund Obligation
+Where a Service Provider fails to complete a Project without valid justification:
+a. the Service Provider shall be liable to refund one hundred percent (100%) of the Project Fund;
+b. such refund shall be payable immediately upon determination of failure by the Platform; and
+c. the Platform may deduct or recover such amount from any available balance held by the Platform for the Service Provider.
+13.3 Account Suspension
+Upon determination of failure to complete a Project:
+a. the Service Provider’s account shall be immediately suspended;
+b. the Service Provider shall be restricted from accepting new Projects; and
+c. suspension shall remain in effect until full settlement of outstanding obligations is completed to the satisfaction of the Platform.
+13.4 Recovery and Set-Off Rights
+The Platform reserves the right to:
+a. offset any unpaid refund amount against future earnings of the Service Provider;
+b. deduct amounts from any funds held in escrow for other Projects;
+c. withhold payments until outstanding obligations are resolved; and
+d. initiate recovery proceedings in accordance with applicable laws.
+13.5 Good Faith Exceptions
+The Platform may, at its sole discretion, determine that failure to complete a Project is justified in cases such as:
+a. force majeure events;
+b. verified technical or system failures;
+c. health emergencies supported by reasonable evidence; or
+d. other circumstances deemed valid by the Platform.
+In such cases, the Platform may determine an alternative resolution including partial payment, refund, or Project extension.
+13.6 Abuse Prevention
+Any Service Provider who repeatedly fails to complete Projects may be subject to:
+a. permanent account termination;
+b. forfeiture of pending payments;
+c. blacklisting from the Platform; and
+d. any other actions deemed necessary by the Platform.
+13.7 Final Authority
+All determinations made by the Platform under this Section shall be final and binding unless otherwise required by applicable law or a competent judicial authority.
+SECTION 14 – DISPUTE RESOLUTION POLICY
+14.1 Platform as Neutral Intermediary
+In the event of any dispute, disagreement, complaint, or conflict between a Service Provider and a Service Requester, the Platform shall act as a neutral intermediary responsible for reviewing, investigating, and resolving the matter.
+Both parties agree that the Platform shall have authority to determine the outcome of any dispute based on evidence and applicable Platform policies.
+14.2 Mandatory Dispute Submission
+When a dispute is raised, both parties are required to submit all relevant evidence requested by the Platform, including but not limited to:
+a. Project descriptions and scope;
+b. communication records conducted through the Platform;
+c. submitted deliverables;
+d. revision requests and responses;
+e. screenshots, files, and documentation;
+f. proof of work submission or rejection; and
+g. any other information deemed relevant by the Platform.
+Failure to provide requested evidence may result in an adverse decision against the non-compliant party.
+14.3 Escrow Protection During Dispute
+During an active dispute:
+a. the Project Fund shall remain fully held in escrow by the Platform;
+b. no funds shall be released to either party; and
+c. all transactions related to the Project shall be temporarily suspended until resolution is reached.
+14.4 Investigation Process
+The Platform may investigate the dispute by reviewing:
+a. Project scope and SOP requirements;
+b. communication history;
+c. submitted deliverables;
+d. timeline compliance;
+e. revision history;
+f. user conduct and behaviour; and
+g. any additional evidence or documentation.
+The Platform may request further clarification or evidence from either party at any stage.
+14.5 Platform Determination
+After review and investigation, the Platform shall determine:
+a. whether the Service Provider has completed the Project;
+b. whether the Service Requester has unreasonably rejected delivered work;
+c. whether either party has breached these Terms; and
+d. the appropriate distribution of the Project Fund.
+14.6 Dispute Outcomes
+The Platform may issue one or more of the following outcomes:
+a. release of payment to the Service Provider in full or in part;
+b. refund to the Service Requester in full or in part;
+c. requirement for revision or correction;
+d. Project continuation until completion;
+e. suspension or termination of either party’s account;
+f. forfeiture of funds due to breach or fraud.
+14.7 Final and Binding Decision
+Unless otherwise required by applicable law, all decisions made by the Platform in dispute resolution shall be final, binding, and conclusive upon both parties.
+By using the Platform, Users expressly agree to accept the Platform’s decision as the final authority in all disputes.
+14.8 False or Misleading Evidence
+Any User found to have submitted false, misleading, forged, or manipulated evidence shall be subject to:
+a. immediate account suspension or termination;
+b. forfeiture of Project Funds;
+c. permanent restriction from the Platform; and
+d. legal action where applicable.
+14.9 Good Faith Requirement
+All Users must act in good faith during the dispute process.
+Any attempt to manipulate, delay, obstruct, or abuse the dispute resolution system may result in penalties determined by the Platform.
+SECTION 15 – ACCOUNT SUSPENSION AND TERMINATION
+15.1 Grounds for Suspension or Termination
+The Platform may suspend, restrict, or permanently terminate any User account where it reasonably determines that the User has:
+a. violated these Terms or any Platform Policy;
+b. engaged in fraud, deception, or misrepresentation;
+c. failed to complete Projects or refund obligations;
+d. submitted false or misleading evidence;
+e. abused the dispute resolution system;
+f. engaged in unlawful activity; or
+g. caused harm to the Platform, other Users, or third parties.
+15.2 Effect of Suspension
+Upon suspension:
+a. the User shall lose access to Platform features;
+b. active Projects may be paused or reassigned;
+c. funds may be held in escrow pending investigation; and
+d. payment withdrawals may be temporarily restricted.
+15.3 Permanent Termination
+Upon termination:
+a. the User’s account shall be permanently disabled;
+b. access to the Platform shall be revoked; and
+c. the Platform may retain or release funds in accordance with these Terms and applicable law.
+15.4 Survival of Obligations
+Termination of an account shall not affect:
+a. outstanding payment obligations;
+b. refund obligations;
+c. dispute resolution processes; or
+d. any legal rights or liabilities accrued prior to termination.
+SECTION 16A – OWNERSHIP OF PROJECT DELIVERABLES AND ROYALTY PROGRAM
+16A.1 Transfer of Ownership Upon Completion
+Unless otherwise expressly agreed in writing between the Service Provider and the Service Requester, ownership of the final approved Project Deliverables shall transfer to the Service Requester upon:
+a. successful completion of the Project;
+b. full release of the Project Fund in accordance with these Terms; and
+c. delivery of the final approved Project Deliverables through the Platform.
+From the effective date of such transfer, the Service Provider shall cease to have any ownership rights in the final approved Project Deliverables except as expressly preserved under these Terms or applicable law.
+16A.2 Assignment of Intellectual Property Rights
+Subject to applicable law and full payment for the Project, the Service Provider irrevocably assigns, transfers, and conveys to the Service Requester all transferable intellectual property rights, including copyright and other proprietary rights, in the final approved Project Deliverables to the extent created specifically for the Project.
+Where any intellectual property rights cannot be assigned by law, the Service Provider grants to the Service Requester an exclusive, worldwide, perpetual, irrevocable, transferable, and royalty-free licence to use, reproduce, modify, publish, distribute, commercialize, sublicense, and otherwise exploit the Project Deliverables to the fullest extent permitted by law.
+16A.3 Pre-Existing Intellectual Property
+Notwithstanding Section 16A.2, any intellectual property owned by the Service Provider before commencement of the Project, including pre-existing software, frameworks, templates, tools, methodologies, know-how, trademarks, logos, or proprietary systems, shall remain the property of the Service Provider unless expressly assigned in writing.
+Where such pre-existing intellectual property is incorporated into the Project Deliverables, the Service Provider grants the Service Requester a perpetual, non-exclusive licence to use such components only to the extent necessary for the intended use of the completed Project.
+16A.4 Moral Rights
+To the extent permitted by applicable law, the Service Provider waives any moral rights that would prevent the Service Requester from using, modifying, adapting, publishing, or commercializing the final approved Project Deliverables.
+16A.5 Platform Marketplace Royalty Program
+The Platform may, at its sole discretion and with the prior authorization of the Service Requester, permit certain completed Projects to be offered for sale through the Platform as digital products.
+Eligible Projects may include, but are not limited to:
+a. research journals;
+b. academic or educational materials where lawful;
+c. design templates;
+d. digital publications;
+e. reports;
+f. software or digital assets approved by the Platform; and
+g. other Project Deliverables approved by the Platform.
+The Platform reserves the absolute right to determine whether a Project is eligible for listing.
+16A.6 Ownership of Marketplace Listings
+Participation in the Marketplace Royalty Program shall not transfer ownership of the Project Deliverables to the Platform.
+The Service Requester shall remain the owner of the intellectual property rights transferred under these Terms, subject to any applicable legal restrictions.
+16A.7 Royalty Distribution
+Where a completed Project is approved for resale through the Platform, the Service Requester shall be entitled to a royalty equal to fifteen percent (15%) of the Net Sale Revenue received by the Platform from each completed sale of the approved digital copy.
+For the purposes of this Section, “Net Sale Revenue” means the amount actually received by the Platform after deduction of applicable taxes, payment processing charges, currency conversion costs, refunds, chargebacks, and other mandatory third-party transaction costs.
+16A.8 Platform Licence for Distribution
+By participating in the Marketplace Royalty Program, the Service Requester grants the Platform a non-exclusive, worldwide licence to host, reproduce, market, distribute, display, and sell authorised digital copies of the approved Project solely for the purposes of operating the Marketplace Royalty Program.
+Such licence shall remain effective until terminated in accordance with this Section.
+16A.9 Withdrawal from the Marketplace
+The Service Requester may request removal of an approved Project from future sales by providing written notice through the Platform.
+Removal from future sales shall not affect sales completed before the effective removal date, and royalties shall remain payable for eligible completed sales made before removal.
+16A.10 Royalty Payments
+Royalties shall be calculated and paid in accordance with the Platform’s Royalty Payment Schedule and shall be subject to applicable taxes, verification procedures, fraud prevention measures, currency conversion adjustments, and minimum payout thresholds established by the Platform.
+The Platform reserves the right to withhold or suspend royalty payments where fraud, copyright infringement, ownership disputes, or other legal concerns are reasonably suspected.
+16A.11 Platform Commission
+The remaining revenue from approved Marketplace sales, after payment of the Service Requester’s royalty and applicable deductions, shall belong to the Platform unless otherwise agreed in writing.
+16A.12 Warranty of Ownership
+The Service Requester represents and warrants that any Project submitted for resale:
+a. is lawfully owned or licensed by the Service Requester;
+b. does not infringe the intellectual property rights of any third party;
+c. does not contain unlawful, defamatory, confidential, or prohibited content; and
+d. complies with all applicable laws and Platform Policies.
+The Service Requester agrees to indemnify the Platform against losses arising from any breach of this warranty.
+SECTION 17 – LIMITATION OF LIABILITY
+17.1 No Guarantee of Results
+The Platform does not guarantee:
+a. Project success;
+b. earnings or income;
+c. satisfaction of Users; or
+d. uninterrupted access to services.
+17.2 Intermediary Role
+The Platform acts solely as an intermediary between Service Providers and Service Requesters and is not a party to any Project agreement between Users.
+17.3 Liability Cap
+To the maximum extent permitted by law, the total liability of the Platform for any claim shall not exceed the total Platform fees received for the specific Project giving rise to the claim.
+17.4 Exclusion of Damages
+The Platform shall not be liable for:
+a. indirect or consequential damages;
+b. loss of profit or revenue;
+c. business interruption;
+d. loss of data; or
+e. disputes between Users.
+SECTION 18 – FORCE MAJEURE
+18.1 Definition
+The Platform shall not be liable for any failure or delay in performance caused by events beyond its reasonable control, including:
+a. natural disasters;
+b. war, terrorism, or civil unrest;
+c. government actions or regulations;
+d. internet or infrastructure failures;
+e. banking or payment system disruptions;
+f. cyberattacks or security incidents; or
+g. any other force majeure events.
+18.2 Suspension of Obligations
+During a force majeure event:
+a. Platform obligations may be suspended;
+b. Project timelines may be extended; and
+c. payments may be delayed until normal operations resume.
+SECTION 19 – GENERAL PROVISIONS
+19.1 Entire Agreement
+These Terms constitute the entire agreement between the User and the Platform.
+19.2 Severability
+If any provision is found invalid or unenforceable, the remaining provisions shall continue in full force.
+19.3 No Waiver
+Failure by the Platform to enforce any provision shall not constitute a waiver of rights.
+19.4 Assignment
+Users may not assign or transfer their rights or obligations without Platform consent.
+The Platform may assign its rights without restriction.
+SECTION 20 – GOVERNING LAW AND ACCEPTANCE
+20.1 Governing Law
+These Terms shall be governed and interpreted in accordance with the laws of the jurisdiction in which the Platform is legally registered.
+20.2 Dispute Jurisdiction
+Any legal disputes not resolved through Platform dispute resolution shall be subject to the exclusive jurisdiction of competent courts in the Platform’s governing jurisdiction.
+20.3 Acceptance of Terms
+By registering, accessing, or using the Platform, Users confirm that they:
+a. have read and understood these Terms;
+b. agree to be legally bound by them; and
+c. accept all Platform Policies and future amendments.
+SECTION 21 – PRIVACY AND CONFIDENTIALITY POLICY
+21.1 Purpose
+This Privacy and Confidentiality Policy governs the collection, use, storage, disclosure, protection, and retention of information by zirclaire.com (“Platform”), owned and operated by MORATT Enterprise.
+By registering an account or using the Platform, every User acknowledges that they have read, understood, and agreed to this Privacy and Confidentiality Policy.
+21.2 Commitment to Privacy
+The Platform is committed to protecting the privacy, confidentiality, and security of User information.
+The Platform shall implement reasonable administrative, technical, and organizational measures to protect User information from unauthorized access, disclosure, alteration, misuse, or destruction.
+Nothing in this Policy shall be interpreted as guaranteeing absolute security, as no electronic storage or internet transmission can be completely secure.
+21.3 Information Collected
+The Platform may collect, receive, generate, or process the following categories of information:
+a. Registration Information
+Including but not limited to:
+i. Full name;
+ii. Username;
+iii. Email address;
+iv. Telephone number;
+v. Date of birth where required;
+vi. Residential or business address;
+vii. Government-issued identification where required for verification;
+viii. Profile photographs;
+ix. Business registration information where applicable.
+b. Financial Information
+Including:
+i. Binary Account information;
+ii. Touch ’n Go account information;
+iii. Payment history;
+iv. Transaction history;
+v. Refund records;
+vi. Escrow records;
+vii. Withdrawal history;
+viii. Currency conversion information.
+The Platform shall not intentionally collect payment credentials beyond what is reasonably necessary to process transactions or comply with applicable legal and regulatory requirements.
+c. Project Information
+The Platform may collect:
+i. Project descriptions;
+ii. Project scope;
+iii. Deliverables;
+iv. Files uploaded;
+v. SOP documentation;
+vi. Revision history;
+vii. Project duration;
+viii. Project completion status.
+d. Communication Information
+The Platform may collect communications exchanged through Platform systems, including:
+i. Messages;
+ii. Notifications;
+iii. Attachments;
+iv. Customer support communications;
+v. Dispute communications.
+Communications conducted outside the Platform may not be retained or considered during dispute resolution.
+e. Technical Information
+Including:
+i. IP address;
+ii. Browser type;
+iii. Device information;
+iv. Operating system;
+v. Login timestamps;
+vi. Session information;
+vii. Device identifiers;
+viii. Diagnostic information;
+ix. Security logs.
+21.4 Purpose of Collection
+The Platform may collect and process information for purposes including:
+a. Account registration;
+b. Identity verification;
+c. Project management;
+d. Payment processing;
+e. Escrow management;
+f. Fraud detection;
+g. Security monitoring;
+h. Customer support;
+i. Dispute resolution;
+j. Legal compliance;
+k. Platform improvement;
+l. Statistical analysis;
+m. Risk management;
+n. Communication with Users.
+21.5 Confidential Information
+Confidential Information includes any non-public information disclosed by one User to another through the Platform, including but not limited to:
+a. Business plans;
+b. Pricing structures;
+c. Technical documentation;
+d. Source code;
+e. Designs;
+f. Trade secrets;
+g. Financial information;
+h. Client information;
+i. Proprietary methodologies.
+21.6 Confidentiality Obligations
+Every User agrees that they shall:
+a. maintain the confidentiality of Confidential Information;
+b. use Confidential Information solely for the purpose of performing the relevant Project;
+c. not disclose Confidential Information to any third party without lawful authority or prior written consent;
+d. implement reasonable safeguards to prevent unauthorized disclosure;
+e. immediately notify the Platform if they become aware of any unauthorized disclosure or misuse.
+21.7 Permitted Disclosure
+Confidential Information may be disclosed where reasonably necessary:
+a. to comply with applicable laws or regulations;
+b. pursuant to a lawful court order or governmental request;
+c. to protect the legal rights of the Platform;
+d. to investigate fraud, abuse, or unlawful activity;
+e. during dispute resolution under these Terms;
+f. with the express consent of the affected User.
+21.8 Data Retention
+The Platform may retain User information for as long as reasonably necessary:
+a. to provide Platform services;
+b. to complete Projects;
+c. to resolve disputes;
+d. to comply with legal or regulatory obligations;
+e. to maintain financial and audit records;
+f. to protect the legitimate interests of the Platform.
+Following expiration of the applicable retention period, the Platform may securely delete, anonymize, or archive information in accordance with applicable law.
+21.9 User Responsibilities
+Users are responsible for:
+a. protecting their login credentials;
+b. ensuring information submitted to the Platform is accurate;
+c. avoiding unnecessary disclosure of confidential information;
+d. using the Platform in accordance with these Terms;
+e. promptly reporting suspected unauthorized access or data breaches affecting their account.
+21.10 Cross-Border Processing
+Where reasonably necessary for operation of the Platform, User information may be processed, stored, or transferred to service providers located in jurisdictions other than the User’s country of residence.
+The Platform shall implement reasonable safeguards to protect such information in accordance with applicable legal requirements.
+21.11 Third-Party Service Providers
+The Platform may engage third-party providers for services including:
+a. cloud hosting;
+b. payment processing;
+c. identity verification;
+d. customer support;
+e. analytics;
+f. fraud prevention;
+g. security monitoring.
+Such providers shall receive only the information reasonably necessary to perform their services and shall be required to protect that information under appropriate contractual or legal obligations.
+21.12 Security Measures
+The Platform may implement security measures including:
+a. encrypted communications;
+b. access controls;
+c. authentication procedures;
+d. activity monitoring;
+e. fraud detection systems;
+f. security audits;
+g. backup systems;
+h. incident response procedures.
+The Platform does not warrant that any security system is completely immune from cyberattacks or unauthorized access.
+21.13 Marketing Communications
+Where permitted by applicable law, the Platform may send Users communications relating to:
+a. Platform updates;
+b. new services;
+c. promotional campaigns;
+d. security notifications;
+e. policy updates.
+Users may opt out of promotional communications where such option is provided, but operational, legal, security, and transactional communications may continue to be sent.
+21.14 Privacy Complaints
+Users who believe that their privacy rights have been affected may submit a written complaint through the Platform’s official support channel.
+The Platform shall review such complaints within a reasonable period and may request additional information where necessary.
+21.15 Amendments
+The Platform reserves the right to amend this Privacy and Confidentiality Policy from time to time.
+Material changes shall become effective upon publication on the Platform or upon such other notice as the Platform may provide.
+Continued use of the Platform following the effective date of any amendment shall constitute acceptance of the revised Policy.
+SECTION 22 – DATA PROTECTION POLICY
+22.1 Purpose
+This Data Protection Policy establishes the principles governing the collection, processing, storage, use, disclosure, transfer, retention, and disposal of personal data by zirclaire.com (“Platform”), owned and operated by MORATT Enterprise.
+This Policy forms an integral part of the Platform’s Terms of Service and Privacy and Confidentiality Policy.
+By accessing or using the Platform, every User acknowledges and agrees that the Platform may process Personal Data in accordance with this Policy and applicable laws.
+22.2 Scope of Application
+This Policy applies to:
+a. all Service Providers;
+b. all Service Requesters;
+c. visitors to the Platform;
+d. prospective Users;
+e. contractors, consultants, and business partners interacting with the Platform; and
+f. any other individual whose Personal Data is collected or processed by the Platform.
+22.3 Definition of Personal Data
+For the purposes of this Policy, “Personal Data” means any information that identifies, relates to, describes, or can reasonably be linked to an identifiable individual, whether directly or indirectly.
+Personal Data may include, without limitation:
+a. name;
+b. username;
+c. email address;
+d. telephone number;
+e. government-issued identification information;
+f. payment account information;
+g. Touch ’n Go account information;
+h. Binary Account information;
+i. transaction records;
+j. device identifiers;
+k. IP addresses;
+l. geolocation information where lawfully collected;
+m. photographs;
+n. account activity; and
+o. communications conducted through the Platform.
+22.4 Data Protection Principles
+The Platform shall endeavor to process Personal Data in accordance with the following principles:
+a. lawfulness;
+b. fairness;
+c. transparency;
+d. purpose limitation;
+e. data minimization;
+f. accuracy;
+g. storage limitation;
+h. integrity and confidentiality; and
+i. accountability.
+Where applicable law imposes stricter requirements, the Platform shall comply with those requirements.
+22.5 Lawful Basis for Processing
+The Platform may process Personal Data where reasonably necessary for one or more of the following purposes:
+a. performance of contractual obligations;
+b. operation of the Platform;
+c. account registration and authentication;
+d. identity verification;
+e. Project administration;
+f. payment processing and escrow management;
+g. fraud prevention and security;
+h. dispute resolution;
+i. compliance with legal and regulatory obligations;
+j. protection of the Platform’s legitimate business interests; or
+k. where consent has been provided by the User, where required by applicable law.
+22.6 Data Accuracy
+Users are responsible for ensuring that the Personal Data they provide is accurate, complete, and current.
+Users shall promptly update inaccurate or outdated information through the Platform or by contacting the Platform.
+The Platform shall not be responsible for losses arising from inaccurate information supplied by Users.
+22.7 Data Security Measures
+The Platform shall implement reasonable technical and organizational safeguards, which may include:
+a. encryption of data in transit where appropriate;
+b. password protection and authentication controls;
+c. access controls based on business necessity;
+d. monitoring of unauthorized access attempts;
+e. system logging and audit trails;
+f. secure backup procedures;
+g. malware protection;
+h. periodic security reviews; and
+i. incident response procedures.
+The Platform does not warrant that its systems are immune from cyberattacks, malicious software, or other security incidents.
+22.8 Access to Personal Data
+Access to Personal Data shall be limited to:
+a. authorized employees;
+b. authorized contractors;
+c. approved service providers;
+d. financial institutions;
+e. payment processors;
+f. identity verification providers;
+g. regulatory authorities where legally required; and
+h. other persons authorized by law or by the User.
+Access shall be limited to the extent reasonably necessary to perform legitimate business functions.
+22.9 International Data Transfers
+Where operationally necessary, Personal Data may be stored or processed in jurisdictions outside the User’s country of residence.
+The Platform shall take reasonable measures to ensure that such transfers are conducted in accordance with applicable legal requirements and appropriate contractual or technical safeguards.
+22.10 Data Retention
+The Platform may retain Personal Data for as long as reasonably necessary to:
+a. provide Platform services;
+b. administer Projects;
+c. process payments;
+d. resolve disputes;
+e. investigate fraud;
+f. comply with legal, accounting, tax, and regulatory obligations;
+g. enforce these Terms; and
+h. protect the legitimate interests of the Platform.
+When retention is no longer required, the Platform may securely delete, anonymize, or archive the information in accordance with applicable law.
+22.11 User Rights
+Subject to applicable law and legitimate operational or legal limitations, Users may request to:
+a. access their Personal Data;
+b. correct inaccurate Personal Data;
+c. update Personal Data;
+d. request deletion of Personal Data;
+e. object to certain processing activities;
+f. withdraw consent where processing is based on consent; and
+g. request information regarding the categories of Personal Data processed.
+The Platform may decline requests where retention or processing is required by law, necessary for dispute resolution, fraud prevention, contractual obligations, or the establishment, exercise, or defense of legal claims.
+22.12 Data Breach Management
+Where the Platform becomes aware of a Personal Data breach that is likely to pose a significant risk to affected Users, the Platform shall, where required by applicable law:
+a. investigate the incident;
+b. implement reasonable containment measures;
+c. assess the scope and impact of the breach;
+d. notify affected Users and competent authorities where legally required; and
+e. take reasonable steps to reduce the likelihood of recurrence.
+22.13 Third-Party Service Providers
+The Platform may engage third-party service providers to perform functions including hosting, payment processing, identity verification, analytics, fraud detection, and customer support.
+Such providers shall receive only the information reasonably necessary to perform their services and shall be required to maintain appropriate security and confidentiality obligations.
+22.14 Automated Processing
+The Platform may use automated systems to assist in:
+a. fraud detection;
+b. account security;
+c. spam prevention;
+d. risk scoring;
+e. payment verification;
+f. Project monitoring; and
+g. operational analytics.
+Where a significant decision affecting a User is made solely through automated processing, the User may request human review where required by applicable law.
+22.15 Cookies and Similar Technologies
+The Platform may use cookies, pixels, local storage, and similar technologies to:
+a. maintain user sessions;
+b. remember user preferences;
+c. improve platform functionality;
+d. enhance security;
+e. analyze usage trends; and
+f. support lawful advertising and marketing activities.
+Users may manage cookie preferences through their browser or device settings, although disabling certain technologies may affect Platform functionality.
+22.16 Compliance with Applicable Laws
+The Platform intends to operate in compliance with applicable data protection and privacy legislation, including, where applicable, the laws of the jurisdictions in which it operates or processes Personal Data.
+Nothing in this Policy shall limit any rights that Users may have under mandatory applicable law.
+22.17 Amendments
+The Platform reserves the right to amend this Data Protection Policy at any time to reflect changes in legal requirements, operational practices, technology, or business needs.
+Material amendments shall become effective upon publication on the Platform or upon such other notice as the Platform may provide.
+Continued use of the Platform following the effective date of any amendment shall constitute acceptance of the revised Policy.
+SECTION 23 – ANTI-FRAUD, ANTI-MONEY LAUNDERING (AML), COUNTER-TERRORISM FINANCING (CTF) AND KNOW YOUR CUSTOMER (KYC) POLICY
+23.1 Purpose
+This Anti-Fraud, Anti-Money Laundering (AML), Counter-Terrorism Financing (CTF), and Know Your Customer (KYC) Policy establishes the procedures adopted by zirclaire.com (“Platform”), owned and operated by MORATT Enterprise, to protect the Platform, its Users, and the integrity of its payment and escrow systems from fraud, identity misuse, unlawful financial activity, and other prohibited conduct.
+This Policy forms part of the Terms of Service and is binding upon all Users.
+23.2 Compliance Objective
+The Platform is committed to operating its services responsibly and may implement reasonable measures to:
+a. verify User identity;
+b. reduce fraud and identity theft;
+c. protect escrowed Project Funds;
+d. detect suspicious activity;
+e. reduce financial crime risks;
+f. protect other Users; and
+g. comply with applicable legal obligations.
+23.3 Mandatory Identity Verification
+The Platform may require a User to complete identity verification before:
+a. opening an account;
+b. accepting Projects;
+c. creating Projects above limits established by the Platform;
+d. withdrawing funds;
+e. receiving Project payments;
+f. recovering suspended accounts; or
+g. whenever the Platform reasonably considers verification necessary.
+23.4 Verification Documents
+The Platform may request one or more of the following:
+a. government-issued identification;
+b. passport;
+c. driving licence;
+d. proof of residential address;
+e. company registration documents;
+f. business licences;
+g. selfie or live facial verification;
+h. proof of ownership of the registered Touch ’n Go account;
+i. additional documents reasonably required for verification.
+Submission of documents does not guarantee approval.
+23.5 Continuous Verification
+The Platform may request additional verification at any time where it reasonably believes that:
+a. account information has changed;
+b. suspicious activity has occurred;
+c. fraud indicators exist;
+d. legal or operational requirements require additional checks.
+23.6 User Representations
+Each User represents and warrants that:
+a. all information provided is accurate;
+b. all submitted documents are genuine;
+c. the User acts on their own behalf unless otherwise disclosed;
+d. the User will not impersonate another person or entity.
+23.7 Prohibited Financial Activities
+Users shall not use the Platform for:
+a. fraud;
+b. identity theft;
+c. money laundering;
+d. terrorist financing;
+e. sanctions evasion;
+f. bribery or corruption;
+g. stolen funds;
+h. stolen identities;
+i. phishing;
+j. account trafficking;
+k. unauthorized payment processing;
+l. any unlawful financial activity.
+23.8 Monitoring
+The Platform may monitor:
+a. payment behaviour;
+b. escrow activity;
+c. transaction patterns;
+d. unusual withdrawals;
+e. abnormal account activity;
+f. repeated disputes;
+g. multiple linked accounts; and
+h. other indicators of potential abuse.
+Monitoring may include automated tools together with human review.
+23.9 Source of Funds
+Where reasonably necessary, the Platform may request information or documents relating to the lawful source of Project Funds or other payments processed through the Platform.
+Failure to provide requested information may result in delayed processing, suspension, or refusal of transactions.
+23.10 Temporary Restrictions
+Where the Platform reasonably believes that an account or transaction presents a fraud, security, or legal risk, it may:
+a. place funds on hold;
+b. suspend withdrawals;
+c. suspend Projects;
+d. restrict account functions; or
+e. require additional verification before further activity.
+23.11 Refusal of Service
+The Platform reserves the right to refuse, suspend, or terminate services where it reasonably determines that continued use presents an unacceptable legal, operational, security, or fraud risk.
+23.12 Record Retention
+Verification records, transaction records, and investigation materials may be retained for as long as reasonably necessary to:
+a. resolve disputes;
+b. investigate fraud;
+c. protect the Platform;
+d. comply with applicable legal obligations; or
+e. establish, exercise, or defend legal claims.
+23.13 User Cooperation
+Users shall cooperate with reasonable requests for information made by the Platform under this Policy.
+Failure to cooperate may result in account restrictions, suspension, delayed payments, or termination.
+23.14 False Information
+Any User who knowingly submits false, forged, altered, misleading, or fraudulent information or documentation may be subject to:
+a. immediate account suspension or termination;
+b. forfeiture of rights under these Terms, where permitted by applicable law;
+c. cancellation of affected Projects;
+d. restriction from future use of the Platform; and
+e. any other lawful action considered appropriate by the Platform.
+23.15 Policy Amendments
+The Platform reserves the right to amend this Policy to reflect changes in operational requirements, security practices, legal obligations, or business needs.
+Material amendments shall become effective upon publication on the Platform or such other notice as the Platform may provide.

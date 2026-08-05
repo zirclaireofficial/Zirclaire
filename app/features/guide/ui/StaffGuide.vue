@@ -86,11 +86,12 @@ const adminSections: Section[] = [
     icon: 'i-lucide-ticket',
     heading: 'Support tickets',
     where: 'Dashboard → Support tickets',
-    description: 'The ticket log, with Unclaimed / Open / Closed / All tabs. You see unclaimed tickets and the ones assigned to you.',
+    description: 'The ticket log, with Bot / Unclaimed / Open / Closed / All tabs. You see the ones the bot is handling, unclaimed ones, and the ones assigned to you.',
     actions: [
-      { name: 'Unclaimed', detail: 'Tickets with no agent yet — the bot may still be chatting, or it has escalated and is waiting. Open one to read it, then Claim to take it.' },
+      { name: 'Bot', detail: 'The assistant is handling it and hasn’t escalated. No action needed from you unless you want to step in.' },
+      { name: 'Unclaimed', detail: 'The assistant escalated it — it needs an agent. Open to read the conversation, then Claim to take it.' },
       { name: 'Open', detail: 'Tickets you have claimed and are still handling. Reply, then Close when resolved.' },
-      { name: 'Closed / All', detail: 'Closed shows resolved tickets; All shows every ticket you can see.' },
+      { name: 'Closed / All', detail: 'Closed shows resolved tickets; All shows everything. Tickets left idle for 24 hours close automatically.' },
     ],
   },
   {

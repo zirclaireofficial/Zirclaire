@@ -38,12 +38,13 @@ export function useMessaging() {
   }
 
   /** Send a service-desk message — the server routes it to the member's open
-   *  ticket, or opens a new one if their last ticket is closed. */
+   *  ticket, or opens a new one if their last ticket is closed. Returns the
+   *  saved message so the UI can show it immediately. */
   function supportSend(body: string) {
-    return authedFetch<{ conversationId: string; ticketNumber: number | null }>('/api/messages/support-send', {
-      method: 'POST',
-      body: { body },
-    })
+    return authedFetch<{ conversationId: string; ticketNumber: number | null; message: Message }>(
+      '/api/messages/support-send',
+      { method: 'POST', body: { body } },
+    )
   }
 
   /**

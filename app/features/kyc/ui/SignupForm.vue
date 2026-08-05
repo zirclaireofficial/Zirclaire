@@ -13,6 +13,11 @@ const done = ref(false)
 const error = ref('')
 const loading = ref(false)
 
+// Rules & Regulations — loaded from the static file and shown in a scroll box.
+// The user must accept before signing up.
+const rulesText = ref('')
+const accepted = ref(false)
+
 const form = reactive({
   full_name: '',
   email: '',
@@ -32,6 +37,11 @@ onMounted(async () => {
   const { data } = await supabase.from('countries').select('id, name').eq('is_active', true)
   countries.value = (data ?? []).map((c) => ({ label: c.name, value: c.id }))
   if (countries.value.length) form.country_id = countries.value[0]!.value
+  try {
+    rulesText.value = await $fetch<string>('/rules.txt', { responseType: 'text' })
+  } catch {
+    rulesText.value = 'Rules and Regulations could not be loaded. Please try again.'
+  }
 })
 
 const providerItems = [
@@ -50,6 +60,10 @@ async function submit() {
   error.value = ''
   if (!idFile.value || !picFile.value) {
     error.value = 'Please upload your ID document and a profile picture.'
+    return
+  }
+  if (!accepted.value) {
+    error.value = 'Please read and accept the Rules and Regulations to continue.'
     return
   }
   loading.value = true
@@ -165,6 +179,18 @@ async function submit() {
       <input type="file" accept="image/*" required class="block w-full text-sm text-stone-500 file:mr-3 file:rounded-lg file:border-0 file:bg-stone-100 file:px-3 file:py-2 file:text-sm dark:file:bg-stone-800" @change="onPic" >
     </UFormField>
 
-    <UButton type="submit" color="primary" block :loading="loading" label="Submit application" />
+    <!-- Rules & Regulations — scrollable, must be accepted before signup -->
+    <div>
+      <p class="mb-1.5 text-sm font-medium">Rules and Regulations</p>
+      <div
+        class="h-56 overflow-y-auto whitespace-pre-wrap rounded-xl border border-stone-200 bg-stone-50 p-3 text-xs leading-relaxed text-stone-600 dark:border-stone-800 dark:bg-stone-800/40 dark:text-stone-300"
+      >{{ rulesText || 'Loading…' }}</div>
+      <label class="zc-tap mt-2 flex cursor-pointer items-start gap-2 text-sm">
+        <input v-model="accepted" type="checkbox" class="mt-0.5 size-4 accent-primary" >
+        <span>I have read and accept the Rules and Regulations.</span>
+      </label>
+    </div>
+
+    <UButton type="submit" color="primary" block :loading="loading" :disabled="!accepted" label="Submit application" />
   </form>
 </template>

@@ -4,7 +4,7 @@
 
 import { useMessaging, useSupportModeration } from '~/features/messaging/application/useMessaging'
 import { usePublicMedia } from '~/shared/lib/media'
-import { ticketLabel } from '~/features/messaging/domain'
+import { ticketLabel, ticketStage, stageLabel, stageColor } from '~/features/messaging/domain'
 import type { SupportTicket } from '~/features/messaging/domain'
 import MessageThread from './MessageThread.vue'
 
@@ -45,9 +45,9 @@ async function onClose(t: SupportTicket) {
   closing.value = t.id
   try {
     await close(t.id)
+    t.closed_at = new Date().toISOString() // reflect locally, no reload
     toast.add({ title: `Ticket #${t.ticket_number} closed`, color: 'success' })
     openId.value = null
-    await load()
   } catch (e) {
     const err = e as { data?: { statusMessage?: string } }
     toast.add({ title: 'Could not close', description: err?.data?.statusMessage, color: 'error' })
@@ -60,12 +60,13 @@ async function onClaim(t: SupportTicket) {
   claiming.value = t.id
   try {
     await claim(t.id)
-    await load()
+    // Server confirmed — reflect it locally (moves the ticket to "Yours").
+    t.assigned_admin_id = currentUserId.value
     openId.value = t.id
   } catch (e) {
     const err = e as { data?: { statusMessage?: string } }
     toast.add({ title: 'Could not claim', description: err?.data?.statusMessage ?? 'Someone may have taken it first.', color: 'error' })
-    await load()
+    await load() // a failed claim means someone beat us — refresh to the truth
   } finally {
     claiming.value = null
   }
@@ -112,6 +113,7 @@ function initials(name: string | null | undefined) {
                   <div class="flex items-center gap-1.5">
                     <span class="font-mono text-xs font-medium text-primary">{{ ticketLabel(t.ticket_number) }}</span>
                     <p class="truncate text-sm font-medium">{{ t.requester?.full_name ?? 'Member' }}</p>
+                    <UBadge :color="(stageColor(ticketStage(t)) as any)" variant="soft" size="sm" class="shrink-0">{{ stageLabel(ticketStage(t)) }}</UBadge>
                   </div>
                   <p class="truncate text-xs text-stone-500 dark:text-stone-400">{{ t.preview || 'New request' }}</p>
                 </div>
