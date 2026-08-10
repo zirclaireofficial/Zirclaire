@@ -9,7 +9,7 @@ import { MAX_POST_MEDIA, isPostPublishable } from '~/features/social/domain'
 
 const emit = defineEmits<{ published: [] }>()
 
-const { publishPost } = useSocial()
+const { publishPost, screenPost } = useSocial()
 const { upload } = useMediaUpload()
 const { me } = useMe()
 const toast = useToast()
@@ -61,7 +61,9 @@ async function submit() {
         return { media_url: up.publicId, media_type: 'image' }
       }),
     )
-    await publishPost({ body: body.value, media: uploaded })
+    const post = await publishPost({ body: body.value, media: uploaded })
+    // AI sweeper screens it in the background (flag-only; never blocks the post).
+    if (post?.id) screenPost(post.id).catch(() => {})
     toast.add({ title: 'Posted', description: "It's live on the feed.", color: 'success' })
     body.value = ''
     previews.value.forEach((u) => URL.revokeObjectURL(u))

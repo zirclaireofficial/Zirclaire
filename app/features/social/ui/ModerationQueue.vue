@@ -17,6 +17,13 @@ const toast = useToast()
 const reports = ref<PendingReport[]>([])
 const loading = ref(true)
 const busy = ref<string | null>(null)
+const filter = ref<'all' | 'system' | 'user'>('all')
+
+const filtered = computed(() =>
+  filter.value === 'all' ? reports.value : reports.value.filter((r) => r.source === filter.value),
+)
+const systemCount = computed(() => reports.value.filter((r) => r.source === 'system').length)
+const userCount = computed(() => reports.value.filter((r) => r.source === 'user').length)
 
 async function load() {
   loading.value = true
@@ -80,11 +87,24 @@ const alreadyRemoved = (r: PendingReport) => r.target_type === 'post' && r.post?
 
 <template>
   <div>
+    <!-- Filter by who flagged it -->
+    <div class="mb-4 flex flex-wrap gap-1.5">
+      <button
+        v-for="f in [{ k: 'all', l: `All (${reports.length})` }, { k: 'system', l: `System (${systemCount})` }, { k: 'user', l: `Member (${userCount})` }]"
+        :key="f.k"
+        class="zc-tap rounded-full border px-3 py-1 text-xs transition"
+        :class="filter === f.k ? 'border-primary bg-primary/10 font-medium text-primary' : 'border-stone-200 text-stone-500 dark:border-stone-800 dark:text-stone-400'"
+        @click="filter = (f.k as 'all' | 'system' | 'user')"
+      >
+        {{ f.l }}
+      </button>
+    </div>
+
     <div v-if="loading" class="grid gap-4 lg:grid-cols-2">
       <div v-for="i in 2" :key="i" class="zc-card h-48 animate-pulse" />
     </div>
 
-    <div v-else-if="!reports.length" class="flex flex-col items-center gap-2 py-20 text-center">
+    <div v-else-if="!filtered.length" class="flex flex-col items-center gap-2 py-20 text-center">
       <div class="flex size-12 items-center justify-center rounded-full bg-success/10">
         <UIcon name="i-lucide-shield-check" class="size-6 text-success" />
       </div>
@@ -93,10 +113,15 @@ const alreadyRemoved = (r: PendingReport) => r.target_type === 'post' && r.post?
     </div>
 
     <div v-else class="grid gap-4 lg:grid-cols-2">
-      <article v-for="r in reports" :key="r.id" class="zc-card p-4">
+      <article v-for="r in filtered" :key="r.id" class="zc-card p-4">
         <div class="flex items-start justify-between gap-2">
-          <div class="flex items-center gap-2">
+          <div class="flex flex-wrap items-center gap-2">
             <UBadge color="primary" variant="soft" size="sm" class="capitalize">{{ r.target_type }}</UBadge>
+            <!-- Who flagged it: the AI sweeper or a member -->
+            <UBadge :color="r.source === 'system' ? 'info' : 'neutral'" variant="soft" size="sm">
+              <UIcon :name="r.source === 'system' ? 'i-lucide-bot' : 'i-lucide-user'" class="mr-1 size-3" />
+              {{ r.source === 'system' ? 'AI flagged' : 'Member report' }}
+            </UBadge>
             <UBadge v-if="alreadyRemoved(r)" color="neutral" variant="soft" size="sm">Already removed</UBadge>
           </div>
           <span class="shrink-0 text-xs text-stone-400">{{ ago(r.created_at) }}</span>
@@ -104,12 +129,15 @@ const alreadyRemoved = (r: PendingReport) => r.target_type === 'post' && r.post?
 
         <!-- Why it was flagged -->
         <div class="mt-3 flex items-start gap-2 rounded-lg bg-primary/5 p-3 text-sm">
-          <UIcon name="i-lucide-flag" class="mt-0.5 size-4 shrink-0 text-primary" />
+          <UIcon :name="r.source === 'system' ? 'i-lucide-bot' : 'i-lucide-flag'" class="mt-0.5 size-4 shrink-0 text-primary" />
           <div class="min-w-0">
             <p class="leading-snug">{{ r.reason || 'No reason given' }}</p>
             <p class="mt-1 text-xs text-stone-500 dark:text-stone-400">
-              Reported by {{ r.reporter?.full_name ?? 'a member' }}
-              <span class="font-mono">{{ r.reporter?.member_id }}</span>
+              <template v-if="r.source === 'system'">Flagged automatically by AI moderation</template>
+              <template v-else>
+                Reported by {{ r.reporter?.full_name ?? 'a member' }}
+                <span class="font-mono">{{ r.reporter?.member_id }}</span>
+              </template>
             </p>
           </div>
         </div>

@@ -75,6 +75,8 @@ export interface FeedComment extends Comment {
 
 export type ReportTarget = 'post' | 'comment'
 
+export type ReportSource = 'user' | 'system'
+
 export interface PendingReport {
   id: string
   target_type: ReportTarget
@@ -82,6 +84,7 @@ export interface PendingReport {
   comment_id: string | null
   reason: string | null
   status: ReportStatus
+  source: ReportSource
   created_at: string
   reporter: PostAuthor | null
   /** The reported content, so an admin can judge without hunting for it. */

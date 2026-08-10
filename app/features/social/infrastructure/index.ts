@@ -318,8 +318,9 @@ export function createSupabaseSocialRepository(
           comment_id: r.comment_id,
           reason: r.reason,
           status: r.status,
+          source: (r.source ?? 'user') as 'user' | 'system',
           created_at: r.created_at,
-          reporter: authors.get(r.reporter_id) ?? null,
+          reporter: r.reporter_id ? authors.get(r.reporter_id) ?? null : null,
           post: p ? { ...p, author: authors.get(p.author_id) ?? null } : null,
           comment: c ? { ...c, author: authors.get(c.author_id) ?? null } : null,
         }

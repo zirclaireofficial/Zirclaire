@@ -4,9 +4,43 @@ import { useMediaUpload } from '~/shared/lib/useMediaUpload'
 import { authedFetch } from '~/shared/lib/authedFetch'
 import type { Database } from '~/shared/types/database'
 
-const { signUp } = useAuth()
+const { sendEmailOtp, verifyEmailOtp, setPassword } = useAuth()
 const { upload } = useMediaUpload()
 const supabase = useSupabaseClient<Database>()
+
+// Email verification (OTP) — required before an application can be submitted.
+const otpSent = ref(false)
+const otpCode = ref('')
+const emailVerified = ref(false)
+const otpBusy = ref(false)
+
+async function sendCode() {
+  error.value = ''
+  if (!form.email) { error.value = 'Enter your email first.'; return }
+  otpBusy.value = true
+  try {
+    await sendEmailOtp(form.email)
+    otpSent.value = true
+  } catch (e) {
+    error.value = (e as { message?: string })?.message ?? 'Could not send the code.'
+  } finally {
+    otpBusy.value = false
+  }
+}
+
+async function verifyCode() {
+  error.value = ''
+  if (!otpCode.value.trim()) { error.value = 'Enter the code from your email.'; return }
+  otpBusy.value = true
+  try {
+    await verifyEmailOtp(form.email, otpCode.value.trim())
+    emailVerified.value = true
+  } catch (e) {
+    error.value = (e as { message?: string })?.message ?? 'Invalid or expired code.'
+  } finally {
+    otpBusy.value = false
+  }
+}
 
 const role = ref<'service_requester' | 'service_provider' | null>(null)
 const done = ref(false)
@@ -58,6 +92,14 @@ function onPic(e: Event) {
 
 async function submit() {
   error.value = ''
+  if (!emailVerified.value) {
+    error.value = 'Please verify your email before submitting.'
+    return
+  }
+  if (!form.password || form.password.length < 8) {
+    error.value = 'Choose a password of at least 8 characters.'
+    return
+  }
   if (!idFile.value || !picFile.value) {
     error.value = 'Please upload your ID document and a profile picture.'
     return
@@ -68,7 +110,8 @@ async function submit() {
   }
   loading.value = true
   try {
-    await signUp(form.email, form.password)
+    // Email is already verified (OTP created the session); set the password.
+    await setPassword(form.password)
     const [idUp, picUp] = await Promise.all([
       upload(idFile.value, 'kyc'),
       upload(picFile.value, 'profile'),
@@ -148,9 +191,32 @@ async function submit() {
       <UInput v-model="form.full_name" required class="w-full" />
     </UFormField>
     <UFormField label="Email">
-      <UInput v-model="form.email" type="email" placeholder="name@company.com" autocomplete="email" required class="w-full" />
+      <div class="flex gap-2">
+        <UInput v-model="form.email" type="email" placeholder="name@company.com" autocomplete="email" :disabled="emailVerified" required class="w-full" />
+        <UButton
+          v-if="!emailVerified"
+          color="neutral"
+          variant="soft"
+          class="zc-tap shrink-0"
+          :loading="otpBusy"
+          :label="otpSent ? 'Resend' : 'Verify'"
+          @click="sendCode"
+        />
+        <span v-else class="flex shrink-0 items-center gap-1 text-sm text-success">
+          <UIcon name="i-lucide-badge-check" class="size-4" /> Verified
+        </span>
+      </div>
     </UFormField>
-    <UFormField label="Password">
+
+    <!-- Enter the emailed code -->
+    <UFormField v-if="otpSent && !emailVerified" label="Verification code" hint="Sent to your email">
+      <div class="flex gap-2">
+        <UInput v-model="otpCode" inputmode="numeric" placeholder="6-digit code" class="w-full" />
+        <UButton color="primary" class="zc-tap shrink-0" :loading="otpBusy" label="Confirm" @click="verifyCode" />
+      </div>
+    </UFormField>
+
+    <UFormField label="Password" hint="At least 8 characters">
       <UInput v-model="form.password" type="password" autocomplete="new-password" required class="w-full" />
     </UFormField>
     <UFormField label="Phone (with country code)">
@@ -191,6 +257,6 @@ async function submit() {
       </label>
     </div>
 
-    <UButton type="submit" color="primary" block :loading="loading" :disabled="!accepted" label="Submit application" />
+    <UButton type="submit" color="primary" block :loading="loading" :disabled="!accepted || !emailVerified" label="Submit application" />
   </form>
 </template>

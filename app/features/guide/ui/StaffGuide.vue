@@ -36,10 +36,11 @@ const adminSections: Section[] = [
     icon: 'i-lucide-flag',
     heading: 'Reports & moderation',
     where: 'Dashboard → Moderation',
-    description: 'Review posts and comments that members have reported.',
+    description: 'Review flagged posts and comments. Reports come from two sources, shown with a badge and filterable: members, and the AI moderation sweeper.',
     actions: [
+      { name: 'AI flagged vs Member report', detail: 'The AI screens every new post for sexual content, drugs, illegal activity and abuse, and files a report if it sees a violation — it never deletes anything itself. Member reports are filed by users. Both land here for you to judge.' },
       { name: 'Remove content', detail: 'Hides the reported post or comment and closes the report. Not deleted — it can be restored.' },
-      { name: 'Dismiss', detail: 'Closes the report and leaves the content up.' },
+      { name: 'Dismiss', detail: 'Closes the report and leaves the content up (e.g. a false AI flag).' },
     ],
   },
   {

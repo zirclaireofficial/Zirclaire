@@ -10,9 +10,14 @@ definePageMeta({ layout: 'auth' })
       <p class="mt-1 text-sm text-stone-500 dark:text-stone-400">Sign in to your account.</p>
     </div>
     <LoginForm />
-    <p class="text-center text-sm text-stone-500 dark:text-stone-400">
-      New here?
-      <NuxtLink to="/signup" class="font-medium text-primary">Create an account</NuxtLink>
-    </p>
+    <div class="space-y-1 text-center text-sm text-stone-500 dark:text-stone-400">
+      <p>
+        <NuxtLink to="/forgot" class="font-medium text-primary">Forgot your password?</NuxtLink>
+      </p>
+      <p>
+        New here?
+        <NuxtLink to="/signup" class="font-medium text-primary">Create an account</NuxtLink>
+      </p>
+    </div>
   </div>
 </template>

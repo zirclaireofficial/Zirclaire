@@ -48,5 +48,46 @@ export function useAuth() {
     await navigateTo('/login')
   }
 
-  return { user, signIn, signUp, signOut, waitForSession }
+  // --- Email OTP verification (used at signup) ---------------------------
+  /** Email a one-time code to verify the address (creating the auth user). */
+  async function sendEmailOtp(email: string) {
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: { shouldCreateUser: true },
+    })
+    if (error) throw error
+  }
+
+  /** Verify the code. On success the email is confirmed and a session exists. */
+  async function verifyEmailOtp(email: string, token: string) {
+    const { error } = await supabase.auth.verifyOtp({ email, token, type: 'email' })
+    if (error) throw error
+    await waitForSession()
+  }
+
+  /** Set (or change) the signed-in user's password. */
+  async function setPassword(password: string) {
+    const { error } = await supabase.auth.updateUser({ password })
+    if (error) throw error
+  }
+
+  // --- Password recovery -------------------------------------------------
+  /** Email a password-reset link that returns the user to /reset. */
+  async function requestPasswordReset(email: string) {
+    const redirectTo = `${window.location.origin}/reset`
+    const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo })
+    if (error) throw error
+  }
+
+  return {
+    user,
+    signIn,
+    signUp,
+    signOut,
+    waitForSession,
+    sendEmailOtp,
+    verifyEmailOtp,
+    setPassword,
+    requestPasswordReset,
+  }
 }
