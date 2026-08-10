@@ -8,39 +8,11 @@ const { sendEmailOtp, verifyEmailOtp, setPassword } = useAuth()
 const { upload } = useMediaUpload()
 const supabase = useSupabaseClient<Database>()
 
-// Email verification (OTP) — required before an application can be submitted.
-const otpSent = ref(false)
+// Email verification happens as part of submitting: fill the form, hit Submit,
+// then confirm the emailed code. `awaitingCode` shows the code step.
+const awaitingCode = ref(false)
 const otpCode = ref('')
-const emailVerified = ref(false)
 const otpBusy = ref(false)
-
-async function sendCode() {
-  error.value = ''
-  if (!form.email) { error.value = 'Enter your email first.'; return }
-  otpBusy.value = true
-  try {
-    await sendEmailOtp(form.email)
-    otpSent.value = true
-  } catch (e) {
-    error.value = (e as { message?: string })?.message ?? 'Could not send the code.'
-  } finally {
-    otpBusy.value = false
-  }
-}
-
-async function verifyCode() {
-  error.value = ''
-  if (!otpCode.value.trim()) { error.value = 'Enter the code from your email.'; return }
-  otpBusy.value = true
-  try {
-    await verifyEmailOtp(form.email, otpCode.value.trim())
-    emailVerified.value = true
-  } catch (e) {
-    error.value = (e as { message?: string })?.message ?? 'Invalid or expired code.'
-  } finally {
-    otpBusy.value = false
-  }
-}
 
 const role = ref<'service_requester' | 'service_provider' | null>(null)
 const done = ref(false)
@@ -90,12 +62,12 @@ function onPic(e: Event) {
   picFile.value = (e.target as HTMLInputElement).files?.[0] ?? null
 }
 
+// Step 1 — pressing "Submit application": validate everything, make sure the
+// email isn't already registered, then email a verification code.
 async function submit() {
   error.value = ''
-  if (!emailVerified.value) {
-    error.value = 'Please verify your email before submitting.'
-    return
-  }
+  if (!form.full_name.trim()) { error.value = 'Enter your full name.'; return }
+  if (!form.email.trim()) { error.value = 'Enter your email.'; return }
   if (!form.password || form.password.length < 8) {
     error.value = 'Choose a password of at least 8 characters.'
     return
@@ -110,11 +82,36 @@ async function submit() {
   }
   loading.value = true
   try {
-    // Email is already verified (OTP created the session); set the password.
+    // Block a second account on the same email.
+    const { exists } = await $fetch<{ exists: boolean }>('/api/kyc/check-email', {
+      method: 'POST',
+      body: { email: form.email.trim() },
+    })
+    if (exists) {
+      error.value = 'An account with this email already exists. Please sign in or reset your password.'
+      return
+    }
+    await sendEmailOtp(form.email.trim())
+    awaitingCode.value = true
+  } catch (e) {
+    const err = e as { data?: { statusMessage?: string }; message?: string }
+    error.value = err?.data?.statusMessage ?? err?.message ?? 'Could not start verification.'
+  } finally {
+    loading.value = false
+  }
+}
+
+// Step 2 — confirm the emailed code, then actually create the account.
+async function finalize() {
+  error.value = ''
+  if (!otpCode.value.trim()) { error.value = 'Enter the code from your email.'; return }
+  otpBusy.value = true
+  try {
+    await verifyEmailOtp(form.email.trim(), otpCode.value.trim())
     await setPassword(form.password)
     const [idUp, picUp] = await Promise.all([
-      upload(idFile.value, 'kyc'),
-      upload(picFile.value, 'profile'),
+      upload(idFile.value!, 'kyc'),
+      upload(picFile.value!, 'profile'),
     ])
     await authedFetch('/api/kyc/signup', {
       method: 'POST',
@@ -131,13 +128,19 @@ async function submit() {
         profile_picture: picUp.publicId,
       },
     })
+    awaitingCode.value = false
     done.value = true
   } catch (e: unknown) {
     const err = e as { data?: { statusMessage?: string }; message?: string }
-    error.value = err?.data?.statusMessage ?? err?.message ?? 'Signup failed'
+    error.value = err?.data?.statusMessage ?? err?.message ?? 'Invalid or expired code.'
   } finally {
-    loading.value = false
+    otpBusy.value = false
   }
+}
+
+async function resendCode() {
+  otpBusy.value = true
+  try { await sendEmailOtp(form.email.trim()) } catch { /* ignore */ } finally { otpBusy.value = false }
 }
 </script>
 
@@ -190,30 +193,8 @@ async function submit() {
     <UFormField label="Full name (as per national ID)">
       <UInput v-model="form.full_name" required class="w-full" />
     </UFormField>
-    <UFormField label="Email">
-      <div class="flex gap-2">
-        <UInput v-model="form.email" type="email" placeholder="name@company.com" autocomplete="email" :disabled="emailVerified" required class="w-full" />
-        <UButton
-          v-if="!emailVerified"
-          color="neutral"
-          variant="soft"
-          class="zc-tap shrink-0"
-          :loading="otpBusy"
-          :label="otpSent ? 'Resend' : 'Verify'"
-          @click="sendCode"
-        />
-        <span v-else class="flex shrink-0 items-center gap-1 text-sm text-success">
-          <UIcon name="i-lucide-badge-check" class="size-4" /> Verified
-        </span>
-      </div>
-    </UFormField>
-
-    <!-- Enter the emailed code -->
-    <UFormField v-if="otpSent && !emailVerified" label="Verification code" hint="Sent to your email">
-      <div class="flex gap-2">
-        <UInput v-model="otpCode" inputmode="numeric" placeholder="6-digit code" class="w-full" />
-        <UButton color="primary" class="zc-tap shrink-0" :loading="otpBusy" label="Confirm" @click="verifyCode" />
-      </div>
+    <UFormField label="Email" hint="We'll email a code to verify it when you submit">
+      <UInput v-model="form.email" type="email" placeholder="name@company.com" autocomplete="email" required class="w-full" />
     </UFormField>
 
     <UFormField label="Password" hint="At least 8 characters">
@@ -257,6 +238,41 @@ async function submit() {
       </label>
     </div>
 
-    <UButton type="submit" color="primary" block :loading="loading" :disabled="!accepted || !emailVerified" label="Submit application" />
+    <UButton type="submit" color="primary" block :loading="loading" :disabled="!accepted" label="Submit application" />
   </form>
+
+  <!-- Verify email code — appears after pressing Submit -->
+  <Teleport to="body">
+    <div
+      v-if="awaitingCode"
+      class="fixed inset-0 z-50 flex items-end justify-center bg-black/60 p-0 sm:items-center sm:p-4"
+      @click.self="awaitingCode = false"
+    >
+      <div class="w-full max-w-sm rounded-t-2xl bg-white p-5 dark:bg-stone-900 sm:rounded-2xl">
+        <div class="mb-3 flex items-start gap-3">
+          <div class="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/10">
+            <UIcon name="i-lucide-mail" class="size-4 text-primary" />
+          </div>
+          <div>
+            <h2 class="font-medium leading-tight">Verify your email</h2>
+            <p class="mt-0.5 text-xs text-stone-500 dark:text-stone-400">
+              Enter the code we sent to <span class="font-medium">{{ form.email }}</span> to finish.
+            </p>
+          </div>
+        </div>
+
+        <UAlert v-if="error" color="error" variant="soft" :title="error" class="mb-3" />
+
+        <UInput v-model="otpCode" inputmode="numeric" placeholder="6-digit code" class="w-full" @keydown.enter.prevent="finalize" />
+
+        <div class="mt-3 flex gap-2">
+          <UButton color="primary" class="zc-tap flex-1" :loading="otpBusy" label="Verify & submit" @click="finalize" />
+          <UButton color="neutral" variant="ghost" label="Cancel" @click="awaitingCode = false" />
+        </div>
+        <button type="button" class="zc-tap mt-2 text-xs text-primary" :disabled="otpBusy" @click="resendCode">
+          Resend code
+        </button>
+      </div>
+    </div>
+  </Teleport>
 </template>
