@@ -71,11 +71,17 @@ export function useAuth() {
     if (error) throw error
   }
 
-  // --- Password recovery -------------------------------------------------
-  /** Email a password-reset link that returns the user to /reset. */
-  async function requestPasswordReset(email: string) {
-    const redirectTo = `${window.location.origin}/reset`
-    const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo })
+  // --- Password recovery (code-based, no link) ---------------------------
+  /**
+   * Email a one-time code to an EXISTING user so they can reset their password.
+   * Reuses the same OTP email as signup (shouldCreateUser:false so it never
+   * creates an account here). Verify with verifyEmailOtp, then setPassword.
+   */
+  async function sendResetOtp(email: string) {
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: { shouldCreateUser: false },
+    })
     if (error) throw error
   }
 
@@ -88,6 +94,6 @@ export function useAuth() {
     sendEmailOtp,
     verifyEmailOtp,
     setPassword,
-    requestPasswordReset,
+    sendResetOtp,
   }
 }
