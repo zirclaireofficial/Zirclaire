@@ -51,6 +51,15 @@ export default defineNuxtConfig({
     },
   },
 
+  // Sentry module options. On Vercel's serverless functions the default
+  // `--import` bootstrap isn't applied, so server-side errors go uncaptured.
+  // 'top-level-import' injects the Sentry server config at the top of the
+  // server entry instead — this works on Vercel and captures server errors
+  // (native Node instrumentation only; DB/ORM tracing isn't included).
+  sentry: {
+    autoInjectServerSentry: 'top-level-import',
+  },
+
   // Sentry uploads source maps at build time (optional). Left minimal for now;
   // add org/project/authToken here later if you want readable stack traces.
   sourcemap: { client: 'hidden' },
