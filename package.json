@@ -13,6 +13,7 @@
     "@nuxt/ui": "^4.10.0",
     "@nuxtjs/cloudinary": "^4.0.0",
     "@nuxtjs/supabase": "^2.0.9",
+    "@sentry/nuxt": "^10.70.0",
     "@tiptap/core": "^3.28.0",
     "@tiptap/extension-bubble-menu": "^3.28.0",
     "@tiptap/extension-code": "^3.28.0",
