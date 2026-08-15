@@ -3,7 +3,7 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
 
-  modules: ['@nuxtjs/supabase', '@nuxtjs/cloudinary', '@nuxt/ui', '@sentry/nuxt/module'],
+  modules: ['@nuxtjs/supabase', '@nuxtjs/cloudinary', '@nuxt/ui', '@sentry/nuxt/module', '@vercel/speed-insights/nuxt'],
 
   css: ['~/assets/css/main.css'],
 
