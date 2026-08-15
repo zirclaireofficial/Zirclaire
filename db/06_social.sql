@@ -208,4 +208,7 @@ create view feed_posts with (security_invoker = on) as
 alter table posts          enable row level security;
 alter table post_media     enable row level security;
 alter table comments       enable row level security;
-alter ta
+alter table comment_media  enable row level security;
+alter table post_favorites enable row level security;
+alter table post_shares    enable row level security;
+alter table reports        enable row level security;

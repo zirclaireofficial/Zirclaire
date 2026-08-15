@@ -94,4 +94,7 @@ create view public_profiles as
 grant select on public_profiles to anon, authenticated;
 
 -- ---------------------------------------------------------------------
--- member_
+-- member_id_counters: no client policy, by design. RLS is enabled
+-- (deny-all); the counter rows are written only by the assign_member_id()
+-- SECURITY DEFINER trigger during KYC approval, never directly by a client.
+-- ---------------------------------------------------------------------

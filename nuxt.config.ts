@@ -3,7 +3,7 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
 
-  modules: ['@nuxtjs/supabase', '@nuxtjs/cloudinary', '@nuxt/ui'],
+  modules: ['@nuxtjs/supabase', '@nuxtjs/cloudinary', '@nuxt/ui', '@sentry/nuxt/module'],
 
   css: ['~/assets/css/main.css'],
 
@@ -41,5 +41,17 @@ export default defineNuxtConfig({
     cloudinaryApiSecret: process.env.CLOUDINARY_API_SECRET,
     // DeepSeek — called only from /server routes, never exposed to the client.
     deepseekApiKey: process.env.DEEPSEEK_API_KEY,
+
+    public: {
+      // Sentry DSN is a public (client-safe) value; the browser needs it to
+      // report errors. Set NUXT_PUBLIC_SENTRY_DSN locally (.env) and on Vercel.
+      sentry: {
+        dsn: process.env.NUXT_PUBLIC_SENTRY_DSN,
+      },
+    },
   },
+
+  // Sentry uploads source maps at build time (optional). Left minimal for now;
+  // add org/project/authToken here later if you want readable stack traces.
+  sourcemap: { client: 'hidden' },
 })
