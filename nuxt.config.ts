@@ -48,6 +48,16 @@ export default defineNuxtConfig({
       sentry: {
         dsn: process.env.NUXT_PUBLIC_SENTRY_DSN,
       },
+      // Payment mode, surfaced to the UI so it can show a Sandbox/Simulated
+      // badge (testers must never think real money moved when it didn't).
+      //   'simulator' -> no gateway; 'sandbox' -> Xendit test keys;
+      //   'live'      -> Xendit production keys (real money).
+      paymentsMode:
+        process.env.PAYMENTS_PROVIDER !== 'xendit'
+          ? 'simulator'
+          : process.env.XENDIT_SECRET_KEY?.startsWith('xnd_production')
+            ? 'live'
+            : 'sandbox',
     },
   },
 

@@ -29,6 +29,15 @@ export function useProjectActions() {
     })
   }
 
+  /** Gateway funding: creates a Xendit invoice (returns a pay URL to open),
+   *  or auto-funds in simulator mode. Funding is confirmed by the webhook. */
+  function createInvoice(projectId: string, returnUrl?: string) {
+    return authedFetch<{ mode: string; invoiceUrl?: string; funded?: boolean }>(
+      '/api/payments/create-invoice',
+      { method: 'POST', body: { projectId, returnUrl } },
+    )
+  }
+
   /** Award the job to one applicant. The rest are rejected in the same
    *  transaction by the award_applicant function. */
   function awardApplicant(projectId: string, applicationId: string) {
@@ -45,5 +54,5 @@ export function useProjectActions() {
     })
   }
 
-  return { createProject, claimPayment, awardApplicant, fundAndLaunch }
+  return { createProject, claimPayment, createInvoice, awardApplicant, fundAndLaunch }
 }

@@ -20,8 +20,13 @@ const props = defineProps<{
 
 const emit = defineEmits<{ paid: [reference: string]; cancel: [] }>()
 
-const { claimPayment } = useProjectActions()
+const { claimPayment, createInvoice } = useProjectActions()
 const toast = useToast()
+
+// Payment mode decides the flow: 'sandbox'/'live' -> real Xendit hosted page;
+// 'simulator' -> the old instant fake-pay (kept as local/dev fallback).
+const mode = useRuntimeConfig().public.paymentsMode as 'simulator' | 'sandbox' | 'live'
+const isGateway = computed(() => mode === 'sandbox' || mode === 'live')
 
 const method = ref<'touch_n_go' | 'binance'>('touch_n_go')
 const paying = ref(false)
@@ -29,11 +34,22 @@ const paying = ref(false)
 async function pay() {
   paying.value = true
   try {
-    await new Promise((r) => setTimeout(r, 1500)) // simulate the gateway
-    const prefix = method.value === 'binance' ? 'BNB-' : 'TNG-'
-    const reference = prefix + Math.random().toString(36).slice(2, 8).toUpperCase()
-    await claimPayment(props.project.id, method.value, reference)
-    emit('paid', reference)
+    if (isGateway.value) {
+      // Create a Xendit invoice and send the user to the hosted pay page.
+      // Funding is confirmed by the webhook, not here.
+      const res = await createInvoice(props.project.id, window.location.href)
+      if (res.invoiceUrl) {
+        window.location.href = res.invoiceUrl
+        return
+      }
+      emit('paid', 'GATEWAY') // simulator fallback returned funded
+    } else {
+      await new Promise((r) => setTimeout(r, 1200)) // simulate the gateway
+      const prefix = method.value === 'binance' ? 'BNB-' : 'TNG-'
+      const reference = prefix + Math.random().toString(36).slice(2, 8).toUpperCase()
+      await claimPayment(props.project.id, method.value, reference)
+      emit('paid', reference)
+    }
   } catch (e) {
     const err = e as { data?: { statusMessage?: string }; message?: string }
     toast.add({ title: 'Payment failed', description: err?.data?.statusMessage ?? err?.message, color: 'error' })
@@ -56,6 +72,8 @@ async function pay() {
       </p>
     </div>
 
+    <PaymentModeBadge />
+
     <div class="rounded-xl border border-stone-200 bg-stone-50 p-4 dark:border-stone-800 dark:bg-stone-800/40">
       <div class="flex items-center justify-between gap-3">
         <div class="min-w-0">
@@ -64,12 +82,12 @@ async function pay() {
         </div>
         <div class="text-right">
           <div class="text-[11px] uppercase tracking-wide text-stone-400">Amount due</div>
-          <div class="text-2xl font-semibold tabular-nums">${{ project.budget_usd }}</div>
+          <div class="text-2xl font-semibold tabular-nums">RM {{ project.budget_usd }}</div>
         </div>
       </div>
     </div>
 
-    <div>
+    <div v-if="!isGateway">
       <p class="mb-2 text-sm font-medium">Pay with</p>
       <div class="grid grid-cols-2 gap-3">
         <button
@@ -94,7 +112,7 @@ async function pay() {
     </div>
 
     <UButton color="primary" block size="lg" :loading="paying" class="zc-tap" @click="pay">
-      {{ paying ? 'Processing…' : `Pay $${project.budget_usd}` }}
+      {{ paying ? 'Processing…' : isGateway ? `Pay RM ${project.budget_usd} securely` : `Pay RM ${project.budget_usd}` }}
     </UButton>
 
     <UButton
@@ -109,7 +127,8 @@ async function pay() {
 
     <p class="flex items-center justify-center gap-1.5 text-center text-xs text-stone-400">
       <UIcon name="i-lucide-lock" class="size-3" />
-      Simulated payment — no real charge.
+      <template v-if="isGateway">You'll be taken to a secure payment page.</template>
+      <template v-else>Simulated payment — no real charge.</template>
     </p>
   </div>
 </template>
