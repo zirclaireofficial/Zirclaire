@@ -15,7 +15,15 @@ onBeforeUnmount(() => cleanup?.())
 async function openItem(n: { id: string; link: string | null }) {
   await markRead(n.id)
   open.value = false
-  if (n.link) await navigateTo(n.link)
+  const link = n.link?.trim()
+  if (!link) return
+  // Only follow real links: internal paths ('/...') or full URLs. Anything
+  // else (e.g. stray text) is ignored so we never 404 on a bad link.
+  if (link.startsWith('/')) {
+    await navigateTo(link)
+  } else if (/^https?:\/\//i.test(link)) {
+    window.open(link, '_blank', 'noopener')
+  }
 }
 
 function ago(iso: string) {
