@@ -14,6 +14,12 @@ export interface AppNotification {
   created_at: string
 }
 
+// One shared realtime channel for the whole app, reference-counted — several
+// bells (desktop + mobile) can subscribe without opening duplicate channels
+// (Supabase throws if the same channel name is subscribed twice).
+let sharedChannel: ReturnType<ReturnType<typeof useSupabaseClient>['channel']> | null = null
+let subscriberCount = 0
+
 export function useNotifications() {
   // No Database generic: the `notifications` table may not be in the generated
   // types yet, and this table is simple enough not to need them.
@@ -38,19 +44,33 @@ export function useNotifications() {
     items.value = (data as AppNotification[]) ?? []
   }
 
-  /** Subscribe to new notifications for this user. Returns a cleanup fn. */
+  /** Subscribe to new notifications for this user. Returns a cleanup fn.
+   *  Uses a single shared channel across all callers (reference-counted). */
   function subscribe(): () => void {
     const id = uid()
     if (!id) return () => {}
-    const channel = supabase
-      .channel(`notifications:${id}`)
-      .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${id}` },
-        (payload) => { items.value = [payload.new as AppNotification, ...items.value] },
-      )
-      .subscribe()
-    return () => { supabase.removeChannel(channel) }
+    subscriberCount++
+    if (!sharedChannel) {
+      try {
+        sharedChannel = supabase
+          .channel(`notifications:${id}`)
+          .on(
+            'postgres_changes',
+            { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${id}` },
+            (payload) => { items.value = [payload.new as AppNotification, ...items.value] },
+          )
+          .subscribe()
+      } catch {
+        sharedChannel = null // realtime hiccup shouldn't crash the app
+      }
+    }
+    return () => {
+      subscriberCount = Math.max(0, subscriberCount - 1)
+      if (subscriberCount === 0 && sharedChannel) {
+        supabase.removeChannel(sharedChannel)
+        sharedChannel = null
+      }
+    }
   }
 
   async function markRead(id: string) {
