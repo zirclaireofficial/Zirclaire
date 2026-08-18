@@ -110,6 +110,16 @@ export function getPayout(id: string): Promise<XenditPayout> {
   return xenditFetch<XenditPayout>(`/v2/payouts/${id}`)
 }
 
+// ---- Balance ----------------------------------------------------------
+export interface XenditBalance {
+  balance: number
+}
+
+/** The live balance in the Xendit account (CASH). MYR in this setup. */
+export function getBalance(): Promise<XenditBalance> {
+  return xenditFetch<XenditBalance>('/balance')
+}
+
 // ---- Webhook verification ---------------------------------------------
 /**
  * Verify a webhook really came from Xendit by matching the x-callback-token

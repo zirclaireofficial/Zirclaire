@@ -8,6 +8,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { serviceClient } from '../../utils/auth'
 import { verifyCallbackToken } from '../../utils/xendit'
+import { notify } from '../../utils/notify'
 
 export default defineEventHandler(async (event) => {
   if (!verifyCallbackToken(event)) {
@@ -69,9 +70,9 @@ async function handleInvoicePaid(db: SupabaseClient, body: Record<string, any>) 
     .update({ status: 'verified', xendit_status: body.status, paid_at: new Date().toISOString() })
     .eq('id', pay.id)
 
-  // Only fund if still awaiting funding — guards against any double-processing.
+  // Only fund an approved project — guards against any double-processing.
   const { data: project } = await db.from('projects').select('*').eq('id', pay.project_id).maybeSingle()
-  if (!project || project.status !== 'submitted') return
+  if (!project || project.status !== 'approved') return
 
   await db.rpc('fund_project', {
     p_project: project.id,
@@ -81,6 +82,13 @@ async function handleInvoicePaid(db: SupabaseClient, body: Record<string, any>) 
   const mins = project.timeline_minutes ?? 2880
   const deadline = new Date(Date.now() + mins * 60_000).toISOString()
   await db.rpc('push_project_live', { p_project: project.id, p_deadline: deadline })
+
+  await notify(db, project.requester_id, {
+    type: 'payment_received',
+    title: 'Payment received',
+    body: `"${project.title}" is funded and now live for providers to apply.`,
+    link: '/projects',
+  })
 }
 
 // payout SUCCEEDED/FAILED -> update the payouts row (used in Phase 2).

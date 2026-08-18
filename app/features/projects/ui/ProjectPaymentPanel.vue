@@ -20,7 +20,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{ paid: [reference: string]; cancel: [] }>()
 
-const { claimPayment, createInvoice } = useProjectActions()
+const { createInvoice } = useProjectActions()
 const toast = useToast()
 
 // Payment mode decides the flow: 'sandbox'/'live' -> real Xendit hosted page;
@@ -34,22 +34,14 @@ const paying = ref(false)
 async function pay() {
   paying.value = true
   try {
-    if (isGateway.value) {
-      // Create a Xendit invoice and send the user to the hosted pay page.
-      // Funding is confirmed by the webhook, not here.
-      const res = await createInvoice(props.project.id, window.location.href)
-      if (res.invoiceUrl) {
-        window.location.href = res.invoiceUrl
-        return
-      }
-      emit('paid', 'GATEWAY') // simulator fallback returned funded
-    } else {
-      await new Promise((r) => setTimeout(r, 1200)) // simulate the gateway
-      const prefix = method.value === 'binance' ? 'BNB-' : 'TNG-'
-      const reference = prefix + Math.random().toString(36).slice(2, 8).toUpperCase()
-      await claimPayment(props.project.id, method.value, reference)
-      emit('paid', reference)
+    // Both modes go through create-invoice. Gateway returns a hosted pay URL
+    // (funding confirmed later by the webhook); simulator funds instantly.
+    const res = await createInvoice(props.project.id, window.location.href)
+    if (res.invoiceUrl) {
+      window.location.href = res.invoiceUrl
+      return
     }
+    emit('paid', 'SIMULATED')
   } catch (e) {
     const err = e as { data?: { statusMessage?: string }; message?: string }
     toast.add({ title: 'Payment failed', description: err?.data?.statusMessage ?? err?.message, color: 'error' })

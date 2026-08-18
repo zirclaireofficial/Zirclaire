@@ -29,9 +29,10 @@ function round2(n: number): number {
 // they abandoned. Pure rule — no DB, no framework.
 
 export type FundingState =
-  | 'awaiting_payment' // created, but the requester never paid (resumable)
-  | 'awaiting_verification' // requester paid, admin hasn't verified yet
-  | 'rejected' // admin rejected the claim — requester must pay again
+  | 'awaiting_approval' // submitted; an admin hasn't approved it yet (can't pay)
+  | 'awaiting_payment' // approved — the requester must now pay (resumable)
+  | 'awaiting_verification' // requester paid, confirmation in flight
+  | 'rejected' // a payment was rejected — requester must pay again
   | 'funded' // money is in escrow; project has moved on
 
 export interface PaymentClaim {
@@ -55,12 +56,13 @@ export function latestClaim(p: ProjectWithPayments): PaymentClaim | null {
 }
 
 export function fundingStateOf(p: ProjectWithPayments): FundingState {
-  if (p.status !== 'submitted') return 'funded'
+  // Approve-before-pay: submitted = waiting on the admin; approved = pay now.
+  if (p.status === 'submitted') return 'awaiting_approval'
+  if (p.status !== 'approved') return 'funded'
   const claim = latestClaim(p)
-  if (!claim) return 'awaiting_payment'
-  if (claim.status === 'rejected') return 'rejected'
-  if (claim.status === 'verified') return 'awaiting_verification'
-  return 'awaiting_verification'
+  if (claim?.status === 'rejected') return 'rejected'
+  if (claim?.status === 'verified') return 'awaiting_verification' // paid, funding in flight
+  return 'awaiting_payment'
 }
 
 /** Can the requester (re)open the payment step for this project? */

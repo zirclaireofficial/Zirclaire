@@ -54,5 +54,14 @@ export function useProjectActions() {
     })
   }
 
-  return { createProject, claimPayment, createInvoice, awardApplicant, fundAndLaunch }
+  /** Admin approves a submitted project (approve-before-pay). Notifies the
+   *  requester, who can then pay. No money moves here. */
+  function approveProject(projectId: string) {
+    return authedFetch<{ project: Project }>('/api/projects/approve', {
+      method: 'POST',
+      body: { projectId },
+    })
+  }
+
+  return { createProject, claimPayment, createInvoice, awardApplicant, fundAndLaunch, approveProject }
 }

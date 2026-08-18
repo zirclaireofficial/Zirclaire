@@ -4,21 +4,24 @@
 // nothing is ambiguous. All data comes from master-only server endpoints.
 
 import { useMaster } from '~/features/master/application/useMaster'
-import type { MasterStats, AuditEntry } from '~/features/master/application/useMaster'
+import type { MasterStats, AuditEntry, MasterFinancials } from '~/features/master/application/useMaster'
 
-const { stats, audit, createAdmin } = useMaster()
+const { stats, audit, financials, sendNotification, createAdmin } = useMaster()
 const toast = useToast()
+const supabase = useSupabaseClient()
 
 const data = ref<MasterStats | null>(null)
 const entries = ref<AuditEntry[]>([])
+const fin = ref<MasterFinancials | null>(null)
 const loading = ref(true)
 
 async function load() {
   loading.value = true
   try {
-    const [s, a] = await Promise.all([stats(), audit(120)])
+    const [s, a, f] = await Promise.all([stats(), audit(120), financials()])
     data.value = s
     entries.value = a.entries
+    fin.value = f
   } catch (e) {
     const err = e as { data?: { statusMessage?: string }; message?: string }
     toast.add({ title: 'Could not load the console', description: err?.data?.statusMessage ?? err?.message, color: 'error' })
@@ -30,6 +33,18 @@ onMounted(load)
 
 const money = (n: number | undefined) => (n === undefined ? '—' : `$${Number(n).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`)
 const num = (n: number | undefined) => (n === undefined ? '—' : n.toLocaleString())
+const rm = (n: number | null | undefined) => (n === null || n === undefined ? '—' : `RM ${Number(n).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`)
+const shortId = (id: string | null) => (id ? id.slice(0, 8) : '—')
+function payColor(status: string) {
+  if (['verified', 'paid', 'PAID', 'SETTLED'].includes(status)) return 'success'
+  if (['failed', 'rejected'].includes(status)) return 'error'
+  if (['processing', 'pending', 'claimed', 'held'].includes(status)) return 'warning'
+  return 'neutral'
+}
+function shortTime(iso: string) {
+  const d = new Date(iso)
+  return `${d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })} ${d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}`
+}
 
 // Create-admin form
 const showCreate = ref(false)
@@ -56,6 +71,75 @@ async function submitAdmin() {
   }
 }
 
+// --- Broadcast notifications ---
+type SelUser = { id: string; full_name: string | null; member_id: string | null }
+const showBroadcast = ref(false)
+const bc = reactive({
+  audience: 'all' as 'all' | 'admins' | 'providers' | 'requesters' | 'selected',
+  title: '',
+  body: '',
+  link: '',
+})
+const audienceItems = [
+  { label: 'All users', value: 'all' },
+  { label: 'All admins', value: 'admins' },
+  { label: 'All providers', value: 'providers' },
+  { label: 'All requesters', value: 'requesters' },
+  { label: 'Specific users', value: 'selected' },
+]
+const selectedUsers = ref<SelUser[]>([])
+const userQuery = ref('')
+const userResults = ref<SelUser[]>([])
+const sending = ref(false)
+let searchTimer: ReturnType<typeof setTimeout> | undefined
+
+function onUserSearch() {
+  clearTimeout(searchTimer)
+  searchTimer = setTimeout(searchUsers, 250)
+}
+async function searchUsers() {
+  const q = userQuery.value.trim()
+  if (!q) { userResults.value = []; return }
+  const { data } = await supabase
+    .from('profiles')
+    .select('id, full_name, member_id')
+    .or(`full_name.ilike.%${q}%,member_id.ilike.%${q}%`)
+    .limit(8)
+  userResults.value = ((data as SelUser[]) ?? []).filter((u) => !selectedUsers.value.some((s) => s.id === u.id))
+}
+function addUser(u: SelUser) {
+  selectedUsers.value.push(u)
+  userQuery.value = ''
+  userResults.value = []
+}
+function removeUser(id: string) {
+  selectedUsers.value = selectedUsers.value.filter((u) => u.id !== id)
+}
+async function sendBroadcast() {
+  if (!bc.title.trim()) return toast.add({ title: 'Add a title', color: 'warning' })
+  if (bc.audience === 'selected' && !selectedUsers.value.length) {
+    return toast.add({ title: 'Pick at least one user', color: 'warning' })
+  }
+  sending.value = true
+  try {
+    const res = await sendNotification({
+      audience: bc.audience,
+      userIds: bc.audience === 'selected' ? selectedUsers.value.map((u) => u.id) : undefined,
+      title: bc.title.trim(),
+      body: bc.body.trim() || undefined,
+      link: bc.link.trim() || undefined,
+    })
+    toast.add({ title: 'Notification sent', description: `Delivered to ${res.sent} user(s).`, color: 'success' })
+    bc.title = ''; bc.body = ''; bc.link = ''; selectedUsers.value = []
+    showBroadcast.value = false
+  } catch (e) {
+    const err = e as { data?: { statusMessage?: string }; message?: string }
+    toast.add({ title: 'Could not send', description: err?.data?.statusMessage ?? err?.message, color: 'error' })
+  } finally {
+    sending.value = false
+  }
+}
+
 function actionColor(action: string) {
   if (action.includes('reject') || action.includes('remove') || action.includes('suspend') || action.includes('unpublish')) return 'error'
   if (action.includes('restore') || action.includes('unsuspend') || action.includes('reopen')) return 'warning'
@@ -78,6 +162,73 @@ const projectStatuses = computed(() => Object.entries(data.value?.projects.bySta
         <h1 class="font-serif text-2xl leading-tight">Oversight console</h1>
       </div>
     </div>
+
+    <!-- BROADCAST -->
+    <section>
+      <div class="mb-3 flex items-center justify-between">
+        <div class="flex items-center gap-1.5">
+          <h2 class="text-sm font-semibold uppercase tracking-wide text-stone-400">Send notification</h2>
+          <UTooltip text="Push an in-site notification to everyone, a role group, or specific users — delivered instantly to their bell.">
+            <UIcon name="i-lucide-info" class="size-3.5 text-stone-400" />
+          </UTooltip>
+        </div>
+        <UButton
+          size="sm"
+          :color="showBroadcast ? 'neutral' : 'primary'"
+          :variant="showBroadcast ? 'ghost' : 'solid'"
+          :icon="showBroadcast ? 'i-lucide-x' : 'i-lucide-megaphone'"
+          :label="showBroadcast ? 'Cancel' : 'Compose'"
+          class="zc-tap"
+          @click="showBroadcast = !showBroadcast"
+        />
+      </div>
+
+      <div v-if="showBroadcast" class="space-y-3 rounded-xl border border-stone-200 p-4 dark:border-stone-800">
+        <div class="grid gap-3 sm:grid-cols-2">
+          <UFormField label="Audience">
+            <USelect v-model="bc.audience" :items="audienceItems" class="w-full" />
+          </UFormField>
+          <UFormField label="Link (optional)" hint="Where clicking it goes, e.g. /projects">
+            <UInput v-model="bc.link" placeholder="/projects" class="w-full" />
+          </UFormField>
+        </div>
+
+        <div v-if="bc.audience === 'selected'">
+          <UFormField label="Recipients">
+            <UInput v-model="userQuery" placeholder="Search by name or member ID" class="w-full" @input="onUserSearch" />
+          </UFormField>
+          <div v-if="userResults.length" class="mt-1 overflow-hidden rounded-lg border border-stone-200 dark:border-stone-800">
+            <button
+              v-for="u in userResults"
+              :key="u.id"
+              type="button"
+              class="flex w-full items-center justify-between px-3 py-2 text-left text-sm hover:bg-stone-50 dark:hover:bg-stone-800/50"
+              @click="addUser(u)"
+            >
+              <span>{{ u.full_name || 'Unnamed' }}</span>
+              <span class="font-mono text-xs text-stone-400">{{ u.member_id }}</span>
+            </button>
+          </div>
+          <div v-if="selectedUsers.length" class="mt-2 flex flex-wrap gap-1.5">
+            <span v-for="u in selectedUsers" :key="u.id" class="flex items-center gap-1 rounded-full bg-primary/10 px-2 py-1 text-xs text-primary">
+              {{ u.full_name || u.member_id }}
+              <button type="button" class="zc-tap" aria-label="Remove" @click="removeUser(u.id)">
+                <UIcon name="i-lucide-x" class="size-3" />
+              </button>
+            </span>
+          </div>
+        </div>
+
+        <UFormField label="Title">
+          <UInput v-model="bc.title" placeholder="e.g. Scheduled maintenance tonight" class="w-full" />
+        </UFormField>
+        <UFormField label="Message (optional)">
+          <UTextarea v-model="bc.body" :rows="2" placeholder="Details…" class="w-full" />
+        </UFormField>
+
+        <UButton color="primary" :loading="sending" icon="i-lucide-send" label="Send notification" class="zc-tap" @click="sendBroadcast" />
+      </div>
+    </section>
 
     <!-- FINANCES -->
     <section>
@@ -123,6 +274,65 @@ const projectStatuses = computed(() => Object.entries(data.value?.projects.bySta
       <p class="mt-2 text-xs text-stone-400">
         Royalty store: {{ money(data?.royalty.sales) }} in sales · {{ money(data?.royalty.commission) }} commission.
       </p>
+    </section>
+
+    <!-- GATEWAY & PAYMENT LOGS -->
+    <section>
+      <div class="mb-3 flex items-center gap-1.5">
+        <h2 class="text-sm font-semibold uppercase tracking-wide text-stone-400">Gateway &amp; payment logs</h2>
+        <UTooltip text="Live money movement through the payment gateway (Xendit): the real account balance, plus every incoming payment and outgoing payout.">
+          <UIcon name="i-lucide-info" class="size-3.5 text-stone-400" />
+        </UTooltip>
+      </div>
+
+      <!-- Live Xendit balance -->
+      <div class="rounded-xl border border-stone-200 p-4 dark:border-stone-800 sm:max-w-sm">
+        <div class="flex items-center justify-between">
+          <span class="text-xs text-stone-500 dark:text-stone-400">Live Xendit balance</span>
+          <UBadge :color="fin?.mode === 'xendit' ? 'primary' : 'neutral'" variant="soft" size="sm">
+            {{ fin?.mode === 'xendit' ? 'Gateway live' : 'Simulator' }}
+          </UBadge>
+        </div>
+        <div class="mt-1 text-2xl font-semibold tabular-nums">{{ rm(fin?.xenditBalance) }}</div>
+        <p v-if="fin?.xenditError" class="mt-1 text-xs text-error">{{ fin.xenditError }}</p>
+        <p v-else-if="fin && fin.mode !== 'xendit'" class="mt-1 text-xs text-stone-400">Gateway off (simulator) — no live balance.</p>
+      </div>
+
+      <!-- Incoming / Outgoing logs -->
+      <div class="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <div>
+          <p class="mb-2 flex items-center gap-1 text-xs font-medium text-stone-500 dark:text-stone-400">
+            <UIcon name="i-lucide-arrow-down-left" class="size-3.5 text-success" /> Incoming — funding
+          </p>
+          <div class="max-h-72 overflow-y-auto rounded-xl border border-stone-200 dark:border-stone-800">
+            <p v-if="!fin?.incoming.length" class="p-3 text-sm text-stone-400">No payments yet.</p>
+            <div v-for="p in fin?.incoming" :key="p.id" class="flex items-center justify-between gap-2 border-b border-stone-100 p-2.5 text-sm last:border-0 dark:border-stone-800">
+              <div class="min-w-0">
+                <div class="font-medium tabular-nums">{{ rm(p.amount_usd) }}</div>
+                <div class="truncate text-[11px] text-stone-400">#{{ shortId(p.project_id) }} · {{ shortTime(p.created_at) }}</div>
+              </div>
+              <UBadge :color="(payColor(p.xendit_status ?? p.status) as any)" variant="soft" size="sm">{{ p.xendit_status ?? p.status }}</UBadge>
+            </div>
+          </div>
+        </div>
+        <div>
+          <p class="mb-2 flex items-center gap-1 text-xs font-medium text-stone-500 dark:text-stone-400">
+            <UIcon name="i-lucide-arrow-up-right" class="size-3.5 text-primary" /> Outgoing — payouts
+          </p>
+          <div class="max-h-72 overflow-y-auto rounded-xl border border-stone-200 dark:border-stone-800">
+            <p v-if="!fin?.outgoing.length" class="p-3 text-sm text-stone-400">No payouts yet.</p>
+            <div v-for="p in fin?.outgoing" :key="p.id" class="flex items-center justify-between gap-2 border-b border-stone-100 p-2.5 text-sm last:border-0 dark:border-stone-800">
+              <div class="min-w-0">
+                <div class="font-medium tabular-nums">{{ rm(p.amount_myr) }}</div>
+                <div class="truncate text-[11px] text-stone-400">
+                  #{{ shortId(p.project_id) }} · {{ shortTime(p.created_at) }}<span v-if="p.failed_reason" class="text-error"> · {{ p.failed_reason }}</span>
+                </div>
+              </div>
+              <UBadge :color="(payColor(p.status) as any)" variant="soft" size="sm">{{ p.status }}</UBadge>
+            </div>
+          </div>
+        </div>
+      </div>
     </section>
 
     <!-- MEMBERS -->

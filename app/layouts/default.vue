@@ -33,6 +33,7 @@ const isSuspended = computed(() => me.value?.is_suspended === true)
           </NuxtLink>
           <div class="flex items-center gap-1">
             <ShellThemeToggle />
+            <ShellNotificationBell v-if="user" />
             <!-- Inbox lives here now; sign out moved to the profile page. -->
             <UButton
               v-if="user"

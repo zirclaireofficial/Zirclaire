@@ -38,10 +38,10 @@ onMounted(load)
 const resuming = ref<ProjectWithPayments | null>(null)
 const resumeIsRetry = computed(() => !!resuming.value && fundingStateOf(resuming.value) === 'rejected')
 
-function onResumePaid(reference: string) {
+function onResumePaid() {
   toast.add({
-    title: 'Payment submitted',
-    description: `Reference ${reference}. The admin will verify it shortly.`,
+    title: 'Payment complete',
+    description: 'Your project is being funded and will go live shortly.',
     color: 'success',
   })
   resuming.value = null
@@ -91,6 +91,7 @@ const statusColor = (s: string) =>
 
 function statusLabel(p: ProjectWithPayments) {
   const f = fundingStateOf(p)
+  if (f === 'awaiting_approval') return 'Awaiting approval'
   if (f === 'awaiting_payment') return 'Payment due'
   if (f === 'awaiting_verification') return 'Verifying payment'
   if (f === 'rejected') return 'Payment rejected'
@@ -99,6 +100,7 @@ function statusLabel(p: ProjectWithPayments) {
 
 function labelColor(p: ProjectWithPayments) {
   const f = fundingStateOf(p)
+  if (f === 'awaiting_approval') return 'neutral'
   if (f === 'awaiting_payment') return 'warning'
   if (f === 'rejected') return 'error'
   if (f === 'awaiting_verification') return 'neutral'

@@ -70,17 +70,20 @@ function isActive(to: string) {
 
     <div class="mt-auto flex items-center justify-between border-t border-stone-200 px-1 pt-3 dark:border-stone-800">
       <ShellThemeToggle />
-      <!-- Inbox lives here now; sign out moved to the profile page. -->
-      <UButton
-        v-if="user"
-        to="/messages"
-        icon="i-lucide-message-square"
-        color="neutral"
-        variant="ghost"
-        size="sm"
-        label="Inbox"
-      />
-      <UButton v-else to="/login" color="primary" size="sm" label="Log in" class="zc-tap" />
+      <div class="flex items-center gap-1">
+        <!-- Notifications + inbox; sign out moved to the profile page. -->
+        <ShellNotificationBell v-if="user" />
+        <UButton
+          v-if="user"
+          to="/messages"
+          icon="i-lucide-message-square"
+          color="neutral"
+          variant="ghost"
+          size="sm"
+          label="Inbox"
+        />
+        <UButton v-else to="/login" color="primary" size="sm" label="Log in" class="zc-tap" />
+      </div>
     </div>
   </aside>
 </template>

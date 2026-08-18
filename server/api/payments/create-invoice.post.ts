@@ -13,8 +13,8 @@ export default defineEventHandler(async (event) => {
   if (!projectId) throw createError({ statusCode: 400, statusMessage: 'projectId is required' })
 
   const { project } = await requireProjectOwner(event, projectId)
-  if (project.status !== 'submitted') {
-    throw createError({ statusCode: 400, statusMessage: 'This project is not awaiting funding' })
+  if (project.status !== 'approved') {
+    throw createError({ statusCode: 400, statusMessage: 'This project is not approved for payment yet' })
   }
 
   const db = serviceClient(event)

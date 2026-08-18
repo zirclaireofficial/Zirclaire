@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { useProjectActions } from '~/features/projects/application/useProjectActions'
 import { useMediaUpload } from '~/shared/lib/useMediaUpload'
-import ProjectPaymentPanel from './ProjectPaymentPanel.vue'
-import type { Database, Project } from '~/shared/types/database'
+import type { Database } from '~/shared/types/database'
 
 const { createProject } = useProjectActions()
 const { upload } = useMediaUpload()
@@ -22,15 +21,9 @@ const subcategoryId = ref<number | null>(null)
 const attachment = ref<File | null>(null)
 const loading = ref(false)
 
-// payment step (the panel itself lives in ProjectPaymentPanel.vue)
-const createdProject = ref<Project | null>(null)
-const paid = ref(false)
-const reference = ref('')
-
-function onPaid(ref_: string) {
-  reference.value = ref_
-  paid.value = true
-}
+// After submission the project awaits admin approval (approve-before-pay).
+// The requester pays only once it's approved (they're notified).
+const submitted = ref(false)
 
 const categories = ref<{ label: string; value: number }[]>([])
 const allSubs = ref<{ id: number; name: string; category_id: number }[]>([])
@@ -63,7 +56,7 @@ async function submit() {
       const up = await upload(attachment.value, 'project-attachment')
       attachments = [{ media_url: up.publicId, media_type: 'pdf' }]
     }
-    const res = await createProject({
+    await createProject({
       title: form.title.trim(),
       description: form.description.trim() || null,
       subcategory_id: subcategoryId.value,
@@ -72,7 +65,7 @@ async function submit() {
       timeline_minutes: timelineMinutes > 0 ? timelineMinutes : null,
       attachments,
     })
-    createdProject.value = res.project // → payment step
+    submitted.value = true // → awaits admin approval, then payment
   } catch (e) {
     const err = e as { data?: { statusMessage?: string }; message?: string }
     toast.add({ title: 'Could not create project', description: err?.data?.statusMessage ?? err?.message, color: 'error' })
@@ -83,20 +76,17 @@ async function submit() {
 </script>
 
 <template>
-  <!-- 3. Paid — awaiting admin verification -->
-  <div v-if="paid" class="space-y-3 py-14 text-center">
+  <!-- 2. Submitted — awaiting admin approval -->
+  <div v-if="submitted" class="space-y-3 py-14 text-center">
     <div class="mx-auto flex size-12 items-center justify-center rounded-full bg-success/10">
       <UIcon name="i-lucide-check" class="size-6 text-success" />
     </div>
-    <h2 class="text-lg font-semibold tracking-tight">Payment submitted</h2>
+    <h2 class="text-lg font-semibold tracking-tight">Submitted for approval</h2>
     <p class="text-sm text-stone-500 dark:text-stone-400">
-      Reference <span class="font-mono">{{ reference }}</span>. Once the admin verifies your funds, your project goes live for providers.
+      An admin will review your project. Once it's approved you'll get a notification to pay — then it goes live for providers.
     </p>
     <UButton to="/projects" color="neutral" variant="soft" label="View my projects" class="mt-1" />
   </div>
-
-  <!-- 2. Payment step (mock gateway) -->
-  <ProjectPaymentPanel v-else-if="createdProject" :project="createdProject" @paid="onPaid" />
 
   <!-- 1. The form -->
   <form v-else class="space-y-5" @submit.prevent="submit">
@@ -154,6 +144,6 @@ async function submit() {
       >
     </UFormField>
 
-    <UButton type="submit" color="primary" block size="lg" :loading="loading" label="Continue to payment" class="zc-tap" />
+    <UButton type="submit" color="primary" block size="lg" :loading="loading" label="Submit for approval" class="zc-tap" />
   </form>
 </template>

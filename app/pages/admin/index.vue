@@ -24,7 +24,7 @@ onMounted(async () => {
 
 const metrics = computed(() => [
   { to: '/admin/kyc', label: 'Pending KYC', value: stats.pendingKyc, icon: 'i-lucide-shield-check', action: true },
-  { to: '/admin/funding', label: 'Awaiting funding', value: stats.awaitingFunding, icon: 'i-lucide-banknote', action: true },
+  { to: '/admin/funding', label: 'Awaiting approval', value: stats.awaitingFunding, icon: 'i-lucide-clipboard-check', action: true },
   { to: '/admin/services', label: 'Service reviews', value: stats.pendingServices, icon: 'i-lucide-briefcase', action: true },
   { to: '/admin/royalties', label: 'Royalty reviews', value: stats.pendingRoyalties, icon: 'i-lucide-book-open-text', action: true },
 ])
@@ -76,10 +76,10 @@ const metrics = computed(() => [
 
         <NuxtLink to="/admin/funding" class="zc-card zc-card-hover zc-tap flex items-center justify-between p-4">
           <span class="flex items-center gap-3">
-            <UIcon name="i-lucide-banknote" class="size-5 text-primary" />
+            <UIcon name="i-lucide-clipboard-check" class="size-5 text-primary" />
             <span>
-              <span class="block font-medium">Fund projects</span>
-              <span class="block text-xs text-stone-500 dark:text-stone-400">Verify payments and launch</span>
+              <span class="block font-medium">Approve projects</span>
+              <span class="block text-xs text-stone-500 dark:text-stone-400">Approve so requesters can pay</span>
             </span>
           </span>
           <span class="flex items-center gap-2">
