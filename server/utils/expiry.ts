@@ -71,3 +71,44 @@ export async function runExpirySweep(db: SupabaseClient) {
 
   return summary
 }
+
+// Mature cancellation decisions whose 48h appeal window has closed with no
+// appeal: the SQL function executes the refund (if approved) and returns the
+// resolved request ids; we notify both parties of the final outcome. Users
+// never see admin/master — just the Platform's decision.
+export async function runCancellationFinalizer(db: SupabaseClient) {
+  const { data: ids } = await db.rpc('finalize_matured_cancellations', { p_hours: 48 })
+  const resolved = (ids ?? []) as string[]
+  for (const id of resolved) {
+    const { data: r } = await db
+      .from('cancellation_requests')
+      .select('status, requested_by, provider_id, projects(title)')
+      .eq('id', id)
+      .single()
+    if (!r) continue
+    const row = r as unknown as {
+      status: string; requested_by: string; provider_id: string | null; projects: { title: string } | null
+    }
+    const title = row.projects?.title ?? 'your project'
+    const approved = row.status === 'approved'
+    await notify(db, row.requested_by, {
+      type: 'cancellation_resolved',
+      title: approved ? 'Cancellation approved' : 'Cancellation declined',
+      body: approved
+        ? `Your request to cancel "${title}" was approved. 95% has been refunded.`
+        : `Your request to cancel "${title}" was declined; the project continues.`,
+      link: '/projects',
+    })
+    if (row.provider_id) {
+      await notify(db, row.provider_id, {
+        type: 'cancellation_resolved',
+        title: approved ? 'Project cancelled' : 'Project continues',
+        body: approved
+          ? `"${title}" has been cancelled by Zirclaire.`
+          : `The cancellation request on "${title}" was declined; please continue the work.`,
+        link: '/projects',
+      })
+    }
+  }
+  return { finalized: resolved.length }
+}

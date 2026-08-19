@@ -2,14 +2,20 @@
 import { useMe } from '~/features/auth/application/useMe'
 import ProjectFeed from '~/features/projects/ui/ProjectFeed.vue'
 import MyProjects from '~/features/projects/ui/MyProjects.vue'
+import MyCancellations from '~/features/cancellations/ui/MyCancellations.vue'
 
 const user = useSupabaseUser()
 const { me, load } = useMe()
 watch(user, () => load(), { immediate: true })
+
+const isParty = computed(() => me.value?.role === 'service_provider' || me.value?.role === 'service_requester')
 </script>
 
 <template>
   <div>
+    <!-- Any cancellation the current user is involved in (both roles) -->
+    <MyCancellations v-if="isParty" />
+
     <ProjectFeed v-if="me?.role === 'service_provider'" />
     <MyProjects v-else-if="me?.role === 'service_requester'" />
 

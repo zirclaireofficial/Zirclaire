@@ -26,3 +26,9 @@ export async function notify(db: SupabaseClient, userId: string, n: NotifyInput)
     link: n.link ?? null,
   })
 }
+
+/** Notify every user holding one of the given roles (e.g. staff, masters). */
+export async function notifyRoles(db: SupabaseClient, roles: string[], n: NotifyInput) {
+  const { data } = await db.from('profiles').select('id').in('role', roles)
+  for (const r of (data ?? []) as Array<{ id: string }>) await notify(db, r.id, n)
+}

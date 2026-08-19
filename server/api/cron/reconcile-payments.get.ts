@@ -17,7 +17,7 @@ import { serviceClient } from '../../utils/auth'
 import { isXendit } from '../../utils/payments'
 import { getInvoice } from '../../utils/xendit'
 import { notify } from '../../utils/notify'
-import { runExpirySweep } from '../../utils/expiry'
+import { runExpirySweep, runCancellationFinalizer } from '../../utils/expiry'
 
 export default defineEventHandler(async (event) => {
   const auth = getHeader(event, 'authorization')
@@ -30,8 +30,11 @@ export default defineEventHandler(async (event) => {
   // (A) Unclosed-project sweep — always runs.
   const expiry = await runExpirySweep(db)
 
-  // (B) Payment reconciliation — Xendit modes only.
-  if (!isXendit()) return { expiry, payments: 'skipped (simulator mode)' }
+  // (B) Mature cancellation decisions past their 48h appeal window — always runs.
+  const cancellations = await runCancellationFinalizer(db)
+
+  // (C) Payment reconciliation — Xendit modes only.
+  if (!isXendit()) return { expiry, cancellations, payments: 'skipped (simulator mode)' }
 
   // Claimed (unpaid-in-our-records) invoices whose project is still 'approved'.
   const { data: rows } = await db

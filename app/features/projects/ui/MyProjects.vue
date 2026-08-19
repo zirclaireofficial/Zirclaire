@@ -14,6 +14,10 @@ import type { ProjectWithPayments } from '~/features/projects/domain'
 import ProjectPaymentPanel from './ProjectPaymentPanel.vue'
 import ApplicantList from './ApplicantList.vue'
 import MessageButton from '~/features/messaging/ui/MessageButton.vue'
+import CancelProjectButton from '~/features/cancellations/ui/CancelProjectButton.vue'
+
+// Statuses where an SR may still request cancellation (funded through review).
+const CANCELLABLE = ['funded', 'live', 'awarded', 'in_progress', 'submitted_work', 'in_review', 'revision_requested']
 
 const { myProjectsWithPayments } = useProjects()
 const toast = useToast()
@@ -230,6 +234,18 @@ function labelColor(p: ProjectWithPayments) {
         <!-- Message the awarded provider once there is one -->
         <div v-if="p.awarded_provider_id" class="mt-3 border-t border-stone-100 pt-3 dark:border-stone-800">
           <MessageButton :project-id="p.id" block label="Message provider" />
+        </div>
+
+        <!-- Request cancellation (SR) — the flow + refund rules live server-side -->
+        <div v-if="CANCELLABLE.includes(p.status)" class="mt-2">
+          <CancelProjectButton
+            :project-id="p.id"
+            :title="p.title"
+            :budget="Number(p.budget_usd)"
+            :deadline-at="p.deadline_at"
+            :has-provider="!!p.awarded_provider_id"
+            @done="load"
+          />
         </div>
       </article>
     </div>
