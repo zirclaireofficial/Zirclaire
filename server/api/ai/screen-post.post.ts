@@ -40,19 +40,22 @@ export default defineEventHandler(async (event) => {
   if ((usage?.calls ?? 0) >= DAILY_CALL_CAP) return { skipped: true }
   await db.from('ai_usage').upsert({ day: today, calls: (usage?.calls ?? 0) + 1 }, { onConflict: 'day' })
 
-  const system = `You are a content-moderation classifier for a professional services platform. Decide whether a post violates policy.
+  const system = `You are a content-moderation classifier for a professional services platform (Zirclaire). All work and payment is meant to stay on-platform, held in escrow, with the platform taking a commission. Decide whether a post violates policy.
 
 Flag ONLY content that clearly involves any of:
 - sexual content
 - drugs
 - illegal activity
 - abuse or harassment
+- off-platform: soliciting to take the work or PAYMENT off the platform to avoid fees/escrow. Examples: "DM me and pay me directly", "I'll do it cheaper outside the platform", "contact me on WhatsApp and pay via my personal PayPal to skip the fees", sharing personal payment handles to transact off-site.
+
+IMPORTANT for "off-platform": only flag a CLEAR attempt to move the transaction or payment off-platform. Normal professional behaviour is NOT a violation: showcasing work, sharing a portfolio/website link, inviting people to "message me to discuss", or linking social profiles are all fine unless they clearly propose paying/hiring OUTSIDE the platform to avoid fees.
 
 Be conservative: if it's a normal professional post or you are unsure, do NOT flag it.
 
 Respond as JSON: {"flag": boolean, "categories": string[], "reason": string}.
 - flag: true only for a clear violation.
-- categories: which of [sexual, drugs, illegal, abuse] apply.
+- categories: which of [sexual, drugs, illegal, abuse, off-platform] apply.
 - reason: one short sentence.`
 
   let parsed: { flag?: boolean; categories?: string[]; reason?: string } = {}
