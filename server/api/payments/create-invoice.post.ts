@@ -6,7 +6,7 @@
 import { serviceClient } from '../../utils/auth'
 import { requireProjectOwner } from '../../utils/projects'
 import { isXendit, paymentMode } from '../../utils/payments'
-import { createInvoice } from '../../utils/xendit'
+import { createInvoice, getInvoice } from '../../utils/xendit'
 
 export default defineEventHandler(async (event) => {
   const { projectId, returnUrl } = await readBody(event)
@@ -35,6 +35,30 @@ export default defineEventHandler(async (event) => {
     const deadline = new Date(Date.now() + mins * 60_000).toISOString()
     const { data } = await db.rpc('push_project_live', { p_project: projectId, p_deadline: deadline })
     return { mode: 'simulator' as const, funded: true, project: data }
+  }
+
+  // ---- Idempotency: reuse an existing unpaid invoice ----
+  // A double-click or a retry-after-timeout must NOT create a second invoice
+  // (which could lead to a double charge). If this project already has a
+  // pending invoice, return it instead of making a new one.
+  const { data: existing } = await db
+    .from('payments')
+    .select('xendit_invoice_id')
+    .eq('project_id', projectId)
+    .eq('status', 'claimed')
+    .not('xendit_invoice_id', 'is', null)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+  if (existing?.xendit_invoice_id) {
+    try {
+      const inv = await getInvoice(existing.xendit_invoice_id)
+      if (inv.status === 'PENDING') {
+        return { mode: paymentMode(), invoiceUrl: inv.invoice_url, invoiceId: inv.id, reused: true }
+      }
+    } catch {
+      // Couldn't fetch it (expired/deleted) — fall through and make a fresh one.
+    }
   }
 
   // ---- Xendit: real hosted invoice; funding waits for the webhook ----

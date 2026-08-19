@@ -15,5 +15,9 @@ useSeoMeta({
 <template>
   <div class="mx-auto max-w-2xl">
     <PostList />
+    <p class="mt-8 flex items-center justify-center gap-1.5 border-t border-stone-200 pt-4 text-xs text-stone-400 dark:border-stone-800">
+      <UIcon name="i-lucide-clock" class="size-3.5" />
+      Office hours: 9:00 AM – 5:00 PM (Kuala Lumpur)
+    </p>
   </div>
 </template>

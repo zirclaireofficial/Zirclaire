@@ -13,6 +13,9 @@ const supabase = useSupabaseClient<Database>()
 const awaitingCode = ref(false)
 const otpCode = ref('')
 const otpBusy = ref(false)
+// Tracks that the email code was already verified, so a retry after an upload
+// failure doesn't re-use the (single-use) code — it just retries the uploads.
+const verified = ref(false)
 
 const role = ref<'service_requester' | 'service_provider' | null>(null)
 const done = ref(false)
@@ -104,11 +107,17 @@ async function submit() {
 // Step 2 — confirm the emailed code, then actually create the account.
 async function finalize() {
   error.value = ''
-  if (!otpCode.value.trim()) { error.value = 'Enter the code from your email.'; return }
+  if (!verified.value && !otpCode.value.trim()) { error.value = 'Enter the code from your email.'; return }
   otpBusy.value = true
   try {
-    await verifyEmailOtp(form.email.trim(), otpCode.value.trim())
-    await setPassword(form.password)
+    // Verify once. If the uploads or profile creation fail after this, pressing
+    // submit again skips re-verify (the code is single-use) and just retries
+    // the uploads — so a failed upload never leaves an account without a profile.
+    if (!verified.value) {
+      await verifyEmailOtp(form.email.trim(), otpCode.value.trim())
+      await setPassword(form.password)
+      verified.value = true
+    }
     const [idUp, picUp] = await Promise.all([
       upload(idFile.value!, 'kyc'),
       upload(picFile.value!, 'profile'),
@@ -132,7 +141,7 @@ async function finalize() {
     done.value = true
   } catch (e: unknown) {
     const err = e as { data?: { statusMessage?: string }; message?: string }
-    error.value = err?.data?.statusMessage ?? err?.message ?? 'Invalid or expired code.'
+    error.value = err?.data?.statusMessage ?? err?.message ?? 'Something went wrong — please try again.'
   } finally {
     otpBusy.value = false
   }

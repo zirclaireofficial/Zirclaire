@@ -35,7 +35,12 @@ async function approve(p: Row) {
     items.value = items.value.filter((x) => x.id !== p.id)
   } catch (e) {
     const err = e as { data?: { statusMessage?: string }; message?: string }
-    toast.add({ title: 'Could not approve', description: err?.data?.statusMessage ?? err?.message, color: 'error' })
+    toast.add({
+      title: 'Could not approve',
+      description: err?.data?.statusMessage ?? 'Another admin may have just handled it.',
+      color: 'error',
+    })
+    await load() // conflict — refresh to the real state (same pattern as claim)
   } finally {
     busy.value = null
   }

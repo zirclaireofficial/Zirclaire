@@ -38,7 +38,12 @@ async function onApprove(it: PendingService) {
     items.value = items.value.filter((x) => x.id !== it.id)
   } catch (e) {
     const err = e as { data?: { statusMessage?: string }; message?: string }
-    toast.add({ title: 'Approve failed', description: err?.data?.statusMessage ?? err?.message, color: 'error' })
+    toast.add({
+      title: 'Approve failed',
+      description: err?.data?.statusMessage ?? 'Another admin may have just handled it.',
+      color: 'error',
+    })
+    await load() // conflict — refresh to the real state
   } finally {
     busy.value = null
   }
@@ -54,7 +59,12 @@ async function confirmReject(it: PendingService) {
     rejectReason.value = ''
   } catch (e) {
     const err = e as { data?: { statusMessage?: string }; message?: string }
-    toast.add({ title: 'Reject failed', description: err?.data?.statusMessage ?? err?.message, color: 'error' })
+    toast.add({
+      title: 'Reject failed',
+      description: err?.data?.statusMessage ?? 'Another admin may have just handled it.',
+      color: 'error',
+    })
+    await load() // conflict — refresh to the real state
   } finally {
     busy.value = null
   }

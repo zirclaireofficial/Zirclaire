@@ -56,7 +56,13 @@ async function confirmAward(a: Applicant) {
     emit('awarded')
   } catch (e) {
     const err = e as { data?: { statusMessage?: string }; message?: string }
-    toast.add({ title: 'Could not award', description: err?.data?.statusMessage ?? err?.message, color: 'error' })
+    toast.add({
+      title: 'Could not award',
+      description: err?.data?.statusMessage ?? 'The project may have changed — refreshing.',
+      color: 'error',
+    })
+    confirming.value = null
+    emit('awarded') // conflict — force the parent to refresh to the true state
   } finally {
     busy.value = null
   }
