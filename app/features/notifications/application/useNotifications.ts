@@ -51,9 +51,18 @@ export function useNotifications() {
     if (!id) return () => {}
     subscriberCount++
     if (!sharedChannel) {
+      const topic = `notifications:${id}`
+      // Defensive: drop any leftover channel with this topic (e.g. a prior
+      // mount whose cleanup didn't run, or an HMR reload) so we never call
+      // .on() on an already-subscribed channel — the cause of the crash.
+      for (const ch of supabase.getChannels()) {
+        if (ch.topic === topic || ch.topic === `realtime:${topic}`) {
+          supabase.removeChannel(ch)
+        }
+      }
       try {
         sharedChannel = supabase
-          .channel(`notifications:${id}`)
+          .channel(topic)
           .on(
             'postgres_changes',
             { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${id}` },
