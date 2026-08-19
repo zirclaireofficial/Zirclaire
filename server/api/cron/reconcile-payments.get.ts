@@ -1,26 +1,37 @@
-// GET /api/cron/reconcile-payments   (Vercel Cron)
-// Safety net for a lost/late payment webhook. Finds 'approved' projects whose
-// invoice Xendit reports as PAID but that never got funded, and funds them —
-// exactly what the webhook would have done.
+// GET /api/cron/reconcile-payments   (Vercel Cron — nightly maintenance)
+// Two jobs run here so we stay within the Hobby plan's cron limit:
 //
-// SAFE BY DESIGN — it can never fund a project by mistake:
-//   1. It only considers projects in 'approved' state that HAVE an invoice.
-//   2. It funds ONLY if Xendit itself confirms the invoice is PAID/SETTLED.
-//   3. fund_project is atomic (WHERE status='approved'), so a concurrent
-//      webhook or a re-run can never double-fund.
+//   A. Unclosed-project sweep (Terms §11) — runs in EVERY mode. Past-deadline
+//      projects with no submission are auto-refunded 95%; the rest are flagged
+//      for a human. See server/utils/expiry.ts.
+//
+//   B. Payment reconciliation (Xendit modes only) — safety net for a lost/late
+//      webhook. Finds 'approved' projects whose invoice Xendit reports as PAID
+//      but that never got funded, and funds them — exactly what the webhook
+//      would have done. SAFE BY DESIGN — it can never fund by mistake:
+//        1. only 'approved' projects that HAVE an invoice,
+//        2. funds ONLY if Xendit confirms PAID/SETTLED,
+//        3. fund_project is atomic (WHERE status='approved'), so a concurrent
+//           webhook or re-run can never double-fund.
 import { serviceClient } from '../../utils/auth'
 import { isXendit } from '../../utils/payments'
 import { getInvoice } from '../../utils/xendit'
 import { notify } from '../../utils/notify'
+import { runExpirySweep } from '../../utils/expiry'
 
 export default defineEventHandler(async (event) => {
   const auth = getHeader(event, 'authorization')
   if (!process.env.CRON_SECRET || auth !== `Bearer ${process.env.CRON_SECRET}`) {
     throw createError({ statusCode: 401, statusMessage: 'Unauthorized' })
   }
-  if (!isXendit()) return { skipped: 'simulator mode' }
 
   const db = serviceClient(event)
+
+  // (A) Unclosed-project sweep — always runs.
+  const expiry = await runExpirySweep(db)
+
+  // (B) Payment reconciliation — Xendit modes only.
+  if (!isXendit()) return { expiry, payments: 'skipped (simulator mode)' }
 
   // Claimed (unpaid-in-our-records) invoices whose project is still 'approved'.
   const { data: rows } = await db
@@ -75,6 +86,7 @@ export default defineEventHandler(async (event) => {
   }
 
   return {
+    expiry,
     checked: (rows ?? []).length,
     recovered: results.filter((x) => x.funded).length,
     results,

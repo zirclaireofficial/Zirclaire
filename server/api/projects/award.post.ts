@@ -17,6 +17,11 @@ export default defineEventHandler(async (event) => {
     p_project: projectId,
     p_application: applicationId,
   })
-  if (error) throw createError({ statusCode: 400, statusMessage: error.message })
+  if (error) {
+    const msg = error.message.includes('active projects')
+      ? 'This provider already has the maximum of 3 active projects. Please choose another applicant.'
+      : error.message
+    throw createError({ statusCode: 400, statusMessage: msg })
+  }
   return { project: data }
 })

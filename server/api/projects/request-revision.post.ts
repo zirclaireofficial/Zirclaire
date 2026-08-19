@@ -15,6 +15,11 @@ export default defineEventHandler(async (event) => {
     p_reviewer: profile.id,
     p_reason: reason ?? null,
   })
-  if (error) throw createError({ statusCode: 400, statusMessage: error.message })
+  if (error) {
+    const msg = error.message.includes('permitted revision')
+      ? 'This project has already used its one permitted revision. A further change needs a new agreement.'
+      : error.message
+    throw createError({ statusCode: 400, statusMessage: msg })
+  }
   return { project: data }
 })
