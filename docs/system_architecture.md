@@ -1,7 +1,7 @@
 # Zirclaire — System Architecture
 
 **Project:** Zirclaire.com
-**Backed by:** MORATT INC (Modern operations, Research, Advanced Technology and trade incorporation)
+**Operated by:** ZIRCLAIRE ENTERPRISE (SSM Business Registration No. 202603179161 (003867899-K))
 **Type:** Escrow-backed service marketplace + regulated professional social community
 **Status:** Foundation / v0 design
 **Last updated:** 2026-07-14

@@ -19,7 +19,7 @@ export default defineNuxtConfig({
     redirectOptions: {
       login: '/login',
       callback: '/confirm',
-      exclude: ['/', '/signup', '/forgot', '/reset'],
+      exclude: ['/', '/signup', '/forgot', '/reset', '/legal'],
     },
     // Dev runs on http://localhost, where `Secure` cookies are unreliable —
     // that breaks the auth session (server can't read it, client can't attach

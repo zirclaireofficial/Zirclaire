@@ -589,7 +589,7 @@ b. agree to be legally bound by them; and
 c. accept all Platform Policies and future amendments.
 SECTION 21 – PRIVACY AND CONFIDENTIALITY POLICY
 21.1 Purpose
-This Privacy and Confidentiality Policy governs the collection, use, storage, disclosure, protection, and retention of information by zirclaire.com (“Platform”), owned and operated by MORATT Enterprise.
+This Privacy and Confidentiality Policy governs the collection, use, storage, disclosure, protection, and retention of information by zirclaire.com (“Platform”), owned and operated by ZIRCLAIRE ENTERPRISE (SSM Business Registration No. 202603179161 (003867899-K)).
 By registering an account or using the Platform, every User acknowledges that they have read, understood, and agreed to this Privacy and Confidentiality Policy.
 21.2 Commitment to Privacy
 The Platform is committed to protecting the privacy, confidentiality, and security of User information.
@@ -747,7 +747,7 @@ Material changes shall become effective upon publication on the Platform or upon
 Continued use of the Platform following the effective date of any amendment shall constitute acceptance of the revised Policy.
 SECTION 22 – DATA PROTECTION POLICY
 22.1 Purpose
-This Data Protection Policy establishes the principles governing the collection, processing, storage, use, disclosure, transfer, retention, and disposal of personal data by zirclaire.com (“Platform”), owned and operated by MORATT Enterprise.
+This Data Protection Policy establishes the principles governing the collection, processing, storage, use, disclosure, transfer, retention, and disposal of personal data by zirclaire.com (“Platform”), owned and operated by ZIRCLAIRE ENTERPRISE (SSM Business Registration No. 202603179161 (003867899-K)).
 This Policy forms an integral part of the Platform’s Terms of Service and Privacy and Confidentiality Policy.
 By accessing or using the Platform, every User acknowledges and agrees that the Platform may process Personal Data in accordance with this Policy and applicable laws.
 22.2 Scope of Application
@@ -890,7 +890,7 @@ Material amendments shall become effective upon publication on the Platform or u
 Continued use of the Platform following the effective date of any amendment shall constitute acceptance of the revised Policy.
 SECTION 23 – ANTI-FRAUD, ANTI-MONEY LAUNDERING (AML), COUNTER-TERRORISM FINANCING (CTF) AND KNOW YOUR CUSTOMER (KYC) POLICY
 23.1 Purpose
-This Anti-Fraud, Anti-Money Laundering (AML), Counter-Terrorism Financing (CTF), and Know Your Customer (KYC) Policy establishes the procedures adopted by zirclaire.com (“Platform”), owned and operated by MORATT Enterprise, to protect the Platform, its Users, and the integrity of its payment and escrow systems from fraud, identity misuse, unlawful financial activity, and other prohibited conduct.
+This Anti-Fraud, Anti-Money Laundering (AML), Counter-Terrorism Financing (CTF), and Know Your Customer (KYC) Policy establishes the procedures adopted by zirclaire.com (“Platform”), owned and operated by ZIRCLAIRE ENTERPRISE (SSM Business Registration No. 202603179161 (003867899-K)), to protect the Platform, its Users, and the integrity of its payment and escrow systems from fraud, identity misuse, unlawful financial activity, and other prohibited conduct.
 This Policy forms part of the Terms of Service and is binding upon all Users.
 23.2 Compliance Objective
 The Platform is committed to operating its services responsibly and may implement reasonable measures to:

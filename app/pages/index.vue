@@ -19,5 +19,8 @@ useSeoMeta({
       <UIcon name="i-lucide-clock" class="size-3.5" />
       Office hours: 9:00 AM – 5:00 PM (Kuala Lumpur)
     </p>
+
+    <!-- Public business identity + Terms (also needed for payment KYB) -->
+    <ShellSiteFooter />
   </div>
 </template>
