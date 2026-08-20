@@ -82,7 +82,16 @@ function isActive(to: string) {
           size="sm"
           label="Inbox"
         />
-        <UButton v-else to="/login" color="primary" size="sm" label="Log in" class="zc-tap" />
+        <UButton
+          v-if="!user"
+          to="/legal"
+          icon="i-lucide-info"
+          color="neutral"
+          variant="ghost"
+          size="sm"
+          aria-label="Business & legal information"
+        />
+        <UButton v-if="!user" to="/login" color="primary" size="sm" label="Log in" class="zc-tap" />
       </div>
     </div>
   </aside>
