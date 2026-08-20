@@ -181,14 +181,19 @@ function onCommentCounted(delta: number) {
         label="Post"
         class="zc-tap"
       />
-      <UButton
-        v-else-if="!currentUserId"
-        to="/signup"
-        size="xs"
-        color="primary"
-        label="Join"
-        class="zc-tap"
-      />
+      <div v-else-if="!currentUserId" class="flex items-center gap-1.5">
+        <!-- ℹ️ public business / legal info, next to Join (logged-out only) -->
+        <UButton
+          to="/legal"
+          icon="i-lucide-info"
+          color="neutral"
+          variant="ghost"
+          size="xs"
+          :ui="{ leadingIcon: 'size-6' }"
+          aria-label="Business & legal information"
+        />
+        <UButton to="/signup" size="xs" color="primary" label="Join" class="zc-tap" />
+      </div>
     </div>
 
     <div v-if="loading" class="space-y-4">

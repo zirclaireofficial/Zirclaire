@@ -16,17 +16,9 @@ useSeoMeta({
 
 <template>
   <div class="mx-auto max-w-3xl px-4 py-8">
-    <h1 class="font-serif text-2xl leading-tight">About &amp; Legal</h1>
+    <h1 class="font-serif text-2xl leading-tight">Terms, Refund &amp; Privacy Policy</h1>
 
-    <!-- What Zirclaire is + pricing (products / services / prices) -->
-    <p class="mt-3 max-w-2xl text-sm leading-relaxed text-stone-600 dark:text-stone-300">
-      Zirclaire is an escrow-backed marketplace for verified professionals: requesters post and fund
-      projects, order fixed-price services, and buy digital works from providers. Project funds are held
-      in escrow and released on completion. The platform fee is 20% on project and service work (the
-      provider receives 80%), and 15% on royalty sales. Payments are processed securely through Xendit.
-    </p>
-
-    <h2 class="mt-6 font-serif text-lg">Business information</h2>
+    <h2 class="mt-4 font-serif text-lg">Business information</h2>
     <div class="mt-2 space-y-1 rounded-xl bg-stone-50 p-4 text-sm dark:bg-stone-800/40">
       <p class="font-medium">ZIRCLAIRE ENTERPRISE</p>
       <p>Business Registration No. 202603179161 (003867899-K)</p>

@@ -46,17 +46,7 @@ const isSuspended = computed(() => me.value?.is_suspended === true)
             />
             <!-- Master has no bottom bar; the full nav is in this menu. -->
             <ShellMasterMobileMenu v-if="isMaster" />
-            <!-- Signed out: the feed is public, so give visitors a way in.
-                 The ℹ️ opens the public business / legal info page. -->
-            <UButton
-              v-if="!user"
-              to="/legal"
-              icon="i-lucide-info"
-              color="neutral"
-              variant="ghost"
-              size="sm"
-              aria-label="Business & legal information"
-            />
+            <!-- Signed out: the feed is public, so give visitors a way in. -->
             <UButton v-if="!user" to="/login" color="primary" size="sm" label="Log in" class="zc-tap" />
           </div>
         </header>
