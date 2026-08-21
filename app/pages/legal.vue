@@ -16,9 +16,27 @@ useSeoMeta({
 
 <template>
   <div class="mx-auto max-w-3xl px-4 py-8">
-    <h1 class="font-serif text-2xl leading-tight">Terms, Refund &amp; Privacy Policy</h1>
+    <h1 class="font-serif text-2xl leading-tight">About, Services &amp; Legal</h1>
 
-    <h2 class="mt-4 font-serif text-lg">Business information</h2>
+    <!-- Products / services (public, for transparency + payment verification) -->
+    <h2 class="mt-4 font-serif text-lg">Our services</h2>
+    <ul class="mt-2 space-y-2 text-sm leading-relaxed text-stone-700 dark:text-stone-200">
+      <li><span class="font-medium">Project marketplace</span> — requesters post and fully fund a project; a verified provider is selected, delivers the work, and the funds held in escrow are released on completion.</li>
+      <li><span class="font-medium">Fixed-price services</span> — providers offer set-price services (with tiers); requesters order and pay upfront into escrow.</li>
+      <li><span class="font-medium">Digital works store</span> — providers sell finished digital works (e.g. research, journals, e-books) at a fixed price for instant download.</li>
+    </ul>
+
+    <!-- Pricing / checkout -->
+    <h2 class="mt-5 font-serif text-lg">Pricing &amp; payment</h2>
+    <p class="mt-2 text-sm leading-relaxed text-stone-700 dark:text-stone-200">
+      Buyers pay the price shown for each project, service, or digital work. Zirclaire charges a platform
+      service fee of 20% on project and service work (the provider receives 80%); digital works are priced
+      by the seller. All payments are processed securely at checkout through Xendit and — for projects and
+      services — held in escrow until the work is completed. Approved cancellations are refunded per the
+      Refund Policy below (a 5% administrative fee applies).
+    </p>
+
+    <h2 class="mt-6 font-serif text-lg">Business information</h2>
     <div class="mt-2 space-y-1 rounded-xl bg-stone-50 p-4 text-sm dark:bg-stone-800/40">
       <p class="font-medium">ZIRCLAIRE ENTERPRISE</p>
       <p>Business Registration No. 202603179161 (003867899-K)</p>

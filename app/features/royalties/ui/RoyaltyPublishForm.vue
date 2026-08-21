@@ -119,7 +119,7 @@ async function submit() {
 
     <div v-if="form.price" class="rounded-lg bg-stone-50 p-3 text-sm dark:bg-stone-800/40">
       <div class="flex items-center justify-between text-stone-500 dark:text-stone-400">
-        <span>Platform fee (15%)</span><span class="tabular-nums">−${{ commissionPreview }}</span>
+        <span>Platform fee (85%)</span><span class="tabular-nums">−${{ commissionPreview }}</span>
       </div>
       <div class="mt-1 flex items-center justify-between font-medium">
         <span>You receive per sale</span><span class="tabular-nums text-success">${{ payoutPreview }}</span>

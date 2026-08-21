@@ -35,6 +35,9 @@ const exhausted = ref(false)
 const commenting = ref<FeedPost | null>(null)
 const reporting = ref<FeedPost | null>(null)
 
+// One-time hint pointing new/logged-out visitors at the business & legal info.
+const showInfoHint = ref(true)
+
 async function load() {
   loading.value = true
   try {
@@ -183,15 +186,29 @@ function onCommentCounted(delta: number) {
       />
       <div v-else-if="!currentUserId" class="flex items-center gap-1.5">
         <!-- ℹ️ public business / legal info, next to Join (logged-out only) -->
-        <UButton
-          to="/legal"
-          icon="i-lucide-info"
-          color="neutral"
-          variant="ghost"
-          size="xs"
-          :ui="{ leadingIcon: 'size-6' }"
-          aria-label="Business & legal information"
-        />
+        <div class="relative">
+          <!-- Floating hint that explains the ℹ️ -->
+          <div
+            v-if="showInfoHint"
+            class="absolute -top-11 right-0 z-10 flex items-center gap-1.5 whitespace-nowrap rounded-lg bg-stone-900 px-2.5 py-1.5 text-[11px] font-medium text-white shadow-lg dark:bg-stone-700"
+          >
+            About, services &amp; legal info
+            <button class="zc-tap -mr-0.5 opacity-70 hover:opacity-100" aria-label="Dismiss" @click.stop="showInfoHint = false">
+              <UIcon name="i-lucide-x" class="size-3" />
+            </button>
+            <span class="absolute -bottom-1 right-3 size-2.5 rotate-45 bg-stone-900 dark:bg-stone-700" />
+          </div>
+          <UButton
+            to="/legal"
+            icon="i-lucide-info"
+            color="neutral"
+            variant="ghost"
+            size="xs"
+            :ui="{ leadingIcon: 'size-6' }"
+            aria-label="Business & legal information"
+            @click="showInfoHint = false"
+          />
+        </div>
         <UButton to="/signup" size="xs" color="primary" label="Join" class="zc-tap" />
       </div>
     </div>

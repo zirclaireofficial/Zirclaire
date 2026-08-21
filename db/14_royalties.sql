@@ -6,7 +6,7 @@
 -- How this differs from projects, and why it's a separate domain:
 --   * Provider-initiated, not requester-initiated. No bidding, no award.
 --   * INSTANT one-time sale — there is NO escrow hold and NO deliver/review
---     loop. The money splits at the moment of purchase: 15% platform, 85%
+--     loop. The money splits at the moment of purchase: 85% platform, 15%
 --     creator. (Projects hold funds in escrow for the whole lifecycle; a
 --     royalty sale is settled immediately, so it needs its own ledger.)
 --   * The work already exists. The file is uploaded at publish time and
@@ -44,8 +44,8 @@ create type royalty_item_status as enum (
 -- royalties have no 'fund' or 'refund' — a sale settles in one shot.
 create type royalty_entry_type as enum (
   'sale',        -- buyer pays (+)
-  'commission',  -- platform's 15% cut (-)
-  'payout'       -- creator's 85% (-)
+  'commission',  -- platform's 85% cut (-)
+  'payout'       -- owner's 15% (-)
 );
 
 -- ---------------------------------------------------------------------
@@ -100,8 +100,8 @@ create table royalty_purchases (
 
   -- Price snapshot at purchase time (the item's price may change later).
   amount_usd    numeric(12,2) not null check (amount_usd > 0),
-  commission_usd numeric(12,2) not null,   -- platform 15%
-  payout_usd    numeric(12,2) not null,    -- creator 85%
+  commission_usd numeric(12,2) not null,   -- platform 85%
+  payout_usd    numeric(12,2) not null,    -- owner 15%
 
   reference     text,                      -- simulated gateway reference
   purchased_at  timestamptz not null default now(),

@@ -237,7 +237,7 @@ const projectStatuses = computed(() => Object.entries(data.value?.projects.bySta
         <div class="rounded-xl border border-stone-200 p-4 dark:border-stone-800">
           <div class="flex items-center gap-1.5">
             <span class="text-xs text-stone-500 dark:text-stone-400">Platform earnings</span>
-            <UTooltip text="Total commission the platform has kept: 20% of every cleared project + 15% of every royalty sale.">
+            <UTooltip text="Total commission the platform has kept: 20% of every cleared project + 85% of every royalty sale.">
               <UIcon name="i-lucide-info" class="size-3.5 text-stone-400" />
             </UTooltip>
           </div>
@@ -255,7 +255,7 @@ const projectStatuses = computed(() => Object.entries(data.value?.projects.bySta
         <div class="rounded-xl border border-stone-200 p-4 dark:border-stone-800">
           <div class="flex items-center gap-1.5">
             <span class="text-xs text-stone-500 dark:text-stone-400">Paid to providers</span>
-            <UTooltip text="Total ever released to providers: the 80% project payouts plus the 85% royalty payouts.">
+            <UTooltip text="Total ever released to providers: the 80% project payouts plus the 15% royalty payouts.">
               <UIcon name="i-lucide-info" class="size-3.5 text-stone-400" />
             </UTooltip>
           </div>

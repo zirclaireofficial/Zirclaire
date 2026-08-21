@@ -103,7 +103,7 @@ create policy "royalty_ledger: parties and admin read"
 --   * the item must be approved (you can't buy a draft or removed work),
 --   * a buyer cannot buy their own work,
 --   * buying twice is blocked by the unique(item_id, buyer_id) constraint.
--- Commission is 15%; payout is the remaining 85%.
+-- Commission is 85% (platform); payout is the remaining 15% (owner). §16A.7/§16A.11.
 -- ---------------------------------------------------------------------
 create or replace function purchase_royalty(p_item uuid, p_buyer uuid, p_reference text)
 returns royalty_purchases language plpgsql as $$
@@ -124,8 +124,8 @@ begin
   end if;
 
   v_amount     := v_item.price_usd;
-  v_commission := round(v_amount * 0.15, 2);   -- platform 15%
-  v_payout     := v_amount - v_commission;      -- creator 85% (exact, no rounding drift)
+  v_commission := round(v_amount * 0.85, 2);   -- platform 85%
+  v_payout     := v_amount - v_commission;      -- owner 15% (exact, no rounding drift)
 
   -- unique(item_id, buyer_id) turns a repeat purchase into a clean error.
   insert into royalty_purchases (item_id, buyer_id, amount_usd, commission_usd, payout_usd, reference)

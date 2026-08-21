@@ -11,14 +11,14 @@ export type RoyaltyItemStatus = 'pending' | 'approved' | 'rejected' | 'removed'
 
 // --- Business rules --------------------------------------------------------
 
-/** Platform commission on a royalty sale — 15%, versus 20% on services. */
-export const ROYALTY_COMMISSION_RATE = 0.15
+/** Platform commission on a royalty sale — 85% (the owner keeps 15%), per §16A. */
+export const ROYALTY_COMMISSION_RATE = 0.85
 
 export function royaltyCommission(priceUsd: number): number {
   return round2(priceUsd * ROYALTY_COMMISSION_RATE)
 }
 
-/** What the creator keeps — the price minus commission (exact, no drift). */
+/** What the owner keeps — the price minus commission (15%, exact, no drift). */
 export function creatorPayout(priceUsd: number): number {
   return round2(priceUsd - royaltyCommission(priceUsd))
 }

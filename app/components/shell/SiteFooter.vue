@@ -24,8 +24,8 @@ async function loadRules() {
     <p class="mt-1 max-w-2xl text-[13px] leading-relaxed text-stone-500 dark:text-stone-400">
       An escrow-backed marketplace for verified professionals: post and fund projects, order fixed-price
       services, and buy digital works. Project funds are held in escrow and released on completion. The
-      platform fee is 20% on project and service work (the provider receives 80%), and 15% on royalty
-      sales. Payments are processed securely through Xendit.
+      platform fee is 20% on project and service work (the provider receives 80%), and 85% on royalty
+      sales (the owner keeps 15%). Payments are processed securely through Xendit.
     </p>
 
     <!-- ℹ️ Business information -->
