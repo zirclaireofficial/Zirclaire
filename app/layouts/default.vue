@@ -34,6 +34,15 @@ const isSuspended = computed(() => me.value?.is_suspended === true)
           <div class="flex items-center gap-1">
             <ShellThemeToggle />
             <ShellNotificationBell v-if="user" />
+            <UButton
+              v-if="user"
+              to="/legal"
+              icon="i-lucide-info"
+              color="neutral"
+              variant="ghost"
+              size="sm"
+              aria-label="About & legal"
+            />
             <!-- Inbox lives here now; sign out moved to the profile page. -->
             <UButton
               v-if="user"

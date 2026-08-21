@@ -75,6 +75,15 @@ function isActive(to: string) {
         <ShellNotificationBell v-if="user" />
         <UButton
           v-if="user"
+          to="/legal"
+          icon="i-lucide-info"
+          color="neutral"
+          variant="ghost"
+          size="sm"
+          aria-label="About & legal"
+        />
+        <UButton
+          v-if="user"
           to="/messages"
           icon="i-lucide-message-square"
           color="neutral"
