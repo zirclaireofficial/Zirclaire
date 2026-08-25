@@ -10,12 +10,13 @@ export function createRoyaltyUseCases(repo: RoyaltyRepository) {
     itemsByCreator: (creatorId: string) => repo.itemsByCreator(creatorId),
 
     publish: (input: PublishInput) => {
-      if (!isPublishable({ title: input.title, price: input.price_usd, hasFile: !!input.file_url })) {
-        throw new Error('A title, a price and a file are all required.')
+      if (!isPublishable({ title: input.title, price: input.price_usd, hasProject: !!input.project_id })) {
+        throw new Error('A completed project, a title and a price are all required.')
       }
       return repo.publish(input)
     },
 
+    eligibleProjects: () => repo.eligibleProjects(),
     removeOwn: (itemId: string) => repo.removeOwn(itemId),
     myItems: () => repo.myItems(),
     myLibrary: () => repo.myLibrary(),

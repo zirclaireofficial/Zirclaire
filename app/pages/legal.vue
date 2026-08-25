@@ -18,8 +18,13 @@ useSeoMeta({
   <div class="mx-auto max-w-3xl px-4 py-8">
     <h1 class="font-serif text-2xl leading-tight">About, Services &amp; Legal</h1>
 
+    <!-- Vision / mission / core business -->
+    <div class="mt-4">
+      <ShellCompanyOverview />
+    </div>
+
     <!-- Products / services (public, for transparency + payment verification) -->
-    <h2 class="mt-4 font-serif text-lg">Our services</h2>
+    <h2 class="mt-6 font-serif text-lg">Our services</h2>
     <ul class="mt-2 space-y-2 text-sm leading-relaxed text-stone-700 dark:text-stone-200">
       <li><span class="font-medium">Project marketplace</span> — requesters post and fully fund a project; a verified provider is selected, delivers the work, and the funds held in escrow are released on completion.</li>
       <li><span class="font-medium">Fixed-price services</span> — providers offer set-price services (with tiers); requesters order and pay upfront into escrow.</li>

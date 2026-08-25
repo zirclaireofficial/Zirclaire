@@ -19,5 +19,9 @@ definePageMeta({ layout: 'auth' })
         <NuxtLink to="/signup" class="font-medium text-primary">Create an account</NuxtLink>
       </p>
     </div>
+
+    <div class="border-t border-stone-200 pt-5 dark:border-stone-800">
+      <ShellCompanyOverview />
+    </div>
   </div>
 </template>

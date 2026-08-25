@@ -7,6 +7,7 @@
 
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '~/shared/types/database'
+import { authedFetch } from '~/shared/lib/authedFetch'
 import type {
   RoyaltyRepository,
   StoreItem,
@@ -15,6 +16,7 @@ import type {
   PendingItem,
   CreatorRef,
   PublishInput,
+  EligibleProject,
   WorkType,
 } from '../domain'
 
@@ -107,26 +109,33 @@ export function createSupabaseRoyaltyRepository(client: SupabaseClient<Database>
     },
 
     async publish(input: PublishInput): Promise<{ id: string }> {
-      const uid = await currentUserId()
-      if (!uid) throw new Error('Not authenticated')
-      // RLS enforces approved-provider + status 'pending' on this insert.
-      const { data, error } = await supabase
-        .from('royalty_items')
-        .insert({
-          creator_id: uid,
-          work_type: input.work_type,
+      // Server verifies ownership + closed status and pulls the deliverable
+      // file; the requester (owner) never handles the private file URL.
+      return authedFetch<{ id: string }>('/api/royalties/publish', {
+        method: 'POST',
+        body: {
+          projectId: input.project_id,
+          workType: input.work_type,
           title: input.title.trim(),
           description: input.description?.trim() || null,
-          price_usd: input.price_usd,
-          file_url: input.file_url,
-          file_type: input.file_type,
-          cover_image: input.cover_image,
-          status: 'pending',
-        })
-        .select('id')
-        .single()
-      if (error) throw error
-      return { id: data.id }
+          price: input.price_usd,
+          coverImage: input.cover_image,
+        },
+      })
+    },
+
+    async eligibleProjects(): Promise<EligibleProject[]> {
+      const uid = await currentUserId()
+      if (!uid) return []
+      // My completed projects, minus any already listed.
+      const [{ data: closed }, { data: listed }] = await Promise.all([
+        supabase.from('projects').select('id, title').eq('requester_id', uid).eq('status', 'closed'),
+        supabase.from('royalty_items').select('project_id').eq('creator_id', uid),
+      ])
+      const taken = new Set((listed ?? []).map((r: any) => r.project_id).filter(Boolean))
+      return (closed ?? [])
+        .filter((p: any) => !taken.has(p.id))
+        .map((p: any) => ({ id: p.id as string, title: p.title as string }))
     },
 
     async removeOwn(itemId: string): Promise<void> {

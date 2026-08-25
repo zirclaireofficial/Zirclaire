@@ -27,8 +27,8 @@ function round2(n: number): number {
   return Math.round(n * 100) / 100
 }
 
-export function isPublishable(input: { title: string; price: number | null; hasFile: boolean }): boolean {
-  return input.title.trim().length > 0 && !!input.price && input.price > 0 && input.hasFile
+export function isPublishable(input: { title: string; price: number | null; hasProject: boolean }): boolean {
+  return input.title.trim().length > 0 && !!input.price && input.price > 0 && input.hasProject
 }
 
 export const WORK_TYPES: { value: WorkType; label: string }[] = [
@@ -116,13 +116,18 @@ export interface PendingItem {
 // --- Ports -----------------------------------------------------------------
 
 export interface PublishInput {
+  project_id: string // the completed project whose deliverable is being listed
   work_type: WorkType
   title: string
   description: string | null
   price_usd: number
-  file_url: string
-  file_type: string | null
   cover_image: string | null
+}
+
+/** A completed project the owner can list for resale. */
+export interface EligibleProject {
+  id: string
+  title: string
 }
 
 export interface RoyaltyRepository {
@@ -130,6 +135,7 @@ export interface RoyaltyRepository {
   storeItem(id: string): Promise<StoreItem | null>
   itemsByCreator(creatorId: string): Promise<StoreItem[]>
   publish(input: PublishInput): Promise<{ id: string }>
+  eligibleProjects(): Promise<EligibleProject[]>
   removeOwn(itemId: string): Promise<void>
   myItems(): Promise<MyItem[]>
   myLibrary(): Promise<PurchasedItem[]>

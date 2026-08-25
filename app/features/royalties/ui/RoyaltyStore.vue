@@ -19,7 +19,8 @@ const type = ref<WorkType | null>(null)
 const search = ref('')
 const selected = ref<StoreItem | null>(null)
 
-const isProvider = computed(() => me.value?.role === 'service_provider' && me.value?.kyc_status === 'approved')
+// Requesters (owners of completed deliverables) are the sellers here.
+const isSeller = computed(() => me.value?.role === 'service_requester' && me.value?.kyc_status === 'approved')
 
 const FILTERS = [{ value: null, label: 'All' }, ...WORK_TYPES]
 
@@ -59,7 +60,7 @@ function onPurchased() {
       </div>
       <div class="flex items-center gap-2">
         <UButton to="/services" size="xs" color="neutral" variant="soft" icon="i-lucide-briefcase" label="Services" class="zc-tap" />
-        <UButton v-if="isProvider" to="/royalties/publish" size="xs" color="primary" icon="i-lucide-plus" label="Publish" class="zc-tap" />
+        <UButton v-if="isSeller" to="/royalties/publish" size="xs" color="primary" icon="i-lucide-plus" label="Sell a work" class="zc-tap" />
       </div>
     </div>
 
@@ -89,9 +90,9 @@ function onPurchased() {
       </div>
       <p class="font-medium">Nothing here yet</p>
       <p class="max-w-xs text-sm text-stone-500 dark:text-stone-400">
-        {{ isProvider ? 'Be the first to publish a work.' : 'Published works will appear here.' }}
+        {{ isSeller ? 'Be the first to list a completed work.' : 'Published works will appear here.' }}
       </p>
-      <UButton v-if="isProvider" to="/royalties/publish" color="primary" size="sm" label="Publish a work" class="zc-tap mt-1" />
+      <UButton v-if="isSeller" to="/royalties/publish" color="primary" size="sm" label="Sell a work" class="zc-tap mt-1" />
     </div>
 
     <div v-else class="grid grid-cols-2 gap-3 lg:grid-cols-4">

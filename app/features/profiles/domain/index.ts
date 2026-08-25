@@ -25,7 +25,11 @@ export type ProfileTab = 'posts' | 'replies' | 'services' | 'royalties'
  * render a tab that would be permanently empty for them.
  */
 export function tabsFor(role: string | null): ProfileTab[] {
-  return role === 'service_provider' ? ['posts', 'services', 'royalties', 'replies'] : ['replies']
+  // Providers post and offer services; requesters own and resell the works
+  // from their completed projects (the royalties tab).
+  if (role === 'service_provider') return ['posts', 'services', 'replies']
+  if (role === 'service_requester') return ['royalties', 'replies']
+  return ['replies']
 }
 
 export function tabLabel(tab: ProfileTab): string {
