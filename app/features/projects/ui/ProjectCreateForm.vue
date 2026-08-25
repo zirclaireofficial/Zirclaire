@@ -47,7 +47,9 @@ function onAttach(e: Event) { attachment.value = (e.target as HTMLInputElement).
 
 async function submit() {
   if (!form.title.trim()) return toast.add({ title: 'Add a project title', color: 'error' })
-  if (!form.budgetUsd || form.budgetUsd <= 0) return toast.add({ title: 'Add a valid budget', color: 'error' })
+  if (!form.budgetUsd || form.budgetUsd < 100 || form.budgetUsd > 4000) {
+    return toast.add({ title: 'Budget must be between $100 and $4000', color: 'error' })
+  }
   loading.value = true
   try {
     const timelineMinutes = (form.hours ?? 0) * 60 + (form.minutes ?? 0)
@@ -112,8 +114,8 @@ async function submit() {
       </UFormField>
     </div>
 
-    <UFormField label="Budget (USD)">
-      <UInput v-model.number="form.budgetUsd" type="number" min="1" placeholder="500" required class="w-full" />
+    <UFormField label="Budget (USD)" hint="Between $100 and $4000">
+      <UInput v-model.number="form.budgetUsd" type="number" min="100" max="4000" step="1" placeholder="500" required class="w-full" />
     </UFormField>
 
     <UFormField label="Timeline" hint="How long providers have once it's live">

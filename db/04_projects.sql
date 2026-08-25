@@ -19,7 +19,7 @@ create table projects (
   description            text,
   subcategory_id         int  references subcategories(id),
   requirements           text[],                       -- up to N requirement lines
-  budget_usd             numeric(12,2) not null check (budget_usd > 0),
+  budget_usd             numeric(12,2) not null check (budget_usd >= 100 and budget_usd <= 4000),
   timeline_minutes       int check (timeline_minutes is null or timeline_minutes > 0),
 
   status                 project_status not null default 'draft',

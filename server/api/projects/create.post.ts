@@ -12,8 +12,8 @@ export default defineEventHandler(async (event) => {
   }
   const b = await readBody(event)
   if (!b.title) throw createError({ statusCode: 400, statusMessage: 'title is required' })
-  if (!b.budget_usd || b.budget_usd <= 0) {
-    throw createError({ statusCode: 400, statusMessage: 'budget_usd must be positive' })
+  if (!b.budget_usd || b.budget_usd < 100 || b.budget_usd > 4000) {
+    throw createError({ statusCode: 400, statusMessage: 'Budget must be between $100 and $4000' })
   }
 
   const db = serviceClient(event)
