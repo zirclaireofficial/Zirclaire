@@ -96,7 +96,7 @@ const menuItems = computed(() => {
         {{ initials }}
       </div>
 
-      <!-- Member ID leads, as in the wireframe; the name sits underneath.
+      <!-- Name leads and is prominent; the member ID sits underneath, smaller.
            The byline links through to the author's public profile. -->
       <NuxtLink
         :to="post.author?.member_id ? `/u/${post.author.member_id}` : ''"
@@ -104,12 +104,12 @@ const menuItems = computed(() => {
         class="min-w-0 flex-1"
       >
         <div class="flex items-center gap-1.5">
-          <span class="truncate font-mono text-sm font-medium hover:text-primary">{{ post.author?.member_id ?? '—' }}</span>
+          <span class="truncate text-sm font-medium hover:text-primary">{{ post.author?.full_name ?? 'Member' }}</span>
           <UIcon name="i-lucide-badge-check" class="size-4 shrink-0 text-success" aria-label="Verified" />
           <UBadge color="primary" variant="soft" size="sm" class="shrink-0">{{ roleLabel }}</UBadge>
         </div>
         <p class="truncate text-xs text-stone-500 dark:text-stone-400">
-          {{ post.author?.full_name ?? 'Member' }} · {{ timeAgo }}
+          <span class="font-mono">{{ post.author?.member_id ?? '—' }}</span> · {{ timeAgo }}
         </p>
       </NuxtLink>
 
