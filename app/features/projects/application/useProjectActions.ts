@@ -9,7 +9,7 @@ export interface CreateProjectInput {
   description?: string | null
   subcategory_id?: number | null
   requirements?: string[] | null
-  budget_usd: number
+  budget_myr: number
   timeline_minutes?: number | null
   attachments?: { media_url: string; media_type?: string | null; label?: string | null }[]
 }

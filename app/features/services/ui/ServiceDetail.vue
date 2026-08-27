@@ -107,7 +107,7 @@ async function order() {
               >
                 <div class="flex items-center justify-between">
                   <span class="font-medium">{{ t.name }}</span>
-                  <span class="font-semibold tabular-nums">${{ t.price_usd }}</span>
+                  <span class="font-semibold tabular-nums">RM {{ t.price_myr }}</span>
                 </div>
                 <p v-if="t.description" class="mt-1 text-sm text-stone-500 dark:text-stone-400">{{ t.description }}</p>
                 <p v-if="deliveryLabel(t.delivery_minutes)" class="mt-1 flex items-center gap-1 text-xs text-stone-400">
@@ -137,7 +137,7 @@ async function order() {
                 </button>
               </div>
             </div>
-            <UButton color="primary" block size="lg" class="zc-tap" :loading="ordering" :disabled="!selectedTier" :label="selectedTier ? `Order · $${selectedTier.price_usd}` : 'Select a level'" @click="order" />
+            <UButton color="primary" block size="lg" class="zc-tap" :loading="ordering" :disabled="!selectedTier" :label="selectedTier ? `Order · RM ${selectedTier.price_myr}` : 'Select a level'" @click="order" />
             <p class="flex items-center justify-center gap-1.5 text-center text-xs text-stone-400">
               <UIcon name="i-lucide-lock" class="size-3" /> Funds held in escrow until you accept the work. Simulated — no real charge.
             </p>

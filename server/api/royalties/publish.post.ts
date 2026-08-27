@@ -66,7 +66,7 @@ export default defineEventHandler(async (event) => {
       work_type: workType,
       title: String(title).trim(),
       description: description?.trim() || null,
-      price_usd: price,
+      price_myr: price,
       file_url: deliverable.media_url,
       file_type: deliverable.media_type,
       cover_image: coverImage ?? null,

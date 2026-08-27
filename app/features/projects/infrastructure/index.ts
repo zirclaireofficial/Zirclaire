@@ -55,7 +55,7 @@ export function createSupabaseProjectRepository(
       // RLS only exposes rows where the caller is the payer).
       const { data, error } = await supabase
         .from('projects')
-        .select('*, payments(status, method, amount_usd, reference, created_at)')
+        .select('*, payments(status, method, amount_myr, reference, created_at)')
         .order('created_at', { ascending: false })
       if (error) throw error
       return (data ?? []).map((p) => ({ ...p, payments: p.payments ?? [] })) as ProjectWithPayments[]
@@ -178,12 +178,12 @@ export function createSupabaseProjectRepository(
           .order('created_at'),
         supabase
           .from('escrow_ledger')
-          .select('id, entry_type, amount_usd, note, created_at')
+          .select('id, entry_type, amount_myr, note, created_at')
           .eq('project_id', projectId)
           .order('created_at'),
         supabase
           .from('payments')
-          .select('status, method, amount_usd, reference, created_at')
+          .select('status, method, amount_myr, reference, created_at')
           .eq('project_id', projectId)
           .order('created_at'),
       ])

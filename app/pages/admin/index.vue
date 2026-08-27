@@ -4,22 +4,23 @@ definePageMeta({ middleware: 'admin' })
 
 const supabase = useSupabaseClient<Database>()
 const loading = ref(true)
-const stats = reactive({ pendingKyc: 0, awaitingFunding: 0, openReports: 0, pendingServices: 0, pendingRoyalties: 0, openCancellations: 0, liveProjects: 0, members: 0, closed: 0 })
+const stats = reactive({ pendingKyc: 0, awaitingFunding: 0, openReports: 0, pendingServices: 0, pendingRoyalties: 0, openCancellations: 0, pendingPayouts: 0, liveProjects: 0, members: 0, closed: 0 })
 
 onMounted(async () => {
   const c = (q: PromiseLike<{ count: number | null }>) => q.then((r) => r.count ?? 0)
-  const [k, f, r, sv, ro, cx, l, m, cl] = await Promise.all([
+  const [k, f, r, sv, ro, cx, po, l, m, cl] = await Promise.all([
     c(supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('kyc_status', 'pending')),
     c(supabase.from('projects').select('id', { count: 'exact', head: true }).eq('status', 'submitted')),
     c(supabase.from('reports').select('id', { count: 'exact', head: true }).eq('status', 'open')),
     c((supabase as any).from('services').select('id', { count: 'exact', head: true }).eq('status', 'pending')),
     c((supabase as any).from('royalty_items').select('id', { count: 'exact', head: true }).eq('status', 'pending')),
     c((supabase as any).from('cancellation_requests').select('id', { count: 'exact', head: true }).in('status', ['in_arbitration', 'appealed'])),
+    c((supabase as any).from('payouts').select('id', { count: 'exact', head: true }).eq('status', 'pending')),
     c(supabase.from('projects').select('id', { count: 'exact', head: true }).eq('status', 'live')),
     c(supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('kyc_status', 'approved')),
     c(supabase.from('projects').select('id', { count: 'exact', head: true }).eq('status', 'closed')),
   ])
-  Object.assign(stats, { pendingKyc: k, awaitingFunding: f, openReports: r, pendingServices: sv, pendingRoyalties: ro, openCancellations: cx, liveProjects: l, members: m, closed: cl })
+  Object.assign(stats, { pendingKyc: k, awaitingFunding: f, openReports: r, pendingServices: sv, pendingRoyalties: ro, openCancellations: cx, pendingPayouts: po, liveProjects: l, members: m, closed: cl })
   loading.value = false
 })
 
@@ -29,6 +30,7 @@ const metrics = computed(() => [
   { to: '/admin/services', label: 'Service reviews', value: stats.pendingServices, icon: 'i-lucide-briefcase', action: true },
   { to: '/admin/royalties', label: 'Royalty reviews', value: stats.pendingRoyalties, icon: 'i-lucide-book-open-text', action: true },
   { to: '/admin/cancellations', label: 'Cancellations', value: stats.openCancellations, icon: 'i-lucide-x-circle', action: true },
+  { to: '/admin/payouts', label: 'Payouts due', value: stats.pendingPayouts, icon: 'i-lucide-hand-coins', action: true },
 ])
 </script>
 
@@ -128,6 +130,20 @@ const metrics = computed(() => [
           </span>
           <span class="flex items-center gap-2">
             <UBadge v-if="stats.pendingRoyalties" color="primary" variant="soft" size="sm">{{ stats.pendingRoyalties }}</UBadge>
+            <UIcon name="i-lucide-chevron-right" class="size-5 text-stone-400" />
+          </span>
+        </NuxtLink>
+
+        <NuxtLink to="/admin/payouts" class="zc-card zc-card-hover zc-tap flex items-center justify-between p-4">
+          <span class="flex items-center gap-3">
+            <UIcon name="i-lucide-hand-coins" class="size-5 text-primary" />
+            <span>
+              <span class="block font-medium">Payouts</span>
+              <span class="block text-xs text-stone-500 dark:text-stone-400">Send provider payments and mark them paid</span>
+            </span>
+          </span>
+          <span class="flex items-center gap-2">
+            <UBadge v-if="stats.pendingPayouts" color="primary" variant="soft" size="sm">{{ stats.pendingPayouts }}</UBadge>
             <UIcon name="i-lucide-chevron-right" class="size-5 text-stone-400" />
           </span>
         </NuxtLink>

@@ -106,7 +106,7 @@ async function confirmReject(it: PendingService) {
           <div v-for="t in it.tiers" :key="t.id" class="rounded-lg border border-stone-100 p-2.5 text-sm dark:border-stone-800">
             <div class="flex items-center justify-between">
               <span class="font-medium">{{ t.name }}</span>
-              <span class="font-semibold tabular-nums">${{ t.price_usd }}</span>
+              <span class="font-semibold tabular-nums">RM {{ t.price_myr }}</span>
             </div>
             <p v-if="t.description" class="mt-0.5 text-xs text-stone-500 dark:text-stone-400">{{ t.description }}</p>
           </div>

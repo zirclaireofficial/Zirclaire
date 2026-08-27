@@ -87,7 +87,7 @@ async function submit() {
           <dl class="mt-4 space-y-2 rounded-xl bg-stone-50 p-3 text-sm dark:bg-stone-800/40">
             <div class="flex justify-between">
               <dt class="text-stone-500 dark:text-stone-400">Held in escrow</dt>
-              <dd class="font-medium tabular-nums">${{ budget }}</dd>
+              <dd class="font-medium tabular-nums">RM {{ budget }}</dd>
             </div>
             <div v-if="timeLeft" class="flex justify-between">
               <dt class="text-stone-500 dark:text-stone-400">Deadline</dt>
@@ -95,7 +95,7 @@ async function submit() {
             </div>
             <div class="flex justify-between">
               <dt class="text-stone-500 dark:text-stone-400">Refund if approved</dt>
-              <dd class="font-medium tabular-nums">${{ (budget * 0.95).toFixed(2) }} <span class="text-xs text-stone-400">(5% fee)</span></dd>
+              <dd class="font-medium tabular-nums">RM {{ (budget * 0.95).toFixed(2) }} <span class="text-xs text-stone-400">(5% fee)</span></dd>
             </div>
           </dl>
 

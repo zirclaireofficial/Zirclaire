@@ -74,7 +74,7 @@ async function pay() {
         </div>
         <div class="text-right">
           <div class="text-[11px] uppercase tracking-wide text-stone-400">Amount due</div>
-          <div class="text-2xl font-semibold tabular-nums">RM {{ project.budget_usd }}</div>
+          <div class="text-2xl font-semibold tabular-nums">RM {{ project.budget_myr }}</div>
         </div>
       </div>
     </div>
@@ -104,7 +104,7 @@ async function pay() {
     </div>
 
     <UButton color="primary" block size="lg" :loading="paying" class="zc-tap" @click="pay">
-      {{ paying ? 'Processing…' : isGateway ? `Pay RM ${project.budget_usd} securely` : `Pay RM ${project.budget_usd}` }}
+      {{ paying ? 'Processing…' : isGateway ? `Pay RM ${project.budget_myr} securely` : `Pay RM ${project.budget_myr}` }}
     </UButton>
 
     <UButton

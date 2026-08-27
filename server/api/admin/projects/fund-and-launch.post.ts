@@ -37,7 +37,7 @@ export default defineEventHandler(async (event) => {
   // Fund escrow (submitted → funded, + fund ledger entry).
   const { error: fundErr } = await db.rpc('fund_project', {
     p_project: projectId,
-    p_amount: project.budget_usd,
+    p_amount: project.budget_myr,
     p_actor: admin.id,
   })
   if (fundErr) throw createError({ statusCode: 400, statusMessage: fundErr.message })
@@ -55,8 +55,8 @@ export default defineEventHandler(async (event) => {
     action: 'project.fund_and_launch',
     target_type: 'project',
     target_id: projectId,
-    summary: `Funded & launched "${project.title}" ($${project.budget_usd})`,
-    detail: { amount: project.budget_usd },
+    summary: `Funded & launched "${project.title}" (RM ${project.budget_myr})`,
+    detail: { amount: project.budget_myr },
   })
   return { project: data }
 })

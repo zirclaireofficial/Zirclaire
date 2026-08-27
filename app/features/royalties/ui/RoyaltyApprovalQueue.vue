@@ -109,7 +109,7 @@ async function viewFile(it: PendingItem) {
           <div class="min-w-0 flex-1">
             <div class="flex items-center gap-2">
               <UBadge color="neutral" variant="soft" size="sm" class="capitalize">{{ workTypeLabel(it.work_type) }}</UBadge>
-              <span class="font-semibold tabular-nums">${{ it.price_usd }}</span>
+              <span class="font-semibold tabular-nums">RM {{ it.price_myr }}</span>
             </div>
             <h3 class="mt-1 truncate font-serif text-lg leading-tight">{{ it.title }}</h3>
             <p class="truncate text-xs text-stone-500 dark:text-stone-400">

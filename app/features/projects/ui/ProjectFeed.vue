@@ -142,7 +142,7 @@ async function doApply(p: Project) {
         <div class="mt-3 flex items-center justify-between border-t border-stone-100 pt-3 dark:border-stone-800">
           <div>
             <div class="text-[11px] text-stone-400">Budget</div>
-            <div class="font-medium">${{ p.budget_usd }}</div>
+            <div class="font-medium">RM {{ p.budget_myr }}</div>
           </div>
           <UButton
             v-if="appliedIds.has(p.id)"
@@ -197,7 +197,7 @@ async function doApply(p: Project) {
           <div class="mt-4 flex items-center justify-between border-t border-stone-100 pt-4 dark:border-stone-800">
             <div>
               <div class="text-[11px] text-stone-400">Budget</div>
-              <div class="text-lg font-medium">${{ selected.budget_usd }}</div>
+              <div class="text-lg font-medium">RM {{ selected.budget_myr }}</div>
             </div>
             <div v-if="countdown(selected)" class="text-right">
               <div class="text-[11px] text-stone-400">Time left</div>

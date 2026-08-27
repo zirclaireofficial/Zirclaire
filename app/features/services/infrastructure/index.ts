@@ -43,7 +43,7 @@ export function createSupabaseServiceRepository(client: SupabaseClient<Database>
     if (!serviceIds.length) return new Map()
     const { data } = await supabase
       .from('service_tiers')
-      .select('id, service_id, position, name, price_usd, description, delivery_minutes')
+      .select('id, service_id, position, name, price_myr, description, delivery_minutes')
       .in('service_id', serviceIds)
       .order('position')
     const byService = new Map<string, ServiceTier[]>()
@@ -53,7 +53,7 @@ export function createSupabaseServiceRepository(client: SupabaseClient<Database>
         id: t.id,
         position: t.position,
         name: t.name,
-        price_usd: Number(t.price_usd),
+        price_myr: Number(t.price_myr),
         description: t.description ?? null,
         delivery_minutes: t.delivery_minutes ?? null,
       })
@@ -132,7 +132,7 @@ export function createSupabaseServiceRepository(client: SupabaseClient<Database>
         service_id: svc.id,
         position: i + 1,
         name: t.name.trim(),
-        price_usd: t.price_usd,
+        price_myr: t.price_myr,
         description: t.description?.trim() || null,
         delivery_minutes: t.delivery_minutes,
       }))

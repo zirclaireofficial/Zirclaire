@@ -24,7 +24,7 @@ export default defineEventHandler(async (event) => {
       project_id: projectId,
       payer_id: project.requester_id,
       method,
-      amount_usd: project.budget_usd,
+      amount_myr: project.budget_myr,
       reference: reference ?? null,
     })
     .select()

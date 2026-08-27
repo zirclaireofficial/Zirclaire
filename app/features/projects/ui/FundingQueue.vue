@@ -65,7 +65,7 @@ async function approve(p: Row) {
       <article v-for="p in items" :key="p.id" class="zc-card p-4">
         <div class="flex items-start justify-between gap-2">
           <h2 class="font-medium leading-tight">{{ p.title }}</h2>
-          <span class="shrink-0 text-xl font-semibold tabular-nums">RM {{ p.budget_usd }}</span>
+          <span class="shrink-0 text-xl font-semibold tabular-nums">RM {{ p.budget_myr }}</span>
         </div>
 
         <p v-if="p.description" class="mt-2 line-clamp-3 text-sm text-stone-600 dark:text-stone-300">

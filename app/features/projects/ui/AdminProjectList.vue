@@ -68,7 +68,7 @@ const statusColor = (s: string) =>
     cancelled: 'error',
   }) as Record<string, string>)[s] ?? 'neutral'
 
-const money = (n: number | string | null) => (n === null ? '—' : `$${Number(n).toFixed(2)}`)
+const money = (n: number | string | null) => (n === null ? '—' : `RM ${Number(n).toFixed(2)}`)
 </script>
 
 <template>
@@ -138,7 +138,7 @@ const money = (n: number | string | null) => (n === null ? '—' : `$${Number(n)
           </div>
 
           <div class="shrink-0 text-right">
-            <div class="font-semibold tabular-nums">{{ money(p.budget_usd) }}</div>
+            <div class="font-semibold tabular-nums">{{ money(p.budget_myr) }}</div>
             <UIcon name="i-lucide-chevron-right" class="mt-1 size-4 text-stone-400" />
           </div>
         </div>

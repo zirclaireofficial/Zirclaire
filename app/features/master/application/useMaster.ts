@@ -26,7 +26,7 @@ export interface AuditEntry {
 export interface PaymentLog {
   id: string
   project_id: string | null
-  amount_usd: number
+  amount_myr: number
   status: string
   method: string | null
   xendit_status: string | null

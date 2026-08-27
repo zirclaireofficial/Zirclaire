@@ -41,7 +41,7 @@ const { thumbUrl } = usePublicMedia()
         <span class="font-mono">{{ item.creator?.member_id }}</span>
       </p>
       <div class="mt-2 flex items-center justify-between">
-        <span class="text-lg font-semibold tabular-nums">${{ item.price_usd }}</span>
+        <span class="text-lg font-semibold tabular-nums">RM {{ item.price_myr }}</span>
         <span class="text-[11px] text-stone-400">{{ item.purchase_count }} sold</span>
       </div>
     </div>

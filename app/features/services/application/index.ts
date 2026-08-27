@@ -12,7 +12,7 @@ export function createServiceUseCases(repo: ServiceRepository) {
     publish: (input: PublishServiceInput) => {
       const tierDrafts = input.tiers.map((t) => ({
         name: t.name,
-        price: t.price_usd,
+        price: t.price_myr,
         description: t.description ?? '',
         delivery_minutes: t.delivery_minutes,
       }))

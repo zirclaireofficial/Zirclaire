@@ -17,25 +17,28 @@ export default defineEventHandler(async (event) => {
   })
   if (error) throw createError({ statusCode: 400, statusMessage: error.message })
 
-  // Phase 2 — schedule the provider's payout (80%) with a 24h buffer.
-  // The UNIQUE(project_id) constraint means a repeated clear can't create a
-  // second payout (the insert error is ignored on purpose = double-pay guard).
-  if (isXendit() && data?.awarded_provider_id && data?.funded_amount_usd) {
-    const amount = Math.round(Number(data.funded_amount_usd) * 0.8 * 100) / 100
+  // Record the provider's payout (80%) as PENDING. Payouts are done manually
+  // by an admin (from the payouts queue), so this row is created in every mode
+  // — it's the to-do item, not an auto-disbursement. The UNIQUE(project_id)
+  // constraint means a repeated clear can't create a second payout (the insert
+  // error is ignored on purpose = double-pay guard).
+  if (data?.awarded_provider_id && data?.funded_amount_myr) {
+    const amount = Math.round(Number(data.funded_amount_myr) * 0.8 * 100) / 100
     const { data: prov } = await db
       .from('profiles')
       .select('full_name, payout_account, payout_provider')
       .eq('id', data.awarded_provider_id)
       .maybeSingle()
-    // 24h buffer by default; set PAYOUT_BUFFER_HOURS=0 to release immediately
-    // (useful for demos so you don't have to wait a day to test payouts).
+    // A short hold before it shows as "ready to pay" (fraud window). The admin
+    // can still see held ones; set PAYOUT_BUFFER_HOURS=0 to make them ready now.
     const bufferHours = Number(process.env.PAYOUT_BUFFER_HOURS ?? 24)
     const releaseAt = new Date(Date.now() + bufferHours * 60 * 60 * 1000).toISOString()
     await db.from('payouts').insert({
       project_id: data.id,
       provider_id: data.awarded_provider_id,
       amount_myr: amount,
-      channel_code: payoutChannel(prov?.payout_provider),
+      channel_code: isXendit() ? payoutChannel(prov?.payout_provider) : null,
+      payout_method: prov?.payout_provider ?? null,
       account_number: prov?.payout_account ?? null,
       account_holder: prov?.full_name ?? null,
       status: 'pending',

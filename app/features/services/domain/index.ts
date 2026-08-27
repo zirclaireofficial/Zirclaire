@@ -40,10 +40,10 @@ export function statusLabel(s: ServiceStatus): string {
   )[s] ?? s
 }
 
-/** "$50" style, and "From $50" when a listing has several tiers. */
-export function lowestPrice(tiers: { price_usd: number }[]): number | null {
+/** "RM 50" style, and "From RM 50" when a listing has several tiers. */
+export function lowestPrice(tiers: { price_myr: number }[]): number | null {
   if (!tiers.length) return null
-  return Math.min(...tiers.map((t) => t.price_usd))
+  return Math.min(...tiers.map((t) => t.price_myr))
 }
 
 // --- Read models -----------------------------------------------------------
@@ -59,7 +59,7 @@ export interface ServiceTier {
   id: string
   position: number
   name: string
-  price_usd: number
+  price_myr: number
   description: string | null
   delivery_minutes: number | null
 }
@@ -107,7 +107,7 @@ export interface PublishServiceInput {
   description: string | null
   subcategory_id: number | null
   cover_image: string | null
-  tiers: { name: string; price_usd: number; description: string | null; delivery_minutes: number | null }[]
+  tiers: { name: string; price_myr: number; description: string | null; delivery_minutes: number | null }[]
 }
 
 export interface ServiceRepository {

@@ -39,7 +39,7 @@ export default defineEventHandler(async (event) => {
   // Claimed (unpaid-in-our-records) invoices whose project is still 'approved'.
   const { data: rows } = await db
     .from('payments')
-    .select('id, xendit_invoice_id, projects!inner(id, status, title, budget_usd, requester_id, timeline_minutes)')
+    .select('id, xendit_invoice_id, projects!inner(id, status, title, budget_myr, requester_id, timeline_minutes)')
     .eq('status', 'claimed')
     .not('xendit_invoice_id', 'is', null)
     .eq('projects.status', 'approved')
@@ -49,7 +49,7 @@ export default defineEventHandler(async (event) => {
 
   for (const r of rows ?? []) {
     const project = (r as unknown as { projects: {
-      id: string; status: string; title: string; budget_usd: number; requester_id: string; timeline_minutes: number | null
+      id: string; status: string; title: string; budget_myr: number; requester_id: string; timeline_minutes: number | null
     } }).projects
     if (!project || project.status !== 'approved') continue
 
@@ -69,7 +69,7 @@ export default defineEventHandler(async (event) => {
         .eq('id', r.id)
       await db.rpc('fund_project', {
         p_project: project.id,
-        p_amount: project.budget_usd,
+        p_amount: project.budget_myr,
         p_actor: project.requester_id,
       })
       const mins = project.timeline_minutes ?? 2880

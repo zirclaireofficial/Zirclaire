@@ -41,10 +41,10 @@ export default defineEventHandler(async (event) => {
   const projectsTotal = (projRows ?? []).length
 
   // --- Escrow money (project side) ---
-  const { data: ledger } = await (db as any).from('escrow_ledger').select('entry_type, amount_usd')
+  const { data: ledger } = await (db as any).from('escrow_ledger').select('entry_type, amount_myr')
   const money = { funded: 0, commission: 0, payout: 0, refund: 0, held: 0 }
   for (const e of ledger ?? []) {
-    const amt = Number(e.amount_usd)
+    const amt = Number(e.amount_myr)
     money.held += amt
     if (e.entry_type === 'fund') money.funded += amt
     else if (e.entry_type === 'commission') money.commission += -amt
@@ -53,10 +53,10 @@ export default defineEventHandler(async (event) => {
   }
 
   // --- Royalty money ---
-  const { data: royLedger } = await (db as any).from('royalty_ledger').select('entry_type, amount_usd')
+  const { data: royLedger } = await (db as any).from('royalty_ledger').select('entry_type, amount_myr')
   const royalty = { sales: 0, commission: 0, payout: 0 }
   for (const e of royLedger ?? []) {
-    const amt = Number(e.amount_usd)
+    const amt = Number(e.amount_myr)
     if (e.entry_type === 'sale') royalty.sales += amt
     else if (e.entry_type === 'commission') royalty.commission += -amt
     else if (e.entry_type === 'payout') royalty.payout += -amt

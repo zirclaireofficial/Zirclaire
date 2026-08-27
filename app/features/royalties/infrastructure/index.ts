@@ -69,7 +69,7 @@ export function createSupabaseRoyaltyRepository(client: SupabaseClient<Database>
       work_type: r.work_type,
       title: r.title,
       description: r.description ?? null,
-      price_usd: Number(r.price_usd),
+      price_myr: Number(r.price_myr),
       cover_image: r.cover_image ?? null,
       file_type: r.file_type ?? null,
       purchase_count: r.purchase_count ?? 0,
@@ -118,7 +118,7 @@ export function createSupabaseRoyaltyRepository(client: SupabaseClient<Database>
           workType: input.work_type,
           title: input.title.trim(),
           description: input.description?.trim() || null,
-          price: input.price_usd,
+          price: input.price_myr,
           coverImage: input.cover_image,
         },
       })
@@ -148,11 +148,11 @@ export function createSupabaseRoyaltyRepository(client: SupabaseClient<Database>
       if (!uid) return []
       const { data, error } = await supabase
         .from('royalty_items')
-        .select('id, work_type, title, price_usd, status, reject_reason, purchase_count, created_at')
+        .select('id, work_type, title, price_myr, status, reject_reason, purchase_count, created_at')
         .eq('creator_id', uid)
         .order('created_at', { ascending: false })
       if (error) throw error
-      return (data ?? []).map((r: any) => ({ ...r, price_usd: Number(r.price_usd) })) as MyItem[]
+      return (data ?? []).map((r: any) => ({ ...r, price_myr: Number(r.price_myr) })) as MyItem[]
     },
 
     async myLibrary(): Promise<PurchasedItem[]> {
@@ -160,7 +160,7 @@ export function createSupabaseRoyaltyRepository(client: SupabaseClient<Database>
       if (!uid) return []
       const { data, error } = await supabase
         .from('royalty_purchases')
-        .select('id, item_id, amount_usd, purchased_at, royalty_items(title, work_type, creator_id)')
+        .select('id, item_id, amount_myr, purchased_at, royalty_items(title, work_type, creator_id)')
         .eq('buyer_id', uid)
         .order('purchased_at', { ascending: false })
       if (error) throw error
@@ -171,7 +171,7 @@ export function createSupabaseRoyaltyRepository(client: SupabaseClient<Database>
         item_id: r.item_id,
         title: r.royalty_items?.title ?? 'Untitled',
         work_type: r.royalty_items?.work_type as WorkType,
-        amount_usd: Number(r.amount_usd),
+        amount_myr: Number(r.amount_myr),
         purchased_at: r.purchased_at,
         creator: creators.get(r.royalty_items?.creator_id) ?? null,
       }))
@@ -182,7 +182,7 @@ export function createSupabaseRoyaltyRepository(client: SupabaseClient<Database>
       // decision, with the file so they can vet it before approving.
       const { data, error } = await supabase
         .from('royalty_items')
-        .select('id, work_type, title, description, price_usd, file_url, file_type, cover_image, created_at, creator_id')
+        .select('id, work_type, title, description, price_myr, file_url, file_type, cover_image, created_at, creator_id')
         .eq('status', 'pending')
         .order('created_at', { ascending: true })
       if (error) throw error
@@ -193,7 +193,7 @@ export function createSupabaseRoyaltyRepository(client: SupabaseClient<Database>
         work_type: r.work_type,
         title: r.title,
         description: r.description ?? null,
-        price_usd: Number(r.price_usd),
+        price_myr: Number(r.price_myr),
         file_url: r.file_url,
         file_type: r.file_type ?? null,
         cover_image: r.cover_image ?? null,

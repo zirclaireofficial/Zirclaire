@@ -18,7 +18,7 @@ export default defineEventHandler(async (event) => {
   }
 
   const db = serviceClient(event)
-  const amount = Number(project.budget_usd) // treated as MYR
+  const amount = Number(project.budget_myr) // treated as MYR
 
   // ---- Simulator: fake, instant funding (local dev / fallback) ----
   if (!isXendit()) {
@@ -26,7 +26,7 @@ export default defineEventHandler(async (event) => {
       project_id: projectId,
       payer_id: project.requester_id,
       method: 'touch_n_go',
-      amount_usd: amount,
+      amount_myr: amount,
       status: 'verified',
       reference: 'SIMULATED',
     })
@@ -72,7 +72,7 @@ export default defineEventHandler(async (event) => {
   await db.from('payments').insert({
     project_id: projectId,
     payer_id: project.requester_id,
-    amount_usd: amount,
+    amount_myr: amount,
     reference: invoice.external_id,
     xendit_invoice_id: invoice.id,
     xendit_status: invoice.status,

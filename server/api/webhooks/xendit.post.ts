@@ -76,7 +76,7 @@ async function handleInvoicePaid(db: SupabaseClient, body: Record<string, any>) 
 
   await db.rpc('fund_project', {
     p_project: project.id,
-    p_amount: project.budget_usd,
+    p_amount: project.budget_myr,
     p_actor: project.requester_id,
   })
   const mins = project.timeline_minutes ?? 2880

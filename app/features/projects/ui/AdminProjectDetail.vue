@@ -45,7 +45,7 @@ const timeline = computed(() => {
 })
 
 const fmt = (iso: string) => new Date(iso).toLocaleString()
-const money = (n: number | string | null) => (n === null ? '—' : `$${Number(n).toFixed(2)}`)
+const money = (n: number | string | null) => (n === null ? '—' : `RM ${Number(n).toFixed(2)}`)
 </script>
 
 <template>
@@ -79,11 +79,11 @@ const money = (n: number | string | null) => (n === null ? '—' : `$${Number(n)
             <dl class="mt-4 grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
               <div>
                 <dt class="text-[11px] uppercase tracking-wide text-stone-400">Budget</dt>
-                <dd class="tabular-nums">{{ money(detail.budget_usd) }}</dd>
+                <dd class="tabular-nums">{{ money(detail.budget_myr) }}</dd>
               </div>
               <div>
                 <dt class="text-[11px] uppercase tracking-wide text-stone-400">Funded</dt>
-                <dd class="tabular-nums">{{ money(detail.funded_amount_usd) }}</dd>
+                <dd class="tabular-nums">{{ money(detail.funded_amount_myr) }}</dd>
               </div>
               <div v-if="formatRemaining(detail)">
                 <dt class="text-[11px] uppercase tracking-wide text-stone-400">Applications close</dt>
@@ -195,8 +195,8 @@ const money = (n: number | string | null) => (n === null ? '—' : `$${Number(n)
                 class="flex items-center justify-between gap-2 text-sm"
               >
                 <span class="text-stone-600 dark:text-stone-300">{{ ledgerLabel(e.entry_type) }}</span>
-                <span class="tabular-nums" :class="Number(e.amount_usd) > 0 ? 'text-success' : 'text-stone-500'">
-                  {{ money(e.amount_usd) }}
+                <span class="tabular-nums" :class="Number(e.amount_myr) > 0 ? 'text-success' : 'text-stone-500'">
+                  {{ money(e.amount_myr) }}
                 </span>
               </div>
             </div>
@@ -206,7 +206,7 @@ const money = (n: number | string | null) => (n === null ? '—' : `$${Number(n)
               <div v-for="(p, i) in detail.payments" :key="i" class="mt-1 flex items-center justify-between text-sm">
                 <span class="font-mono text-xs">{{ p.reference }}</span>
                 <span class="flex items-center gap-2">
-                  <span class="tabular-nums">{{ money(p.amount_usd) }}</span>
+                  <span class="tabular-nums">{{ money(p.amount_myr) }}</span>
                   <UBadge :color="p.status === 'verified' ? 'success' : 'neutral'" variant="soft" size="sm">
                     {{ p.status }}
                   </UBadge>

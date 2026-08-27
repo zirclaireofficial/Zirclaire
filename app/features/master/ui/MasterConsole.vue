@@ -31,7 +31,7 @@ async function load() {
 }
 onMounted(load)
 
-const money = (n: number | undefined) => (n === undefined ? '—' : `$${Number(n).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`)
+const money = (n: number | undefined) => (n === undefined ? '—' : `RM ${Number(n).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`)
 const num = (n: number | undefined) => (n === undefined ? '—' : n.toLocaleString())
 const rm = (n: number | null | undefined) => (n === null || n === undefined ? '—' : `RM ${Number(n).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`)
 const shortId = (id: string | null) => (id ? id.slice(0, 8) : '—')
@@ -308,7 +308,7 @@ const projectStatuses = computed(() => Object.entries(data.value?.projects.bySta
             <p v-if="!fin?.incoming.length" class="p-3 text-sm text-stone-400">No payments yet.</p>
             <div v-for="p in fin?.incoming" :key="p.id" class="flex items-center justify-between gap-2 border-b border-stone-100 p-2.5 text-sm last:border-0 dark:border-stone-800">
               <div class="min-w-0">
-                <div class="font-medium tabular-nums">{{ rm(p.amount_usd) }}</div>
+                <div class="font-medium tabular-nums">{{ rm(p.amount_myr) }}</div>
                 <div class="truncate text-[11px] text-stone-400">#{{ shortId(p.project_id) }} · {{ shortTime(p.created_at) }}</div>
               </div>
               <UBadge :color="(payColor(p.xendit_status ?? p.status) as any)" variant="soft" size="sm">{{ p.xendit_status ?? p.status }}</UBadge>

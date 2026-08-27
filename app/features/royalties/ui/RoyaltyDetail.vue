@@ -88,7 +88,7 @@ async function download() {
           </p>
 
           <div class="flex items-baseline justify-between border-t border-stone-100 pt-4 dark:border-stone-800">
-            <span class="text-2xl font-semibold tabular-nums">${{ item.price_usd }}</span>
+            <span class="text-2xl font-semibold tabular-nums">RM {{ item.price_myr }}</span>
             <span class="text-xs text-stone-400">{{ item.purchase_count }} sold</span>
           </div>
 
@@ -128,7 +128,7 @@ async function download() {
                 </button>
               </div>
             </div>
-            <UButton color="primary" block size="lg" class="zc-tap" :loading="buying" :label="`Buy for $${item.price_usd}`" @click="buy" />
+            <UButton color="primary" block size="lg" class="zc-tap" :loading="buying" :label="`Buy for RM ${item.price_myr}`" @click="buy" />
             <p class="flex items-center justify-center gap-1.5 text-center text-xs text-stone-400">
               <UIcon name="i-lucide-lock" class="size-3" /> Simulated payment — no real charge.
             </p>

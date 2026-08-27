@@ -64,7 +64,7 @@ export default defineEventHandler(async (event) => {
     .single()
   const { data: myProjects } = await db
     .from('projects')
-    .select('title, status, budget_usd')
+    .select('title, status, budget_myr')
     .or(`requester_id.eq.${user.id},awarded_provider_id.eq.${user.id}`)
     .order('created_at', { ascending: false })
     .limit(10)
@@ -73,7 +73,7 @@ export default defineEventHandler(async (event) => {
     `Member ID: ${profile?.member_id ?? 'not issued yet'}`,
     `Role: ${profile?.role}`,
     `Account status: ${profile?.is_suspended ? 'suspended' : profile?.kyc_status}`,
-    `Their projects: ${(myProjects ?? []).map((p) => `"${p.title}" (${p.status}, $${p.budget_usd})`).join('; ') || 'none'}`,
+    `Their projects: ${(myProjects ?? []).map((p) => `"${p.title}" (${p.status}, RM ${p.budget_myr})`).join('; ') || 'none'}`,
   ].join('\n')
 
   // --- context: recent transcript ---

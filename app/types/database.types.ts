@@ -289,7 +289,7 @@ export type Database = {
       }
       escrow_ledger: {
         Row: {
-          amount_usd: number
+          amount_myr: number
           created_at: string
           created_by: string | null
           entry_type: Database["public"]["Enums"]["ledger_entry_type"]
@@ -298,7 +298,7 @@ export type Database = {
           project_id: string
         }
         Insert: {
-          amount_usd: number
+          amount_myr: number
           created_at?: string
           created_by?: string | null
           entry_type: Database["public"]["Enums"]["ledger_entry_type"]
@@ -307,7 +307,7 @@ export type Database = {
           project_id: string
         }
         Update: {
-          amount_usd?: number
+          amount_myr?: number
           created_at?: string
           created_by?: string | null
           entry_type?: Database["public"]["Enums"]["ledger_entry_type"]
@@ -374,7 +374,7 @@ export type Database = {
       }
       payments: {
         Row: {
-          amount_usd: number
+          amount_myr: number
           created_at: string
           id: string
           method: Database["public"]["Enums"]["payout_provider"]
@@ -386,7 +386,7 @@ export type Database = {
           verified_by: string | null
         }
         Insert: {
-          amount_usd: number
+          amount_myr: number
           created_at?: string
           id?: string
           method: Database["public"]["Enums"]["payout_provider"]
@@ -398,7 +398,7 @@ export type Database = {
           verified_by?: string | null
         }
         Update: {
-          amount_usd?: number
+          amount_myr?: number
           created_at?: string
           id?: string
           method?: Database["public"]["Enums"]["payout_provider"]
@@ -783,7 +783,7 @@ export type Database = {
           assigned_provider_id: string | null
           awarded_application_id: string | null
           awarded_provider_id: string | null
-          budget_usd: number
+          budget_myr: number
           cancel_reason: string | null
           cancelled_at: string | null
           closed_at: string | null
@@ -791,7 +791,7 @@ export type Database = {
           deadline_at: string | null
           description: string | null
           finished_at: string | null
-          funded_amount_usd: number | null
+          funded_amount_myr: number | null
           id: string
           requester_id: string
           requirements: string[] | null
@@ -807,7 +807,7 @@ export type Database = {
           assigned_provider_id?: string | null
           awarded_application_id?: string | null
           awarded_provider_id?: string | null
-          budget_usd: number
+          budget_myr: number
           cancel_reason?: string | null
           cancelled_at?: string | null
           closed_at?: string | null
@@ -815,7 +815,7 @@ export type Database = {
           deadline_at?: string | null
           description?: string | null
           finished_at?: string | null
-          funded_amount_usd?: number | null
+          funded_amount_myr?: number | null
           id?: string
           requester_id: string
           requirements?: string[] | null
@@ -831,7 +831,7 @@ export type Database = {
           assigned_provider_id?: string | null
           awarded_application_id?: string | null
           awarded_provider_id?: string | null
-          budget_usd?: number
+          budget_myr?: number
           cancel_reason?: string | null
           cancelled_at?: string | null
           closed_at?: string | null
@@ -839,7 +839,7 @@ export type Database = {
           deadline_at?: string | null
           description?: string | null
           finished_at?: string | null
-          funded_amount_usd?: number | null
+          funded_amount_myr?: number | null
           id?: string
           requester_id?: string
           requirements?: string[] | null
@@ -1152,8 +1152,8 @@ export type Database = {
       }
       project_balances: {
         Row: {
-          balance_usd: number | null
-          funded_amount_usd: number | null
+          balance_myr: number | null
+          funded_amount_myr: number | null
           project_id: string | null
           status: Database["public"]["Enums"]["project_status"] | null
         }
@@ -1205,7 +1205,7 @@ export type Database = {
           assigned_provider_id: string | null
           awarded_application_id: string | null
           awarded_provider_id: string | null
-          budget_usd: number
+          budget_myr: number
           cancel_reason: string | null
           cancelled_at: string | null
           closed_at: string | null
@@ -1213,7 +1213,7 @@ export type Database = {
           deadline_at: string | null
           description: string | null
           finished_at: string | null
-          funded_amount_usd: number | null
+          funded_amount_myr: number | null
           id: string
           requester_id: string
           requirements: string[] | null
@@ -1242,7 +1242,7 @@ export type Database = {
           assigned_provider_id: string | null
           awarded_application_id: string | null
           awarded_provider_id: string | null
-          budget_usd: number
+          budget_myr: number
           cancel_reason: string | null
           cancelled_at: string | null
           closed_at: string | null
@@ -1250,7 +1250,7 @@ export type Database = {
           deadline_at: string | null
           description: string | null
           finished_at: string | null
-          funded_amount_usd: number | null
+          funded_amount_myr: number | null
           id: string
           requester_id: string
           requirements: string[] | null
@@ -1276,7 +1276,7 @@ export type Database = {
           assigned_provider_id: string | null
           awarded_application_id: string | null
           awarded_provider_id: string | null
-          budget_usd: number
+          budget_myr: number
           cancel_reason: string | null
           cancelled_at: string | null
           closed_at: string | null
@@ -1284,7 +1284,7 @@ export type Database = {
           deadline_at: string | null
           description: string | null
           finished_at: string | null
-          funded_amount_usd: number | null
+          funded_amount_myr: number | null
           id: string
           requester_id: string
           requirements: string[] | null
@@ -1309,7 +1309,7 @@ export type Database = {
           assigned_provider_id: string | null
           awarded_application_id: string | null
           awarded_provider_id: string | null
-          budget_usd: number
+          budget_myr: number
           cancel_reason: string | null
           cancelled_at: string | null
           closed_at: string | null
@@ -1317,7 +1317,7 @@ export type Database = {
           deadline_at: string | null
           description: string | null
           finished_at: string | null
-          funded_amount_usd: number | null
+          funded_amount_myr: number | null
           id: string
           requester_id: string
           requirements: string[] | null
@@ -1343,7 +1343,7 @@ export type Database = {
           assigned_provider_id: string | null
           awarded_application_id: string | null
           awarded_provider_id: string | null
-          budget_usd: number
+          budget_myr: number
           cancel_reason: string | null
           cancelled_at: string | null
           closed_at: string | null
@@ -1351,7 +1351,7 @@ export type Database = {
           deadline_at: string | null
           description: string | null
           finished_at: string | null
-          funded_amount_usd: number | null
+          funded_amount_myr: number | null
           id: string
           requester_id: string
           requirements: string[] | null
@@ -1379,7 +1379,7 @@ export type Database = {
           assigned_provider_id: string | null
           awarded_application_id: string | null
           awarded_provider_id: string | null
-          budget_usd: number
+          budget_myr: number
           cancel_reason: string | null
           cancelled_at: string | null
           closed_at: string | null
@@ -1387,7 +1387,7 @@ export type Database = {
           deadline_at: string | null
           description: string | null
           finished_at: string | null
-          funded_amount_usd: number | null
+          funded_amount_myr: number | null
           id: string
           requester_id: string
           requirements: string[] | null
@@ -1417,7 +1417,7 @@ export type Database = {
           assigned_provider_id: string | null
           awarded_application_id: string | null
           awarded_provider_id: string | null
-          budget_usd: number
+          budget_myr: number
           cancel_reason: string | null
           cancelled_at: string | null
           closed_at: string | null
@@ -1425,7 +1425,7 @@ export type Database = {
           deadline_at: string | null
           description: string | null
           finished_at: string | null
-          funded_amount_usd: number | null
+          funded_amount_myr: number | null
           id: string
           requester_id: string
           requirements: string[] | null
@@ -1450,7 +1450,7 @@ export type Database = {
           assigned_provider_id: string | null
           awarded_application_id: string | null
           awarded_provider_id: string | null
-          budget_usd: number
+          budget_myr: number
           cancel_reason: string | null
           cancelled_at: string | null
           closed_at: string | null
@@ -1458,7 +1458,7 @@ export type Database = {
           deadline_at: string | null
           description: string | null
           finished_at: string | null
-          funded_amount_usd: number | null
+          funded_amount_myr: number | null
           id: string
           requester_id: string
           requirements: string[] | null
@@ -1483,7 +1483,7 @@ export type Database = {
           assigned_provider_id: string | null
           awarded_application_id: string | null
           awarded_provider_id: string | null
-          budget_usd: number
+          budget_myr: number
           cancel_reason: string | null
           cancelled_at: string | null
           closed_at: string | null
@@ -1491,7 +1491,7 @@ export type Database = {
           deadline_at: string | null
           description: string | null
           finished_at: string | null
-          funded_amount_usd: number | null
+          funded_amount_myr: number | null
           id: string
           requester_id: string
           requirements: string[] | null
@@ -1522,7 +1522,7 @@ export type Database = {
           assigned_provider_id: string | null
           awarded_application_id: string | null
           awarded_provider_id: string | null
-          budget_usd: number
+          budget_myr: number
           cancel_reason: string | null
           cancelled_at: string | null
           closed_at: string | null
@@ -1530,7 +1530,7 @@ export type Database = {
           deadline_at: string | null
           description: string | null
           finished_at: string | null
-          funded_amount_usd: number | null
+          funded_amount_myr: number | null
           id: string
           requester_id: string
           requirements: string[] | null

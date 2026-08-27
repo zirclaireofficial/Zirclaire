@@ -75,7 +75,7 @@ async function submit() {
       work_type: form.work_type,
       title: form.title,
       description: form.description || null,
-      price_usd: form.price!,
+      price_myr: form.price!,
       cover_image: coverId,
     })
     toast.add({
@@ -144,16 +144,16 @@ async function submit() {
         <UTextarea v-model="form.description" :rows="4" placeholder="What is it about? What will the buyer get?" class="w-full" />
       </UFormField>
 
-      <UFormField label="Price (USD)">
+      <UFormField label="Price (MYR)">
         <UInput v-model.number="form.price" type="number" min="1" step="0.01" placeholder="20" class="w-full" />
       </UFormField>
 
       <div v-if="form.price" class="rounded-lg bg-stone-50 p-3 text-sm dark:bg-stone-800/40">
         <div class="flex items-center justify-between text-stone-500 dark:text-stone-400">
-          <span>Platform fee (85%)</span><span class="tabular-nums">−${{ commissionPreview }}</span>
+          <span>Platform fee (85%)</span><span class="tabular-nums">−RM {{ commissionPreview }}</span>
         </div>
         <div class="mt-1 flex items-center justify-between font-medium">
-          <span>You receive per sale</span><span class="tabular-nums text-success">${{ payoutPreview }}</span>
+          <span>You receive per sale</span><span class="tabular-nums text-success">RM {{ payoutPreview }}</span>
         </div>
       </div>
 

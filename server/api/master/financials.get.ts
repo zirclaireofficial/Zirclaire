@@ -27,7 +27,7 @@ export default defineEventHandler(async (event) => {
   // Incoming — money in (project funding invoices).
   const { data: incoming } = await db
     .from('payments')
-    .select('id, project_id, amount_usd, status, method, xendit_status, reference, paid_at, created_at')
+    .select('id, project_id, amount_myr, status, method, xendit_status, reference, paid_at, created_at')
     .order('created_at', { ascending: false })
     .limit(100)
 

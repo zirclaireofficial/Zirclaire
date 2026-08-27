@@ -38,7 +38,7 @@ export type FundingState =
 export interface PaymentClaim {
   status: 'claimed' | 'verified' | 'rejected'
   method: string
-  amount_usd: number
+  amount_myr: number
   reference: string | null
   created_at: string
 }
@@ -164,7 +164,7 @@ export interface AdminProjectRow extends Project {
 export interface LedgerEntry {
   id: string
   entry_type: string
-  amount_usd: number
+  amount_myr: number
   note: string | null
   created_at: string
 }
@@ -203,7 +203,7 @@ export interface AdminProjectDetail extends AdminProjectRow {
 
 /** Money currently held in escrow for a project — the ledger sums to it. */
 export function heldBalance(ledger: LedgerEntry[]): number {
-  return round2(ledger.reduce((sum, e) => sum + Number(e.amount_usd), 0))
+  return round2(ledger.reduce((sum, e) => sum + Number(e.amount_myr), 0))
 }
 
 /** Human label for a ledger entry type. */

@@ -70,7 +70,7 @@ async function submit() {
       cover_image: coverId,
       tiers: tiers.filter(isTierComplete).map((t) => ({
         name: t.name,
-        price_usd: t.price!,
+        price_myr: t.price!,
         description: t.description || null,
         delivery_minutes: t.deliveryDays ? t.deliveryDays * 1440 : null,
       })),
@@ -123,7 +123,7 @@ async function submit() {
         <span class="mb-2 block text-xs font-medium uppercase tracking-wide text-stone-400">Level {{ i + 1 }}</span>
         <div class="grid grid-cols-2 gap-2">
           <UInput v-model="t.name" placeholder="Level name" class="w-full" />
-          <UInput v-model.number="t.price" type="number" min="1" step="0.01" placeholder="Price USD" class="w-full" />
+          <UInput v-model.number="t.price" type="number" min="1" step="0.01" placeholder="Price MYR" class="w-full" />
         </div>
         <UTextarea v-model="t.description" :rows="2" placeholder="What this level includes" class="mt-2 w-full" />
         <div class="mt-2 flex items-center gap-2">

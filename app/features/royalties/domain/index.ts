@@ -66,7 +66,7 @@ export interface StoreItem {
   work_type: WorkType
   title: string
   description: string | null
-  price_usd: number
+  price_myr: number
   cover_image: string | null
   file_type: string | null
   purchase_count: number
@@ -81,7 +81,7 @@ export interface MyItem {
   id: string
   work_type: WorkType
   title: string
-  price_usd: number
+  price_myr: number
   status: RoyaltyItemStatus
   reject_reason: string | null
   purchase_count: number
@@ -94,7 +94,7 @@ export interface PurchasedItem {
   item_id: string
   title: string
   work_type: WorkType
-  amount_usd: number
+  amount_myr: number
   purchased_at: string
   creator: CreatorRef | null
 }
@@ -105,7 +105,7 @@ export interface PendingItem {
   work_type: WorkType
   title: string
   description: string | null
-  price_usd: number
+  price_myr: number
   file_url: string
   file_type: string | null
   cover_image: string | null
@@ -120,7 +120,7 @@ export interface PublishInput {
   work_type: WorkType
   title: string
   description: string | null
-  price_usd: number
+  price_myr: number
   cover_image: string | null
 }
 

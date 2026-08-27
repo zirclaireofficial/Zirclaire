@@ -41,7 +41,7 @@ const multiTier = computed(() => props.service.tiers.length > 1)
       <h3 class="line-clamp-2 text-sm font-medium leading-snug">{{ service.title }}</h3>
       <div class="mt-2 flex items-center justify-between">
         <span class="text-xs text-stone-400">{{ multiTier ? 'From' : '' }}</span>
-        <span class="text-base font-semibold tabular-nums">${{ from }}</span>
+        <span class="text-base font-semibold tabular-nums">RM {{ from }}</span>
       </div>
     </div>
   </button>

@@ -10,7 +10,7 @@ export function createRoyaltyUseCases(repo: RoyaltyRepository) {
     itemsByCreator: (creatorId: string) => repo.itemsByCreator(creatorId),
 
     publish: (input: PublishInput) => {
-      if (!isPublishable({ title: input.title, price: input.price_usd, hasProject: !!input.project_id })) {
+      if (!isPublishable({ title: input.title, price: input.price_myr, hasProject: !!input.project_id })) {
         throw new Error('A completed project, a title and a price are all required.')
       }
       return repo.publish(input)

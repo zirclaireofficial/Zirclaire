@@ -48,7 +48,7 @@ function onAttach(e: Event) { attachment.value = (e.target as HTMLInputElement).
 async function submit() {
   if (!form.title.trim()) return toast.add({ title: 'Add a project title', color: 'error' })
   if (!form.budgetUsd || form.budgetUsd < 100 || form.budgetUsd > 4000) {
-    return toast.add({ title: 'Budget must be between $100 and $4000', color: 'error' })
+    return toast.add({ title: 'Budget must be between RM 100 and RM 4000', color: 'error' })
   }
   loading.value = true
   try {
@@ -63,7 +63,7 @@ async function submit() {
       description: form.description.trim() || null,
       subcategory_id: subcategoryId.value,
       requirements: requirements.value.map((r) => r.trim()).filter(Boolean),
-      budget_usd: form.budgetUsd,
+      budget_myr: form.budgetUsd,
       timeline_minutes: timelineMinutes > 0 ? timelineMinutes : null,
       attachments,
     })
@@ -114,7 +114,7 @@ async function submit() {
       </UFormField>
     </div>
 
-    <UFormField label="Budget (USD)" hint="Between $100 and $4000">
+    <UFormField label="Budget (MYR)" hint="Between RM 100 and RM 4000">
       <UInput v-model.number="form.budgetUsd" type="number" min="100" max="4000" step="1" placeholder="500" required class="w-full" />
     </UFormField>
 

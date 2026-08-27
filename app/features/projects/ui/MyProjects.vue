@@ -162,7 +162,7 @@ function labelColor(p: ProjectWithPayments) {
         </div>
 
         <div class="mt-2 flex items-center justify-between gap-2">
-          <span class="text-sm tabular-nums text-stone-500 dark:text-stone-400">${{ p.budget_usd }}</span>
+          <span class="text-sm tabular-nums text-stone-500 dark:text-stone-400">RM {{ p.budget_myr }}</span>
           <!-- Only while applications are actually open; a closed project
                showing "Ended" forever is just noise. -->
           <span
@@ -241,7 +241,7 @@ function labelColor(p: ProjectWithPayments) {
           <CancelProjectButton
             :project-id="p.id"
             :title="p.title"
-            :budget="Number(p.budget_usd)"
+            :budget="Number(p.budget_myr)"
             :deadline-at="p.deadline_at"
             :has-provider="!!p.awarded_provider_id"
             @done="load"
