@@ -3,6 +3,17 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
 
+  // Use the Zirclaire logo as the browser-tab favicon (replaces the Nuxt one).
+  app: {
+    head: {
+      link: [
+        { rel: 'icon', type: 'image/png', href: '/favicon.png' },
+        { rel: 'icon', href: '/favicon.ico', sizes: 'any' },
+        { rel: 'apple-touch-icon', href: '/apple-touch-icon.png' },
+      ],
+    },
+  },
+
   modules: ['@nuxtjs/supabase', '@nuxtjs/cloudinary', '@nuxt/ui', '@sentry/nuxt/module', '@vercel/speed-insights/nuxt'],
 
   css: ['~/assets/css/main.css'],
