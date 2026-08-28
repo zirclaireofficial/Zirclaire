@@ -4,6 +4,7 @@
 // the project funding simulation.
 
 import { serviceClient, getCallerProfile } from '../../utils/auth'
+import { notifyRoles } from '../../utils/notify'
 
 export default defineEventHandler(async (event) => {
   const profile = await getCallerProfile(event)
@@ -28,5 +29,23 @@ export default defineEventHandler(async (event) => {
   })
   if (error) throw createError({ statusCode: 400, statusMessage: error.message })
 
-  return { purchase: { id: (data as { id: string }).id, reference } }
+  // Record the owner's payout (15%) as a to-do for an admin to pay manually.
+  const pur = data as { id: string; item_id: string; payout_myr: number }
+  const { data: item } = await db
+    .from('royalty_items').select('creator_id, title').eq('id', pur.item_id).maybeSingle()
+  if (item?.creator_id) {
+    await db.from('royalty_payouts').insert({
+      purchase_id: pur.id,
+      owner_id: item.creator_id,
+      amount_myr: pur.payout_myr,
+    })
+    await notifyRoles(db, ['admin', 'master'], {
+      type: 'royalty_payout_due',
+      title: 'Royalty payout due',
+      body: `"${item.title ?? 'A work'}" sold — an owner royalty payout is ready to send.`,
+      link: '/admin/royalty-payouts',
+    })
+  }
+
+  return { purchase: { id: pur.id, reference } }
 })

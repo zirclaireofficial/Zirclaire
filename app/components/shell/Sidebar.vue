@@ -15,7 +15,10 @@ const items = computed(() =>
     ? [
         // Master gets its console at the very top; the rest is the admin nav
         // (master can do everything an admin can, and more).
-        ...(isMaster.value ? [{ to: '/master', icon: 'i-lucide-shield', label: 'Master console' }] : []),
+        ...(isMaster.value ? [
+          { to: '/master', icon: 'i-lucide-shield', label: 'Master console' },
+          { to: '/master/payouts', icon: 'i-lucide-hand-coins', label: 'Payouts' },
+        ] : []),
         // KYC, funding and reports are queues reached from the dashboard —
         // the nav keeps only the places you go to browse, not to action.
         { to: '/admin', icon: 'i-lucide-layout-dashboard', label: 'Dashboard' },

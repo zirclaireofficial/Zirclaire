@@ -5,8 +5,9 @@
 //   simulator mode -> funds + launches instantly (fake money), clearly labelled.
 import { serviceClient } from '../../utils/auth'
 import { requireProjectOwner } from '../../utils/projects'
-import { isXendit, paymentMode } from '../../utils/payments'
+import { isXendit, isToyyibpay, paymentMode } from '../../utils/payments'
 import { createInvoice, getInvoice } from '../../utils/xendit'
+import { createBill, getBillStatus, billPayUrl } from '../../utils/toyyibpay'
 
 export default defineEventHandler(async (event) => {
   const { projectId, returnUrl } = await readBody(event)
@@ -18,10 +19,10 @@ export default defineEventHandler(async (event) => {
   }
 
   const db = serviceClient(event)
-  const amount = Number(project.budget_myr) // treated as MYR
+  const amount = Number(project.budget_myr) // MYR
 
   // ---- Simulator: fake, instant funding (local dev / fallback) ----
-  if (!isXendit()) {
+  if (paymentMode() === 'simulator') {
     await db.from('payments').insert({
       project_id: projectId,
       payer_id: project.requester_id,
@@ -35,6 +36,48 @@ export default defineEventHandler(async (event) => {
     const deadline = new Date(Date.now() + mins * 60_000).toISOString()
     const { data } = await db.rpc('push_project_live', { p_project: projectId, p_deadline: deadline })
     return { mode: 'simulator' as const, funded: true, project: data }
+  }
+
+  // ---- ToyyibPay: create a bill; funding waits for the verified callback ----
+  if (isToyyibpay()) {
+    // Idempotency: reuse an open (unpaid, not-failed) bill for this project.
+    const { data: open } = await db
+      .from('payments')
+      .select('toyyibpay_billcode')
+      .eq('project_id', projectId)
+      .eq('status', 'claimed')
+      .not('toyyibpay_billcode', 'is', null)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    if (open?.toyyibpay_billcode) {
+      const st = await getBillStatus(open.toyyibpay_billcode).catch(() => null)
+      if (st && !st.paid && st.status !== '3') {
+        return { mode: paymentMode(), invoiceUrl: billPayUrl(open.toyyibpay_billcode), invoiceId: open.toyyibpay_billcode, reused: true }
+      }
+    }
+
+    const origin = getRequestURL(event).origin
+    const ref = `zc-fund-${projectId}-${Date.now()}`
+    const bill = await createBill({
+      name: 'Zirclaire Project',
+      description: `Fund project ${String(project.title).slice(0, 60)}`,
+      amountMYR: amount,
+      externalRef: ref,
+      returnUrl: typeof returnUrl === 'string' ? returnUrl : `${origin}/projects`,
+      callbackUrl: `${origin}/api/webhooks/toyyibpay`,
+    })
+
+    await db.from('payments').insert({
+      project_id: projectId,
+      payer_id: project.requester_id,
+      amount_myr: amount,
+      reference: ref,
+      toyyibpay_billcode: bill.billCode,
+      status: 'claimed', // becomes 'verified' when the callback is verified
+    })
+
+    return { mode: paymentMode(), invoiceUrl: bill.payUrl, invoiceId: bill.billCode }
   }
 
   // ---- Idempotency: reuse an existing unpaid invoice ----

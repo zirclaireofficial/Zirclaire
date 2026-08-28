@@ -7,7 +7,35 @@
 //      -> notify staff ONCE, marked by projects.expiry_flagged_at.
 // Money only moves in pass 1, and only for the clear-cut no-submission case.
 import type { SupabaseClient } from '@supabase/supabase-js'
-import { notify } from './notify'
+import { notify, notifyRoles } from './notify'
+
+// Auto-complete projects whose 48h post-"mark complete" window has elapsed with
+// no protest. complete_project self-guards (skips any with an open dispute), so
+// this only closes the clean ones. Each creates the provider payout row and
+// notifies master to pay.
+export async function runCompletionSweep(db: SupabaseClient) {
+  const cutoff = new Date(Date.now() - 48 * 3_600_000).toISOString()
+  const { data: due } = await db
+    .from('projects')
+    .select('id, title, requester_id')
+    .eq('status', 'submitted_work')
+    .not('completion_marked_at', 'is', null)
+    .lt('completion_marked_at', cutoff)
+    .limit(200)
+  let completed = 0
+  for (const p of (due ?? []) as Array<{ id: string; title: string; requester_id: string }>) {
+    const { error } = await db.rpc('complete_project', { p_project: p.id, p_actor: p.requester_id })
+    if (error) continue // open dispute / race — leave for a human or next run
+    await notifyRoles(db, ['master'], {
+      type: 'payout_due',
+      title: 'Payout due',
+      body: `"${p.title}" auto-completed — a provider payout is ready to send.`,
+      link: '/master/payouts',
+    })
+    completed++
+  }
+  return { completed }
+}
 
 export async function runExpirySweep(db: SupabaseClient) {
   const nowIso = new Date().toISOString()

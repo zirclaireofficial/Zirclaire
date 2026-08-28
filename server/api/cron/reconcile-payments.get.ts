@@ -14,10 +14,11 @@
 //        3. fund_project is atomic (WHERE status='approved'), so a concurrent
 //           webhook or re-run can never double-fund.
 import { serviceClient } from '../../utils/auth'
-import { isXendit } from '../../utils/payments'
+import { isXendit, isToyyibpay } from '../../utils/payments'
 import { getInvoice } from '../../utils/xendit'
+import { getBillStatus } from '../../utils/toyyibpay'
 import { notify } from '../../utils/notify'
-import { runExpirySweep, runCancellationFinalizer } from '../../utils/expiry'
+import { runExpirySweep, runCancellationFinalizer, runCompletionSweep } from '../../utils/expiry'
 
 export default defineEventHandler(async (event) => {
   const auth = getHeader(event, 'authorization')
@@ -30,11 +31,53 @@ export default defineEventHandler(async (event) => {
   // (A) Unclosed-project sweep — always runs.
   const expiry = await runExpirySweep(db)
 
+  // (A2) Auto-complete projects past their 48h completion window (no protest).
+  const completions = await runCompletionSweep(db)
+
   // (B) Mature cancellation decisions past their 48h appeal window — always runs.
   const cancellations = await runCancellationFinalizer(db)
 
-  // (C) Payment reconciliation — Xendit modes only.
-  if (!isXendit()) return { expiry, cancellations, payments: 'skipped (simulator mode)' }
+  // (C) ToyyibPay reconciliation — recover any bill paid but not funded (lost
+  // callback). Same safety as the webhook: verify with ToyyibPay, fund only if
+  // paid, fund_project is atomic on status='approved'.
+  if (isToyyibpay()) {
+    const { data: rows } = await db
+      .from('payments')
+      .select('id, toyyibpay_billcode, projects!inner(id, status, title, budget_myr, requester_id, timeline_minutes)')
+      .eq('status', 'claimed')
+      .not('toyyibpay_billcode', 'is', null)
+      .eq('projects.status', 'approved')
+      .limit(100)
+    const results: Array<Record<string, unknown>> = []
+    for (const r of rows ?? []) {
+      const project = (r as unknown as { projects: {
+        id: string; status: string; title: string; budget_myr: number; requester_id: string; timeline_minutes: number | null
+      } }).projects
+      if (!project || project.status !== 'approved') continue
+      let st
+      try { st = await getBillStatus(r.toyyibpay_billcode as string) } catch { continue }
+      if (!st.paid) continue
+      try {
+        await db.from('payments').update({ status: 'verified', paid_at: new Date().toISOString() }).eq('id', r.id)
+        await db.rpc('fund_project', { p_project: project.id, p_amount: project.budget_myr, p_actor: project.requester_id })
+        const mins = project.timeline_minutes ?? 2880
+        await db.rpc('push_project_live', { p_project: project.id, p_deadline: new Date(Date.now() + mins * 60_000).toISOString() })
+        await notify(db, project.requester_id, {
+          type: 'payment_received',
+          title: 'Payment received',
+          body: `"${project.title}" is funded and now live for providers to apply.`,
+          link: '/projects',
+        })
+        results.push({ project: project.id, funded: true })
+      } catch {
+        results.push({ project: project.id, funded: false, note: 'already funded / race' })
+      }
+    }
+    return { expiry, cancellations, checked: (rows ?? []).length, recovered: results.filter((x) => x.funded).length, results }
+  }
+
+  // (C) Xendit reconciliation — Xendit mode only.
+  if (!isXendit()) return { expiry, completions, cancellations, payments: 'skipped (no gateway reconciliation)' }
 
   // Claimed (unpaid-in-our-records) invoices whose project is still 'approved'.
   const { data: rows } = await db

@@ -1,21 +1,34 @@
 // Payment provider selector (the "port"). One switch decides whether money
 // operations run against the real Xendit gateway or the built-in simulator.
 //
-//   PAYMENTS_PROVIDER=xendit     -> real Xendit (use TEST keys for the demo)
+//   PAYMENTS_PROVIDER=toyyibpay  -> real ToyyibPay bills (pay-in gateway)
+//   PAYMENTS_PROVIDER=xendit     -> real Xendit (kept for reference/fallback)
 //   PAYMENTS_PROVIDER=simulator  -> fake/instant, no gateway (local dev default)
 //
 // The mode is also exposed to the client (runtimeConfig.public.paymentsMode)
 // so the UI can show a clear "Sandbox / Simulated" badge — testers must never
 // think real money moved when it didn't.
 
-export type PaymentMode = 'xendit' | 'simulator'
+export type PaymentMode = 'toyyibpay' | 'xendit' | 'simulator'
 
 export function paymentMode(): PaymentMode {
-  return process.env.PAYMENTS_PROVIDER === 'xendit' ? 'xendit' : 'simulator'
+  const p = process.env.PAYMENTS_PROVIDER
+  if (p === 'toyyibpay') return 'toyyibpay'
+  if (p === 'xendit') return 'xendit'
+  return 'simulator'
+}
+
+export function isToyyibpay(): boolean {
+  return paymentMode() === 'toyyibpay'
 }
 
 export function isXendit(): boolean {
   return paymentMode() === 'xendit'
+}
+
+/** True when a real external gateway (not the simulator) handles pay-in. */
+export function isGatewayMode(): boolean {
+  return paymentMode() !== 'simulator'
 }
 
 // Map a provider's chosen payout method to a Xendit disbursement channel code.

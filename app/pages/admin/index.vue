@@ -15,7 +15,7 @@ onMounted(async () => {
     c((supabase as any).from('services').select('id', { count: 'exact', head: true }).eq('status', 'pending')),
     c((supabase as any).from('royalty_items').select('id', { count: 'exact', head: true }).eq('status', 'pending')),
     c((supabase as any).from('cancellation_requests').select('id', { count: 'exact', head: true }).in('status', ['in_arbitration', 'appealed'])),
-    c((supabase as any).from('payouts').select('id', { count: 'exact', head: true }).eq('status', 'pending')),
+    c((supabase as any).from('royalty_payouts').select('id', { count: 'exact', head: true }).eq('status', 'pending')),
     c(supabase.from('projects').select('id', { count: 'exact', head: true }).eq('status', 'live')),
     c(supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('kyc_status', 'approved')),
     c(supabase.from('projects').select('id', { count: 'exact', head: true }).eq('status', 'closed')),
@@ -30,7 +30,7 @@ const metrics = computed(() => [
   { to: '/admin/services', label: 'Service reviews', value: stats.pendingServices, icon: 'i-lucide-briefcase', action: true },
   { to: '/admin/royalties', label: 'Royalty reviews', value: stats.pendingRoyalties, icon: 'i-lucide-book-open-text', action: true },
   { to: '/admin/cancellations', label: 'Cancellations', value: stats.openCancellations, icon: 'i-lucide-x-circle', action: true },
-  { to: '/admin/payouts', label: 'Payouts due', value: stats.pendingPayouts, icon: 'i-lucide-hand-coins', action: true },
+  { to: '/admin/royalty-payouts', label: 'Royalty payouts', value: stats.pendingPayouts, icon: 'i-lucide-hand-coins', action: true },
 ])
 </script>
 
@@ -134,12 +134,12 @@ const metrics = computed(() => [
           </span>
         </NuxtLink>
 
-        <NuxtLink to="/admin/payouts" class="zc-card zc-card-hover zc-tap flex items-center justify-between p-4">
+        <NuxtLink to="/admin/royalty-payouts" class="zc-card zc-card-hover zc-tap flex items-center justify-between p-4">
           <span class="flex items-center gap-3">
             <UIcon name="i-lucide-hand-coins" class="size-5 text-primary" />
             <span>
-              <span class="block font-medium">Payouts</span>
-              <span class="block text-xs text-stone-500 dark:text-stone-400">Send provider payments and mark them paid</span>
+              <span class="block font-medium">Royalty payouts</span>
+              <span class="block text-xs text-stone-500 dark:text-stone-400">Send owner royalties (15%) and mark them paid</span>
             </span>
           </span>
           <span class="flex items-center gap-2">

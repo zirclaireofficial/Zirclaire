@@ -61,14 +61,15 @@ export default defineNuxtConfig({
       },
       // Payment mode, surfaced to the UI so it can show a Sandbox/Simulated
       // badge (testers must never think real money moved when it didn't).
-      //   'simulator' -> no gateway; 'sandbox' -> Xendit test keys;
-      //   'live'      -> Xendit production keys (real money).
+      //   'simulator' -> no gateway
+      //   'sandbox'   -> real gateway in test mode (ToyyibPay dev / Xendit test)
+      //   'live'      -> real gateway in production (real money)
       paymentsMode:
-        process.env.PAYMENTS_PROVIDER !== 'xendit'
-          ? 'simulator'
-          : process.env.XENDIT_SECRET_KEY?.startsWith('xnd_production')
-            ? 'live'
-            : 'sandbox',
+        process.env.PAYMENTS_PROVIDER === 'toyyibpay'
+          ? (process.env.TOYYIBPAY_ENV === 'production' ? 'live' : 'sandbox')
+          : process.env.PAYMENTS_PROVIDER === 'xendit'
+            ? (process.env.XENDIT_SECRET_KEY?.startsWith('xnd_production') ? 'live' : 'sandbox')
+            : 'simulator',
     },
   },
 

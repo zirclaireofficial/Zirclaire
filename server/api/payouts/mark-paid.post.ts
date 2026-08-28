@@ -1,14 +1,15 @@
-// POST /api/payouts/mark-paid   { payoutId, reference }   (staff)
-// Manual-payout model: after the admin has transferred the money by hand
-// (Touch 'n Go / bank), they record it here. Atomic: only a pending payout
-// flips to paid, so two admins can't double-mark.
-import { serviceClient, requireStaff } from '../../utils/auth'
+// POST /api/payouts/mark-paid   { payoutId, reference, proofUrl }   (MASTER)
+// Manual provider payout: after master has transferred the money by hand and
+// uploaded proof of payment, they record it here. Proof is MANDATORY. Atomic:
+// only a pending payout flips to paid, so it can't be double-marked.
+import { serviceClient, requireMaster } from '../../utils/auth'
 import { notify } from '../../utils/notify'
 
 export default defineEventHandler(async (event) => {
-  const { payoutId, reference } = await readBody(event)
+  const { payoutId, reference, proofUrl } = await readBody(event)
   if (!payoutId) throw createError({ statusCode: 400, statusMessage: 'payoutId is required' })
-  const staff = await requireStaff(event)
+  if (!proofUrl) throw createError({ statusCode: 400, statusMessage: 'Proof of payment is required' })
+  await requireMaster(event)
   const db = serviceClient(event)
 
   const { data, error } = await db
@@ -17,6 +18,8 @@ export default defineEventHandler(async (event) => {
       status: 'paid',
       paid_at: new Date().toISOString(),
       manual_reference: reference?.trim() || null,
+      proof_url: proofUrl,
+      proof_uploaded_at: new Date().toISOString(),
     })
     .eq('id', payoutId)
     .eq('status', 'pending')            // only from pending — one winner
