@@ -48,9 +48,25 @@ export interface CreateBillInput {
   externalRef: string   // billExternalReferenceNo (our reference)
   returnUrl: string     // where the browser lands after paying
   callbackUrl: string   // server-to-server POST
-  payerName?: string
-  payerEmail?: string
-  payerPhone?: string
+  payerName?: string | null
+  payerEmail?: string | null
+  payerPhone?: string | null
+}
+
+// ToyyibPay REJECTS a bill if billTo / billEmail / billPhone are empty (even
+// though payers re-enter details on the hosted page). So we always send
+// non-empty, well-formed values, falling back to safe placeholders.
+function payerName(v?: string | null): string {
+  const s = (v ?? '').trim()
+  return s.length ? s.slice(0, 30) : 'Zirclaire Customer'
+}
+function payerEmail(v?: string | null): string {
+  const s = (v ?? '').trim()
+  return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(s) ? s : 'noreply@zirclaire.com'
+}
+function payerPhone(v?: string | null): string {
+  const digits = (v ?? '').replace(/\D/g, '')
+  return digits.length >= 7 ? digits : '0000000000'
 }
 
 /** Create a bill. Returns the bill code + the hosted URL to redirect to. */
@@ -67,9 +83,9 @@ export async function createBill(input: CreateBillInput): Promise<{ billCode: st
     billReturnUrl: input.returnUrl,
     billCallbackUrl: input.callbackUrl,
     billExternalReferenceNo: input.externalRef,
-    billTo: input.payerName ?? '',
-    billEmail: input.payerEmail ?? '',
-    billPhone: input.payerPhone ?? '',
+    billTo: payerName(input.payerName),
+    billEmail: payerEmail(input.payerEmail),
+    billPhone: payerPhone(input.payerPhone),
     billPaymentChannel: '2',            // FPX + card
     billDisplayMerchant: '1',
   })

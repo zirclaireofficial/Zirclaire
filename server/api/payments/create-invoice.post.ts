@@ -3,7 +3,7 @@
 //   xendit mode    -> creates a hosted Xendit invoice; the project is funded
 //                     ONLY when the webhook confirms payment (never here).
 //   simulator mode -> funds + launches instantly (fake money), clearly labelled.
-import { serviceClient } from '../../utils/auth'
+import { serviceClient, getCallerProfile } from '../../utils/auth'
 import { requireProjectOwner } from '../../utils/projects'
 import { isXendit, isToyyibpay, paymentMode } from '../../utils/payments'
 import { createInvoice, getInvoice } from '../../utils/xendit'
@@ -59,6 +59,7 @@ export default defineEventHandler(async (event) => {
 
     const origin = getRequestURL(event).origin
     const ref = `zc-fund-${projectId}-${Date.now()}`
+    const payer = await getCallerProfile(event) // the requester (owner)
     const bill = await createBill({
       name: 'Zirclaire Project',
       description: `Fund project ${String(project.title).slice(0, 60)}`,
@@ -66,6 +67,9 @@ export default defineEventHandler(async (event) => {
       externalRef: ref,
       returnUrl: typeof returnUrl === 'string' ? returnUrl : `${origin}/projects`,
       callbackUrl: `${origin}/api/webhooks/toyyibpay`,
+      payerName: payer.full_name,
+      payerEmail: payer.email,
+      payerPhone: payer.phone,
     })
 
     await db.from('payments').insert({

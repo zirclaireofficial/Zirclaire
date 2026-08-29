@@ -58,6 +58,9 @@ export default defineEventHandler(async (event) => {
     externalRef: ref,
     returnUrl: typeof returnUrl === 'string' ? returnUrl : `${origin}/royalties`,
     callbackUrl: `${origin}/api/webhooks/toyyibpay`,
+    payerName: profile.full_name,
+    payerEmail: profile.email,
+    payerPhone: profile.phone,
   })
   await db.from('royalty_payments').insert({
     item_id: itemId, buyer_id: profile.id, amount_myr: item.price_myr,
