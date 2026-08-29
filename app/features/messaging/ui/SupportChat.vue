@@ -4,15 +4,18 @@
 // routes to their open ticket, or opens a new one if the last is closed.
 
 import { useMessaging } from '~/features/messaging/application/useMessaging'
-import { ticketLabel } from '~/features/messaging/domain'
+import { useMediaUpload } from '~/shared/lib/useMediaUpload'
+import { ticketLabel, attachmentTypeOf } from '~/features/messaging/domain'
 import type { SupportTicketThread, Message } from '~/features/messaging/domain'
 
 const emit = defineEmits<{ back: [] }>()
 
-const { myTickets, supportSend, botReply, subscribe } = useMessaging()
+const { myTickets, supportSend, attachmentUrl, botReply, subscribe } = useMessaging()
+const { upload } = useMediaUpload()
 const user = useSupabaseUser()
 const toast = useToast()
 
+const MAX_MB = 15
 const currentUserId = computed(() => (user.value as { sub?: string } | null)?.sub ?? '')
 
 const tickets = ref<SupportTicketThread[]>([])
@@ -20,6 +23,9 @@ const loading = ref(true)
 const body = ref('')
 const sending = ref(false)
 const scroller = ref<HTMLElement | null>(null)
+const fileInput = ref<HTMLInputElement | null>(null)
+const pendingFile = ref<File | null>(null)
+const openingId = ref<string | null>(null)
 let unsub: (() => void) | null = null
 
 async function scrollToEnd() {
@@ -83,24 +89,66 @@ async function load() {
 onMounted(load)
 onBeforeUnmount(() => unsub?.())
 
+function pickFile() {
+  fileInput.value?.click()
+}
+function onFile(e: Event) {
+  const f = (e.target as HTMLInputElement).files?.[0] ?? null
+  if (f && f.size > MAX_MB * 1024 * 1024) {
+    toast.add({ title: 'File too large', description: `Attachments must be under ${MAX_MB} MB.`, color: 'error' })
+    return
+  }
+  pendingFile.value = f
+  if (fileInput.value) fileInput.value.value = ''
+}
+function clearFile() {
+  pendingFile.value = null
+}
+
 async function send() {
   const text = body.value.trim()
-  if (!text || sending.value) return
+  const file = pendingFile.value
+  if ((!text && !file) || sending.value) return
   sending.value = true
   body.value = ''
+  pendingFile.value = null
   try {
-    const res = await supportSend(text)
+    let attachment = null
+    if (file) {
+      const up = await upload(file, 'message-attachment')
+      attachment = { url: up.publicId, type: attachmentTypeOf(file.type), name: file.name }
+    }
+    const res = await supportSend(text, attachment)
     // Show it immediately (server already saved it), no reload.
     appendMessage(res.message, res.ticketNumber)
     // The bot replies asynchronously; its message arrives over realtime.
     botReply(res.conversationId).catch(() => {})
   } catch (e) {
     body.value = text
+    pendingFile.value = file
     const err = e as { message?: string }
     toast.add({ title: 'Could not send', description: err?.message, color: 'error' })
   } finally {
     sending.value = false
   }
+}
+
+async function openAttachment(m: Message) {
+  if (!m.attachment || openingId.value) return
+  openingId.value = m.id
+  try {
+    const { url } = await attachmentUrl(m.id)
+    window.open(url, '_blank', 'noopener')
+  } catch (e) {
+    const err = e as { data?: { statusMessage?: string }; message?: string }
+    toast.add({ title: 'Could not open attachment', description: err?.data?.statusMessage ?? err?.message, color: 'error' })
+  } finally {
+    openingId.value = null
+  }
+}
+
+function attachIcon(type: string) {
+  return type === 'image' ? 'i-lucide-image' : type === 'pdf' ? 'i-lucide-file-text' : 'i-lucide-paperclip'
 }
 
 function time(iso: string) {
@@ -161,7 +209,19 @@ function isMine(m: Message) {
               class="max-w-[80%] rounded-2xl px-3.5 py-2 text-[15px] leading-relaxed"
               :class="isMine(m) ? 'rounded-br-md bg-primary text-white' : 'rounded-bl-md bg-stone-100 text-stone-900 dark:bg-stone-800 dark:text-stone-100'"
             >
-              <p class="whitespace-pre-wrap">{{ m.body }}</p>
+              <p v-if="m.body" class="whitespace-pre-wrap">{{ m.body }}</p>
+              <button
+                v-if="m.attachment"
+                type="button"
+                class="zc-tap mt-1 flex items-center gap-2 rounded-lg px-2 py-1.5 text-left text-sm transition"
+                :class="isMine(m) ? 'bg-white/15 hover:bg-white/25' : 'bg-black/5 hover:bg-black/10 dark:bg-white/10 dark:hover:bg-white/20'"
+                :disabled="openingId === m.id"
+                @click="openAttachment(m)"
+              >
+                <UIcon :name="openingId === m.id ? 'i-lucide-loader-circle' : attachIcon(m.attachment.type)" :class="['size-4 shrink-0', openingId === m.id && 'animate-spin']" />
+                <span class="max-w-[12rem] truncate">{{ m.attachment.name || 'Attachment' }}</span>
+                <UIcon name="i-lucide-external-link" class="size-3.5 shrink-0 opacity-70" />
+              </button>
               <p class="mt-0.5 text-[10px]" :class="isMine(m) ? 'text-white/70' : 'text-stone-400'">{{ time(m.created_at) }}</p>
             </div>
           </div>
@@ -170,9 +230,18 @@ function isMine(m: Message) {
     </div>
 
     <div class="border-t border-stone-200 p-3 dark:border-stone-800">
+      <div v-if="pendingFile" class="mb-2 flex items-center gap-2 rounded-lg bg-stone-100 px-2.5 py-1.5 text-sm dark:bg-stone-800">
+        <UIcon name="i-lucide-paperclip" class="size-4 shrink-0 text-stone-500" />
+        <span class="min-w-0 flex-1 truncate">{{ pendingFile.name }}</span>
+        <button type="button" class="zc-tap text-stone-400 hover:text-stone-600" aria-label="Remove attachment" @click="clearFile">
+          <UIcon name="i-lucide-x" class="size-4" />
+        </button>
+      </div>
       <div class="flex items-end gap-2">
+        <input ref="fileInput" type="file" class="hidden" accept="image/*,application/pdf,.doc,.docx,.txt,.zip" @change="onFile" >
+        <UButton icon="i-lucide-paperclip" color="neutral" variant="ghost" class="zc-tap shrink-0" :disabled="sending" aria-label="Attach a file" @click="pickFile" />
         <UTextarea v-model="body" :rows="1" autoresize placeholder="Describe your issue…" class="w-full" @keydown.enter.exact.prevent="send" />
-        <UButton icon="i-lucide-send-horizontal" color="primary" class="zc-tap shrink-0" :loading="sending" :disabled="!body.trim()" aria-label="Send" @click="send" />
+        <UButton icon="i-lucide-send-horizontal" color="primary" class="zc-tap shrink-0" :loading="sending" :disabled="!body.trim() && !pendingFile" aria-label="Send" @click="send" />
       </div>
       <p v-if="!activeTicket && tickets.length" class="mt-1.5 text-center text-[11px] text-stone-400">
         Your last ticket is closed — a new message opens a new ticket.

@@ -10,6 +10,15 @@ export interface PartyRef {
   profile_picture: string | null
 }
 
+export type AttachmentType = 'image' | 'pdf' | 'file'
+
+/** A single file attached to a message (reference only; URL is signed on view). */
+export interface MessageAttachment {
+  url: string // Cloudinary public_id
+  type: AttachmentType
+  name: string | null
+}
+
 export interface Message {
   id: string
   conversation_id: string
@@ -17,6 +26,7 @@ export interface Message {
   body: string
   is_system: boolean
   created_at: string
+  attachment: MessageAttachment | null
 }
 
 /** A thread as it appears in the inbox list. */
@@ -102,8 +112,15 @@ export function ticketLabel(n: number | null): string {
 
 // --- Rules -----------------------------------------------------------------
 
-export function canSend(body: string): boolean {
-  return body.trim().length > 0
+export function canSend(body: string, hasAttachment = false): boolean {
+  return body.trim().length > 0 || hasAttachment
+}
+
+/** Classify a picked file into the attachment category we store. */
+export function attachmentTypeOf(mime: string): AttachmentType {
+  if (mime.startsWith('image/')) return 'image'
+  if (mime === 'application/pdf') return 'pdf'
+  return 'file'
 }
 
 /** Is a message unread for this viewer? (Their own messages never count.) */
@@ -123,7 +140,7 @@ export function conversationTitle(c: ConversationSummary): string {
 export interface MessagingRepository {
   listConversations(): Promise<ConversationSummary[]>
   listMessages(conversationId: string): Promise<Message[]>
-  sendMessage(conversationId: string, body: string): Promise<Message>
+  sendMessage(conversationId: string, body: string, attachment?: MessageAttachment | null): Promise<Message>
   markRead(conversationId: string): Promise<void>
   /** Admin: the shared support queue (unclaimed + own claimed). */
   supportQueue(): Promise<SupportTicket[]>

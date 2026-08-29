@@ -18,6 +18,7 @@ export type UploadPurpose =
   | 'post'
   | 'deliverable'
   | 'project-attachment'
+  | 'message-attachment'
 
 export function useMediaUpload() {
   async function upload(file: File, purpose: UploadPurpose) {

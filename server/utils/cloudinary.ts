@@ -26,6 +26,9 @@ export const MEDIA_PURPOSES = {
   // purchase check. The cover thumbnail uses the public 'profile'-style path.
   'royalty-file':       { folder: 'zirclaire/royalties',           private: true  },
   'royalty-cover':      { folder: 'zirclaire/royalty-covers',      private: false },
+  // Direct-message attachments — private; served via a participant-gated
+  // signed URL (see /api/messages/attachment-url).
+  'message-attachment': { folder: 'zirclaire/messages',            private: true  },
 } as const
 
 export type MediaPurpose = keyof typeof MEDIA_PURPOSES

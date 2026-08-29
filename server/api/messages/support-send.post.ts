@@ -6,10 +6,19 @@
 
 import { serviceClient, requireUser } from '../../utils/auth'
 
+const ATTACH_TYPES = ['image', 'pdf', 'file']
+
 export default defineEventHandler(async (event) => {
   const user = await requireUser(event)
-  const { body } = await readBody(event)
-  if (!body || !String(body).trim()) throw createError({ statusCode: 400, statusMessage: 'Message is required' })
+  const { body, attachment } = await readBody(event)
+  const text = body ? String(body).trim() : ''
+  const hasAttachment = attachment && typeof attachment.url === 'string'
+  if (!text && !hasAttachment) {
+    throw createError({ statusCode: 400, statusMessage: 'A message or an attachment is required' })
+  }
+  if (hasAttachment && !ATTACH_TYPES.includes(attachment.type)) {
+    throw createError({ statusCode: 400, statusMessage: 'Invalid attachment type' })
+  }
 
   const db = serviceClient(event)
 
@@ -19,8 +28,15 @@ export default defineEventHandler(async (event) => {
 
   const { data: message, error: mErr } = await db
     .from('messages')
-    .insert({ conversation_id: convo.id, sender_id: user.id, body: String(body).trim() })
-    .select('id, conversation_id, sender_id, body, is_system, created_at')
+    .insert({
+      conversation_id: convo.id,
+      sender_id: user.id,
+      body: text,
+      attachment_url: hasAttachment ? attachment.url : null,
+      attachment_type: hasAttachment ? attachment.type : null,
+      attachment_name: hasAttachment ? (attachment.name ?? null) : null,
+    })
+    .select('id, conversation_id, sender_id, body, is_system, created_at, attachment_url, attachment_type, attachment_name')
     .single()
   if (mErr) throw createError({ statusCode: 400, statusMessage: mErr.message })
 

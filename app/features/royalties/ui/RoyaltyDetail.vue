@@ -30,8 +30,10 @@ const isOwnWork = computed(() => me.value && props.item.creator_id === (user.val
 async function buy() {
   buying.value = true
   try {
-    const res = await purchase(props.item.id, method.value)
-    toast.add({ title: 'Purchased', description: `Reference ${res.purchase.reference}. It's yours to download.`, color: 'success' })
+    const res = await purchase(props.item.id, window.location.href)
+    // Gateway mode: go to the hosted payment page; the sale finalizes on callback.
+    if (res.invoiceUrl) { window.location.href = res.invoiceUrl; return }
+    toast.add({ title: 'Purchased', description: `It's yours to download.`, color: 'success' })
     owned.value = true
     emit('purchased')
   } catch (e) {

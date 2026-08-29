@@ -12,12 +12,13 @@ export function useRoyalties() {
   const repo = createSupabaseRoyaltyRepository(supabase)
   const useCases = createRoyaltyUseCases(repo)
 
-  /** Buy an item. Server records the sale + 15/85 split atomically. */
-  function purchase(itemId: string, method: 'binance' | 'touch_n_go') {
-    return authedFetch<{ purchase: { id: string; reference: string } }>('/api/royalties/purchase', {
-      method: 'POST',
-      body: { itemId, method },
-    })
+  /** Buy an item. Simulator finalizes instantly; gateway mode returns a pay URL
+   *  (invoiceUrl) to redirect to — the sale finalizes when the webhook confirms. */
+  function purchase(itemId: string, returnUrl?: string) {
+    return authedFetch<{ mode: string; invoiceUrl?: string; purchase?: { id: string; reference: string } }>(
+      '/api/royalties/purchase',
+      { method: 'POST', body: { itemId, returnUrl } },
+    )
   }
 
   /** Get a signed, short-lived download URL. Server checks a purchase exists. */

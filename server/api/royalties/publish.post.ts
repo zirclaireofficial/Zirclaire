@@ -8,9 +8,12 @@ import { requireApproved } from '../../utils/projects'
 const WORK_TYPES = ['novel', 'research', 'journal']
 
 export default defineEventHandler(async (event) => {
-  const { projectId, workType, title, description, price, coverImage } = await readBody(event)
+  const { projectId, workType, title, description, price, coverImage, consent } = await readBody(event)
   if (!projectId || !title?.trim() || !workType || !price) {
     throw createError({ statusCode: 400, statusMessage: 'projectId, title, work type and price are required' })
+  }
+  if (consent !== true) {
+    throw createError({ statusCode: 400, statusMessage: 'You must confirm you own this work and consent to reselling it' })
   }
   if (!WORK_TYPES.includes(workType)) {
     throw createError({ statusCode: 400, statusMessage: 'Invalid work type' })
@@ -70,6 +73,7 @@ export default defineEventHandler(async (event) => {
       file_url: deliverable.media_url,
       file_type: deliverable.media_type,
       cover_image: coverImage ?? null,
+      owner_consent_at: new Date().toISOString(),
       status: 'pending',
     })
     .select('id')

@@ -9,6 +9,7 @@ import type {
   MessagingRepository,
   ConversationSummary,
   Message,
+  MessageAttachment,
   SupportTicket,
   OversightThread,
   SupportTicketThread,
@@ -16,6 +17,25 @@ import type {
 } from '../domain'
 
 type Loose = SupabaseClient<Database> & { from: (t: string) => any }
+
+// Columns needed to build a Message (incl. the attachment reference).
+const MSG_COLS = 'id, conversation_id, sender_id, body, is_system, created_at, attachment_url, attachment_type, attachment_name'
+
+/** Map a raw messages row into the domain Message (nests the attachment). */
+export function toMessage(row: any): Message {
+  const attachment: MessageAttachment | null = row.attachment_url
+    ? { url: row.attachment_url, type: row.attachment_type ?? 'file', name: row.attachment_name ?? null }
+    : null
+  return {
+    id: row.id,
+    conversation_id: row.conversation_id,
+    sender_id: row.sender_id ?? null,
+    body: row.body ?? '',
+    is_system: !!row.is_system,
+    created_at: row.created_at,
+    attachment,
+  }
+}
 
 export function createSupabaseMessagingRepository(client: SupabaseClient<Database>): MessagingRepository {
   const supabase = client as Loose
@@ -86,23 +106,30 @@ export function createSupabaseMessagingRepository(client: SupabaseClient<Databas
     async listMessages(conversationId: string): Promise<Message[]> {
       const { data, error } = await supabase
         .from('messages')
-        .select('id, conversation_id, sender_id, body, is_system, created_at')
+        .select(MSG_COLS)
         .eq('conversation_id', conversationId)
         .order('created_at', { ascending: true })
       if (error) throw error
-      return (data ?? []) as Message[]
+      return (data ?? []).map(toMessage)
     },
 
-    async sendMessage(conversationId: string, body: string): Promise<Message> {
+    async sendMessage(conversationId: string, body: string, attachment?: MessageAttachment | null): Promise<Message> {
       const uid = await currentUserId()
       if (!uid) throw new Error('Not authenticated')
       const { data, error } = await supabase
         .from('messages')
-        .insert({ conversation_id: conversationId, sender_id: uid, body: body.trim() })
-        .select('id, conversation_id, sender_id, body, is_system, created_at')
+        .insert({
+          conversation_id: conversationId,
+          sender_id: uid,
+          body: body.trim(),
+          attachment_url: attachment?.url ?? null,
+          attachment_type: attachment?.type ?? null,
+          attachment_name: attachment?.name ?? null,
+        })
+        .select(MSG_COLS)
         .single()
       if (error) throw error
-      return data as Message
+      return toMessage(data)
     },
 
     async markRead(conversationId: string): Promise<void> {
@@ -207,14 +234,15 @@ export function createSupabaseMessagingRepository(client: SupabaseClient<Databas
     const ids = rows.map((c: any) => c.id)
     const { data: msgs } = await supabase
       .from('messages')
-      .select('id, conversation_id, sender_id, body, is_system, created_at')
+      .select(MSG_COLS)
       .in('conversation_id', ids)
       .order('created_at', { ascending: true })
     const byConvo = new Map<string, Message[]>()
-    for (const m of msgs ?? []) {
-      const list = byConvo.get(m.conversation_id as string) ?? []
-      list.push(m as Message)
-      byConvo.set(m.conversation_id as string, list)
+    for (const raw of msgs ?? []) {
+      const m = toMessage(raw)
+      const list = byConvo.get(m.conversation_id) ?? []
+      list.push(m)
+      byConvo.set(m.conversation_id, list)
     }
     return rows.map((c: any) => ({
       id: c.id,
@@ -231,11 +259,13 @@ export function createSupabaseMessagingRepository(client: SupabaseClient<Databas
     if (!convoIds.length) return preview
     const { data } = await supabase
       .from('messages')
-      .select('conversation_id, body, created_at')
+      .select('conversation_id, body, attachment_url, created_at')
       .in('conversation_id', convoIds)
       .order('created_at', { ascending: false })
     for (const m of data ?? []) {
-      if (!preview.has(m.conversation_id as string)) preview.set(m.conversation_id as string, m.body as string)
+      if (preview.has(m.conversation_id as string)) continue
+      const text = (m.body as string)?.trim() || (m.attachment_url ? '📎 Attachment' : '')
+      preview.set(m.conversation_id as string, text)
     }
     return preview
   }

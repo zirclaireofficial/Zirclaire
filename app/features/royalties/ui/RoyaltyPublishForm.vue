@@ -25,6 +25,7 @@ const form = reactive({
 })
 const cover = ref<File | null>(null)
 const coverPreview = ref<string | null>(null)
+const consent = ref(false)
 const submitting = ref(false)
 
 const projectItems = computed(() =>
@@ -32,7 +33,7 @@ const projectItems = computed(() =>
 )
 
 const canSubmit = computed(() =>
-  isPublishable({ title: form.title, price: form.price, hasProject: !!form.project_id }),
+  consent.value && isPublishable({ title: form.title, price: form.price, hasProject: !!form.project_id }),
 )
 const payoutPreview = computed(() => (form.price ? creatorPayout(form.price) : 0))
 const commissionPreview = computed(() => (form.price ? royaltyCommission(form.price) : 0))
@@ -77,6 +78,7 @@ async function submit() {
       description: form.description || null,
       price_myr: form.price!,
       cover_image: coverId,
+      consent: consent.value,
     })
     toast.add({
       title: 'Submitted for review',
@@ -168,6 +170,15 @@ async function submit() {
           >
         </div>
       </UFormField>
+
+      <label class="flex items-start gap-3 rounded-xl border border-stone-200 p-3 text-sm dark:border-stone-800">
+        <UCheckbox v-model="consent" class="mt-0.5" />
+        <span class="text-stone-600 dark:text-stone-300">
+          I confirm I own this completed work and have the right to resell it. I consent to Zirclaire
+          listing it for resale, and I understand the platform retains 85% of each sale as commission
+          (Terms §16A).
+        </span>
+      </label>
 
       <UButton
         color="primary"

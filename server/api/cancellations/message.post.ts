@@ -4,10 +4,17 @@
 import { serviceClient, getCallerProfile } from '../../utils/auth'
 import { notify, notifyRoles } from '../../utils/notify'
 
+const ATTACH_TYPES = ['image', 'pdf', 'file']
+
 export default defineEventHandler(async (event) => {
-  const { requestId, body, party } = await readBody(event)
-  if (!requestId || !body || !String(body).trim()) {
-    throw createError({ statusCode: 400, statusMessage: 'requestId and body are required' })
+  const { requestId, body, party, attachment } = await readBody(event)
+  const text = body ? String(body).trim() : ''
+  const hasAttachment = attachment && typeof attachment.url === 'string'
+  if (!requestId || (!text && !hasAttachment)) {
+    throw createError({ statusCode: 400, statusMessage: 'requestId and a message or attachment are required' })
+  }
+  if (hasAttachment && !ATTACH_TYPES.includes(attachment.type)) {
+    throw createError({ statusCode: 400, statusMessage: 'Invalid attachment type' })
   }
   const profile = await getCallerProfile(event)
   const db = serviceClient(event)
@@ -40,7 +47,10 @@ export default defineEventHandler(async (event) => {
   }
 
   const { error } = await db.from('dispute_messages').insert({
-    request_id: requestId, party: channel, sender_side: side, sender_id: profile.id, body: String(body).trim(),
+    request_id: requestId, party: channel, sender_side: side, sender_id: profile.id, body: text,
+    attachment_url: hasAttachment ? attachment.url : null,
+    attachment_type: hasAttachment ? attachment.type : null,
+    attachment_name: hasAttachment ? (attachment.name ?? null) : null,
   })
   if (error) throw createError({ statusCode: 500, statusMessage: error.message })
 

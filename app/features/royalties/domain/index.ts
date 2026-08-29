@@ -122,6 +122,7 @@ export interface PublishInput {
   description: string | null
   price_myr: number
   cover_image: string | null
+  consent: boolean // owner's ownership/resale declaration (mandatory)
 }
 
 /** A completed project the owner can list for resale. */

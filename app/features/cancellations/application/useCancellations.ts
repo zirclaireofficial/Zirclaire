@@ -32,7 +32,16 @@ export interface DisputeMessage {
   party: 'requester' | 'provider'
   sender_side: 'platform' | 'user'
   body: string
+  attachment_url: string | null
+  attachment_type: 'image' | 'pdf' | 'file' | null
+  attachment_name: string | null
   created_at: string
+}
+
+export interface DisputeAttachmentInput {
+  url: string
+  type: 'image' | 'pdf' | 'file'
+  name: string | null
 }
 
 const OPEN = ['pending_provider', 'in_arbitration', 'awaiting_appeal', 'appealed']
@@ -87,10 +96,12 @@ export function useCancellations() {
     authedFetch('/api/cancellations/admin-decide', { method: 'POST', body: { requestId, decision, reason } })
   const masterDecide = (requestId: string, decision: 'approved' | 'denied', reason: string) =>
     authedFetch('/api/cancellations/master-decide', { method: 'POST', body: { requestId, decision, reason } })
-  const sendMessage = (requestId: string, body: string, party?: 'requester' | 'provider') =>
-    authedFetch('/api/cancellations/message', { method: 'POST', body: { requestId, body, party } })
+  const sendMessage = (requestId: string, body: string, party?: 'requester' | 'provider', attachment?: DisputeAttachmentInput | null) =>
+    authedFetch('/api/cancellations/message', { method: 'POST', body: { requestId, body, party, attachment } })
+  const attachmentUrl = (messageId: string) =>
+    authedFetch<{ url: string }>('/api/cancellations/attachment-url', { method: 'POST', body: { messageId } })
 
-  return { mine, forProject, queue, messages, request, respond, appeal, adminDecide, masterDecide, sendMessage }
+  return { mine, forProject, queue, messages, request, respond, appeal, adminDecide, masterDecide, sendMessage, attachmentUrl }
 }
 
 // Plain-language status shown to a USER (no tiers, no internal steps).

@@ -120,6 +120,7 @@ export function createSupabaseRoyaltyRepository(client: SupabaseClient<Database>
           description: input.description?.trim() || null,
           price: input.price_myr,
           coverImage: input.cover_image,
+          consent: input.consent,
         },
       })
     },

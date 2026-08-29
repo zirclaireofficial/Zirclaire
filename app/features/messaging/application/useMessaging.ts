@@ -3,17 +3,25 @@
 
 import type { Database } from '~/shared/types/database'
 import { authedFetch } from '~/shared/lib/authedFetch'
-import { createSupabaseMessagingRepository } from '../infrastructure'
+import { createSupabaseMessagingRepository, toMessage } from '../infrastructure'
 import { canSend } from '../domain'
-import type { Message } from '../domain'
+import type { Message, MessageAttachment } from '../domain'
 
 export function useMessaging() {
   const supabase = useSupabaseClient<Database>()
   const repo = createSupabaseMessagingRepository(supabase)
 
-  function sendMessage(conversationId: string, body: string) {
-    if (!canSend(body)) throw new Error('Write something first.')
-    return repo.sendMessage(conversationId, body)
+  function sendMessage(conversationId: string, body: string, attachment?: MessageAttachment | null) {
+    if (!canSend(body, !!attachment)) throw new Error('Write something or attach a file first.')
+    return repo.sendMessage(conversationId, body, attachment)
+  }
+
+  /** Get a short-lived signed URL to view/download a message's attachment. */
+  function attachmentUrl(messageId: string) {
+    return authedFetch<{ url: string }>('/api/messages/attachment-url', {
+      method: 'POST',
+      body: { messageId },
+    })
   }
 
   /** Get-or-create the buyer↔provider thread for a project/order (server). */
@@ -40,11 +48,12 @@ export function useMessaging() {
   /** Send a service-desk message — the server routes it to the member's open
    *  ticket, or opens a new one if their last ticket is closed. Returns the
    *  saved message so the UI can show it immediately. */
-  function supportSend(body: string) {
-    return authedFetch<{ conversationId: string; ticketNumber: number | null; message: Message }>(
+  async function supportSend(body: string, attachment?: MessageAttachment | null) {
+    const res = await authedFetch<{ conversationId: string; ticketNumber: number | null; message: any }>(
       '/api/messages/support-send',
-      { method: 'POST', body: { body } },
+      { method: 'POST', body: { body, attachment } },
     )
+    return { ...res, message: toMessage(res.message) as Message }
   }
 
   /**
@@ -57,7 +66,7 @@ export function useMessaging() {
       .on(
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'messages', filter: `conversation_id=eq.${conversationId}` },
-        (payload) => onInsert(payload.new as Message),
+        (payload) => onInsert(toMessage(payload.new)),
       )
       .subscribe()
     return () => { supabase.removeChannel(channel) }
@@ -71,6 +80,7 @@ export function useMessaging() {
     oversight: () => repo.oversight(),
     myTickets: () => repo.myTickets(),
     sendMessage,
+    attachmentUrl,
     openProjectThread,
     openSupportThread,
     botReply,
