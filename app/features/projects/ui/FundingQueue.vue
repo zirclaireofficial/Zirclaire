@@ -4,6 +4,7 @@
 // then shows as payment-pending until the gateway confirms (status funded/live).
 import { useProjectActions } from '~/features/projects/application/useProjectActions'
 import type { Database } from '~/shared/types/database'
+import AdminProjectDetail from './AdminProjectDetail.vue'
 
 const { approveProject } = useProjectActions()
 const supabase = useSupabaseClient<Database>()
@@ -14,6 +15,7 @@ type Row = Database['public']['Tables']['projects']['Row']
 const items = ref<Row[]>([])
 const loading = ref(true)
 const busy = ref<string | null>(null)
+const selected = ref<string | null>(null)
 
 async function load() {
   loading.value = true
@@ -88,15 +90,17 @@ async function approve(p: Row) {
             @click="approve(p)"
           />
           <UButton
-            :to="`/admin/projects/${p.id}`"
             color="neutral"
             variant="soft"
             icon="i-lucide-eye"
             class="zc-tap"
             label="View"
+            @click="selected = p.id"
           />
         </div>
       </article>
     </div>
+
+    <AdminProjectDetail v-if="selected" :project-id="selected" @close="selected = null" />
   </div>
 </template>
