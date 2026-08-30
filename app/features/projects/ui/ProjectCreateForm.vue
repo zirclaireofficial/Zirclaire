@@ -47,8 +47,9 @@ function onAttach(e: Event) { attachment.value = (e.target as HTMLInputElement).
 
 async function submit() {
   if (!form.title.trim()) return toast.add({ title: 'Add a project title', color: 'error' })
-  if (!form.budgetUsd || form.budgetUsd < 100 || form.budgetUsd > 4000) {
-    return toast.add({ title: 'Budget must be between RM 100 and RM 4000', color: 'error' })
+  // TEMP (testing money path): floor lowered from RM 100 to RM 1. Restore to 100 before launch.
+  if (!form.budgetUsd || form.budgetUsd < 1 || form.budgetUsd > 4000) {
+    return toast.add({ title: 'Budget must be between RM 1 and RM 4000', color: 'error' })
   }
   loading.value = true
   try {
@@ -114,8 +115,8 @@ async function submit() {
       </UFormField>
     </div>
 
-    <UFormField label="Budget (MYR)" hint="Between RM 100 and RM 4000">
-      <UInput v-model.number="form.budgetUsd" type="number" min="100" max="4000" step="1" placeholder="500" required class="w-full" />
+    <UFormField label="Budget (MYR)" hint="Between RM 1 and RM 4000">
+      <UInput v-model.number="form.budgetUsd" type="number" min="1" max="4000" step="1" placeholder="500" required class="w-full" />
     </UFormField>
 
     <UFormField label="Timeline" hint="How long providers have once it's live">

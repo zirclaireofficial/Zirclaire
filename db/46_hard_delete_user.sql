@@ -28,11 +28,15 @@ security definer
 set search_path = public
 as $$
 begin
-  -- Lift the append-only guards on BOTH money ledgers for this maintenance op.
+  -- Lift the append-only guards on the money ledgers AND the audit log for this
+  -- maintenance op. (Deleting the profile fires audit_log.actor_id's ON DELETE
+  -- SET NULL, which is an UPDATE the audit guard would otherwise block.)
   alter table escrow_ledger  disable trigger trg_ledger_no_update;
   alter table escrow_ledger  disable trigger trg_ledger_no_delete;
   alter table royalty_ledger disable trigger trg_royalty_ledger_no_update;
   alter table royalty_ledger disable trigger trg_royalty_ledger_no_delete;
+  alter table audit_log      disable trigger trg_audit_no_update;
+  alter table audit_log      disable trigger trg_audit_no_delete;
 
   -- 1) Null out "who did this" / counterparty references on OTHER rows so their
   --    foreign keys don't block, without deleting those other users' records.
@@ -61,19 +65,25 @@ begin
   -- 2) Royalty graph (RESTRICT foreign keys → delete children first).
   --    a) purchases the user MADE, and b) everything hanging off items the user
   --    CREATED (including other buyers' purchases of those items).
+  --    royalty_payments / royalty_payouts are guarded: they only exist once
+  --    migrations 42/43 are applied, so skip them if the tables aren't there.
   delete from royalty_ledger
     where purchase_id in (select id from royalty_purchases where buyer_id = p_user)
        or item_id     in (select id from royalty_items     where creator_id = p_user)
        or purchase_id in (select rp.id from royalty_purchases rp
                             join royalty_items ri on ri.id = rp.item_id
                            where ri.creator_id = p_user);
-  delete from royalty_payments
-    where buyer_id = p_user
-       or item_id in (select id from royalty_items where creator_id = p_user);
+  if to_regclass('public.royalty_payments') is not null then
+    delete from royalty_payments
+      where buyer_id = p_user
+         or item_id in (select id from royalty_items where creator_id = p_user);
+  end if;
   delete from royalty_purchases
     where buyer_id = p_user
        or item_id in (select id from royalty_items where creator_id = p_user); -- cascades royalty_payouts by purchase_id
-  delete from royalty_payouts where owner_id = p_user;
+  if to_regclass('public.royalty_payouts') is not null then
+    delete from royalty_payouts where owner_id = p_user;
+  end if;
   delete from royalty_items   where creator_id = p_user;
 
   -- 3) The user's provider work on OTHER people's projects (RESTRICT FKs).
@@ -98,11 +108,13 @@ begin
   --    notifications).
   delete from auth.users where id = p_user;
 
-  -- Restore the ledger guards.
+  -- Restore the guards.
   alter table escrow_ledger  enable trigger trg_ledger_no_update;
   alter table escrow_ledger  enable trigger trg_ledger_no_delete;
   alter table royalty_ledger enable trigger trg_royalty_ledger_no_update;
   alter table royalty_ledger enable trigger trg_royalty_ledger_no_delete;
+  alter table audit_log      enable trigger trg_audit_no_update;
+  alter table audit_log      enable trigger trg_audit_no_delete;
 end;
 $$;
 

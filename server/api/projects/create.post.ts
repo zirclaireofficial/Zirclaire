@@ -12,8 +12,9 @@ export default defineEventHandler(async (event) => {
   }
   const b = await readBody(event)
   if (!b.title) throw createError({ statusCode: 400, statusMessage: 'title is required' })
-  if (!b.budget_myr || b.budget_myr < 100 || b.budget_myr > 4000) {
-    throw createError({ statusCode: 400, statusMessage: 'Budget must be between RM 100 and RM 4000' })
+  // TEMP (testing money path): floor lowered from RM 100 to RM 1. Restore to 100 before launch.
+  if (!b.budget_myr || b.budget_myr < 1 || b.budget_myr > 4000) {
+    throw createError({ statusCode: 400, statusMessage: 'Budget must be between RM 1 and RM 4000' })
   }
 
   const db = serviceClient(event)
