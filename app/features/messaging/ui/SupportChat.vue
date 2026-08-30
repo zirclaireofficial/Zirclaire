@@ -238,7 +238,7 @@ function isMine(m: Message) {
         </button>
       </div>
       <div class="flex items-end gap-2">
-        <input ref="fileInput" type="file" class="hidden" accept="image/*,application/pdf,.doc,.docx,.txt,.zip" @change="onFile" >
+        <input ref="fileInput" type="file" class="hidden" @change="onFile" >
         <UButton icon="i-lucide-paperclip" color="neutral" variant="ghost" class="zc-tap shrink-0" :disabled="sending" aria-label="Attach a file" @click="pickFile" />
         <UTextarea v-model="body" :rows="1" autoresize placeholder="Describe your issue…" class="w-full" @keydown.enter.exact.prevent="send" />
         <UButton icon="i-lucide-send-horizontal" color="primary" class="zc-tap shrink-0" :loading="sending" :disabled="!body.trim() && !pendingFile" aria-label="Send" @click="send" />

@@ -14,7 +14,7 @@ import {
 import type { ProjectWithPayments } from '~/features/projects/domain'
 import ProjectPaymentPanel from './ProjectPaymentPanel.vue'
 import ApplicantList from './ApplicantList.vue'
-import MessageButton from '~/features/messaging/ui/MessageButton.vue'
+import ProjectChatSheet from '~/features/messaging/ui/ProjectChatSheet.vue'
 import CancelProjectButton from '~/features/cancellations/ui/CancelProjectButton.vue'
 
 // Statuses where an SR may still request cancellation (funded through review).
@@ -32,6 +32,7 @@ const UNDER_REVIEW = ['submitted_work', 'in_review']
 const reviewBusy = ref<string | null>(null)
 const changesFor = ref<string | null>(null) // project id whose "request changes" box is open
 const changeNote = ref('')
+const chatFor = ref<{ id: string; title: string } | null>(null) // open project chat sheet
 
 async function viewDeliverable(projectId: string) {
   reviewBusy.value = projectId
@@ -303,9 +304,12 @@ function labelColor(p: ProjectWithPayments) {
           </div>
         </div>
 
-        <!-- Message the awarded provider once there is one -->
+        <!-- Open the project chat/updates feed with the provider -->
         <div v-if="p.awarded_provider_id" class="mt-3 border-t border-stone-100 pt-3 dark:border-stone-800">
-          <MessageButton :project-id="p.id" block label="Message provider" />
+          <UButton
+            color="neutral" variant="soft" block class="zc-tap" icon="i-lucide-messages-square"
+            label="Open chat" @click="chatFor = { id: p.id, title: p.title }"
+          />
         </div>
 
         <!-- Request cancellation (SR) — the flow + refund rules live server-side -->
@@ -321,6 +325,9 @@ function labelColor(p: ProjectWithPayments) {
         </div>
       </article>
     </div>
+
+    <!-- Project chat / updates feed -->
+    <ProjectChatSheet v-if="chatFor" :project-id="chatFor.id" :title="chatFor.title" @close="chatFor = null" />
 
     <!-- Resume payment -->
     <Teleport to="body">

@@ -162,7 +162,7 @@ onBeforeUnmount(() => { if (channel) supabase.removeChannel(channel) })
         </button>
       </div>
       <div class="flex items-end gap-2">
-        <input ref="fileInput" type="file" class="hidden" accept="image/*,application/pdf,.doc,.docx,.txt,.zip" @change="onFile" >
+        <input ref="fileInput" type="file" class="hidden" @change="onFile" >
         <UButton icon="i-lucide-paperclip" color="neutral" variant="ghost" :disabled="sending" aria-label="Attach a file" @click="pickFile" />
         <UTextarea
           v-model="draft"
