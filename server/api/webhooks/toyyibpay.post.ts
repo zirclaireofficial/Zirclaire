@@ -63,17 +63,36 @@ async function verified(billCode: string): Promise<boolean> {
 }
 
 async function fundProjectFromBill(db: SupabaseClient, paymentId: string, projectId: string) {
+  const { data: project } = await db.from('projects').select('*').eq('id', projectId).maybeSingle()
+  if (!project) return
+
+  // Fund FIRST, mark the payment settled ONLY on success. If funding fails we
+  // must NOT flip the payment to 'verified' — leaving it 'claimed' is what lets
+  // the reconcile cron (and ToyyibPay's own callback retry) pick it up again.
+  if (project.status === 'approved') {
+    const { error: fErr } = await db.rpc('fund_project', {
+      p_project: project.id, p_amount: project.budget_myr, p_actor: project.requester_id,
+    })
+    if (fErr) {
+      console.error('[toyyibpay webhook] fund_project failed', { projectId, err: fErr })
+      // 500 → ToyyibPay retries the callback; payment stays 'claimed' for reconcile.
+      throw createError({ statusCode: 500, statusMessage: 'funding failed, will retry' })
+    }
+    const mins = project.timeline_minutes ?? 2880
+    const { error: lErr } = await db.rpc('push_project_live', {
+      p_project: project.id, p_deadline: new Date(Date.now() + mins * 60_000).toISOString(),
+    })
+    if (lErr) console.error('[toyyibpay webhook] push_project_live failed (funded, not live)', { projectId, err: lErr })
+
+    await notify(db, project.requester_id, {
+      type: 'payment_received',
+      title: 'Payment received',
+      body: `"${project.title}" is funded and now live for providers to apply.`,
+      link: '/projects',
+    })
+  }
+
+  // Funded now, or already funded by a prior/concurrent run. Settle the payment.
   await db.from('payments').update({ status: 'verified', paid_at: new Date().toISOString() })
     .eq('id', paymentId).eq('status', 'claimed')
-  const { data: project } = await db.from('projects').select('*').eq('id', projectId).maybeSingle()
-  if (!project || project.status !== 'approved') return
-  await db.rpc('fund_project', { p_project: project.id, p_amount: project.budget_myr, p_actor: project.requester_id })
-  const mins = project.timeline_minutes ?? 2880
-  await db.rpc('push_project_live', { p_project: project.id, p_deadline: new Date(Date.now() + mins * 60_000).toISOString() })
-  await notify(db, project.requester_id, {
-    type: 'payment_received',
-    title: 'Payment received',
-    body: `"${project.title}" is funded and now live for providers to apply.`,
-    link: '/projects',
-  })
 }

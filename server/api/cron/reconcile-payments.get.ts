@@ -41,10 +41,14 @@ export default defineEventHandler(async (event) => {
   // callback). Same safety as the webhook: verify with ToyyibPay, fund only if
   // paid, fund_project is atomic on status='approved'.
   if (isToyyibpay()) {
+    // Recover ANY still-approved project that has a ToyyibPay bill — regardless
+    // of the payment row's status. (A prior bug could flip a payment to
+    // 'verified' while funding failed, which the old 'claimed'-only filter
+    // would never revisit. Keying off the PROJECT being 'approved' closes that
+    // hole: fund_project is atomic on status='approved', so it can't double-fund.)
     const { data: rows } = await db
       .from('payments')
-      .select('id, toyyibpay_billcode, projects!inner(id, status, title, budget_myr, requester_id, timeline_minutes)')
-      .eq('status', 'claimed')
+      .select('id, status, toyyibpay_billcode, projects!inner(id, status, title, budget_myr, requester_id, timeline_minutes)')
       .not('toyyibpay_billcode', 'is', null)
       .eq('projects.status', 'approved')
       .limit(100)
@@ -57,23 +61,21 @@ export default defineEventHandler(async (event) => {
       let st
       try { st = await getBillStatus(r.toyyibpay_billcode as string) } catch { continue }
       if (!st.paid) continue
-      try {
-        await db.from('payments').update({ status: 'verified', paid_at: new Date().toISOString() }).eq('id', r.id)
-        await db.rpc('fund_project', { p_project: project.id, p_amount: project.budget_myr, p_actor: project.requester_id })
-        const mins = project.timeline_minutes ?? 2880
-        await db.rpc('push_project_live', { p_project: project.id, p_deadline: new Date(Date.now() + mins * 60_000).toISOString() })
-        await notify(db, project.requester_id, {
-          type: 'payment_received',
-          title: 'Payment received',
-          body: `"${project.title}" is funded and now live for providers to apply.`,
-          link: '/projects',
-        })
-        results.push({ project: project.id, funded: true })
-      } catch {
-        results.push({ project: project.id, funded: false, note: 'already funded / race' })
-      }
+      // Fund FIRST; only settle the payment if funding succeeded.
+      const { error: fErr } = await db.rpc('fund_project', { p_project: project.id, p_amount: project.budget_myr, p_actor: project.requester_id })
+      if (fErr) { results.push({ project: project.id, funded: false, note: fErr.message }); continue }
+      const mins = project.timeline_minutes ?? 2880
+      await db.rpc('push_project_live', { p_project: project.id, p_deadline: new Date(Date.now() + mins * 60_000).toISOString() })
+      await db.from('payments').update({ status: 'verified', paid_at: new Date().toISOString() }).eq('id', r.id)
+      await notify(db, project.requester_id, {
+        type: 'payment_received',
+        title: 'Payment received',
+        body: `"${project.title}" is funded and now live for providers to apply.`,
+        link: '/projects',
+      })
+      results.push({ project: project.id, funded: true })
     }
-    return { expiry, cancellations, checked: (rows ?? []).length, recovered: results.filter((x) => x.funded).length, results }
+    return { expiry, completions, cancellations, checked: (rows ?? []).length, recovered: results.filter((x) => x.funded).length, results }
   }
 
   // (C) Xendit reconciliation — Xendit mode only.

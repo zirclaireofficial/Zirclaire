@@ -69,6 +69,17 @@ function payerPhone(v?: string | null): string {
   return digits.length >= 7 ? digits : '0000000000'
 }
 
+// Which payment channels the hosted page offers:
+//   '0' = FPX only, '1' = card only, '2' = FPX + card (default / broadest).
+// E-wallets (Touch 'n Go, GrabPay, ...) are enabled at the ACCOUNT level and
+// appear automatically once your ToyyibPay account supports them — this only
+// controls the FPX/card split. Override with TOYYIBPAY_PAYMENT_CHANNEL if
+// ToyyibPay ever asks for a different value; no redeploy needed.
+function paymentChannel(): string {
+  const v = (process.env.TOYYIBPAY_PAYMENT_CHANNEL ?? '').trim()
+  return ['0', '1', '2'].includes(v) ? v : '2'
+}
+
 /** Create a bill. Returns the bill code + the hosted URL to redirect to. */
 export async function createBill(input: CreateBillInput): Promise<{ billCode: string; payUrl: string }> {
   const cents = Math.round(input.amountMYR * 100)
@@ -86,7 +97,7 @@ export async function createBill(input: CreateBillInput): Promise<{ billCode: st
     billTo: payerName(input.payerName),
     billEmail: payerEmail(input.payerEmail),
     billPhone: payerPhone(input.payerPhone),
-    billPaymentChannel: '2',            // FPX + card
+    billPaymentChannel: paymentChannel(), // FPX + card by default (env-overridable)
     billDisplayMerchant: '1',
   })
   // Success shape: [{ "BillCode": "xxxx" }]. Error shape carries status/msg.
@@ -104,20 +115,35 @@ export interface BillStatus {
   amountMYR: number | null
 }
 
+// Read the payment status off a transaction row, tolerant of field-name /
+// casing variations across ToyyibPay responses. '1' = success, '2' = pending,
+// '3' = fail.
+function txnStatus(t: any): string {
+  const v = t?.billpaymentStatus ?? t?.billpaymentstatus ?? t?.paymentStatus ?? t?.status
+  return v == null ? 'unknown' : String(v).trim()
+}
+function txnAmount(t: any): number | null {
+  const v = t?.billpaymentAmount ?? t?.billpaymentamount ?? t?.amount
+  return v == null ? null : Number(v) || null
+}
+
 /** The trusted check: ask ToyyibPay the real status of a bill's transactions. */
 export async function getBillStatus(billCode: string): Promise<BillStatus> {
   const out = await form('getBillTransactions', {
     userSecretKey: secretKey(),
     billCode,
   })
-  const txns = Array.isArray(out) ? out : []
-  // A bill is paid if any transaction reports success (status '1').
-  const success = txns.find((t: any) => String(t.billpaymentStatus) === '1')
+  const txns = Array.isArray(out) ? out : (out ? [out] : [])
+  // Log the raw shape once so we can diagnose a paid-but-not-funded bill.
+  console.log('[toyyibpay getBillStatus]', billCode, JSON.stringify(out).slice(0, 400))
+
+  // A bill is paid if any transaction reports success ('1').
+  const success = txns.find((t: any) => txnStatus(t) === '1')
   if (success) {
-    return { paid: true, status: '1', amountMYR: Number(success.billpaymentAmount ?? 0) || null }
+    return { paid: true, status: '1', amountMYR: txnAmount(success) }
   }
   const latest = txns[0]
-  const s = latest ? String(latest.billpaymentStatus) : 'unknown'
+  const s = latest ? txnStatus(latest) : 'unknown'
   return { paid: false, status: (['1', '2', '3'].includes(s) ? s : 'unknown') as BillStatus['status'], amountMYR: null }
 }
 
