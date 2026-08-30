@@ -12,6 +12,9 @@ export default defineEventHandler(async (event) => {
   const body = await readBody<Record<string, any>>(event)
   const billCode: string | undefined = body?.billcode ?? body?.billCode
   if (!billCode) return { received: true, ignored: 'no billcode' }
+  // ToyyibPay's callback carries the result directly: status '1' = success.
+  const callbackSuccess = String(body?.status ?? body?.status_id ?? '') === '1'
+  console.log('[toyyibpay webhook] callback', { billCode, status: body?.status, order: body?.order_id })
   const db = serviceClient(event)
 
   // ---- Project funding? ----
@@ -19,7 +22,7 @@ export default defineEventHandler(async (event) => {
     .from('payments').select('id, project_id, status').eq('toyyibpay_billcode', billCode).maybeSingle()
   if (pay) {
     if (pay.status === 'verified') return { received: true, duplicate: true }
-    if (!(await verified(billCode))) return { received: true, notPaid: true }
+    if (!(await verified(billCode, callbackSuccess))) return { received: true, notPaid: true }
     await fundProjectFromBill(db, pay.id, pay.project_id)
     return { received: true, kind: 'project' }
   }
@@ -29,7 +32,7 @@ export default defineEventHandler(async (event) => {
     .from('royalty_payments').select('id, item_id, buyer_id, status, reference').eq('toyyibpay_billcode', billCode).maybeSingle()
   if (rp) {
     if (rp.status === 'paid') return { received: true, duplicate: true }
-    if (!(await verified(billCode))) return { received: true, notPaid: true }
+    if (!(await verified(billCode, callbackSuccess))) return { received: true, notPaid: true }
     // Flip once — the winner finalizes the sale.
     const { data: flipped } = await db
       .from('royalty_payments').update({ status: 'paid', paid_at: new Date().toISOString() })
@@ -52,14 +55,23 @@ export default defineEventHandler(async (event) => {
   return { received: true, ignored: 'unknown bill' }
 })
 
-async function verified(billCode: string): Promise<boolean> {
-  try {
-    const st = await getBillStatus(billCode)
-    return st.paid
-  } catch (err) {
-    console.error('[toyyibpay webhook] verify failed', err)
-    return false // leave it pending; reconcile/next callback retries
+// Confirm the bill is really paid. We never fund on the (unsigned) callback
+// alone — we always confirm with getBillTransactions. But that endpoint can lag
+// a few seconds behind the callback, so when ToyyibPay's callback says success
+// we retry a few times before giving up (the daily reconcile is the backstop).
+async function verified(billCode: string, callbackSuccess = false): Promise<boolean> {
+  const attempts = callbackSuccess ? 4 : 1
+  for (let i = 0; i < attempts; i++) {
+    try {
+      const st = await getBillStatus(billCode)
+      if (st.paid) return true
+      if (st.status === '3' && !callbackSuccess) return false // definitively failed
+    } catch (err) {
+      console.error('[toyyibpay webhook] verify failed', err)
+    }
+    if (i < attempts - 1) await new Promise((r) => setTimeout(r, 2000))
   }
+  return false // leave it 'claimed'; reconcile / a later callback retries
 }
 
 async function fundProjectFromBill(db: SupabaseClient, paymentId: string, projectId: string) {
