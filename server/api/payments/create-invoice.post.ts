@@ -60,12 +60,14 @@ export default defineEventHandler(async (event) => {
     const origin = getRequestURL(event).origin
     const ref = `zc-fund-${projectId}-${Date.now()}`
     const payer = await getCallerProfile(event) // the requester (owner)
+    // Send the payer to our return page, which confirms the payment and funds
+    // the project on the spot (ToyyibPay appends ?billcode=&status_id= itself).
     const bill = await createBill({
       name: 'Zirclaire Project',
       description: `Fund project ${String(project.title).slice(0, 60)}`,
       amountMYR: amount,
       externalRef: ref,
-      returnUrl: typeof returnUrl === 'string' ? returnUrl : `${origin}/projects`,
+      returnUrl: `${origin}/payment/return`,
       callbackUrl: `${origin}/api/webhooks/toyyibpay`,
       payerName: payer.full_name,
       payerEmail: payer.email,
