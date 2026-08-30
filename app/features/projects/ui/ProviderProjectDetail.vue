@@ -12,7 +12,7 @@ const emit = defineEmits<{ close: []; changed: [] }>()
 
 const supabase = useSupabaseClient<Database>()
 const user = useSupabaseUser()
-const { startWork, submitDeliverable } = useProjectActions()
+const { submitDeliverable } = useProjectActions()
 const { openProjectThread } = useMessaging()
 const { upload } = useMediaUpload()
 const toast = useToast()
@@ -31,8 +31,7 @@ const file = ref<File | null>(null)
 const note = ref('')
 
 const status = computed(() => project.value?.status ?? '')
-const canStart = computed(() => status.value === 'awarded')
-const canSubmit = computed(() => ['in_progress', 'revision_requested'].includes(status.value))
+const canSubmit = computed(() => ['awarded', 'in_progress', 'revision_requested'].includes(status.value))
 const submitted = computed(() => ['submitted_work', 'in_review'].includes(status.value))
 
 async function load() {
@@ -51,17 +50,6 @@ async function load() {
   }
 }
 onMounted(load)
-
-async function begin() {
-  busy.value = true
-  try {
-    await startWork(props.projectId)
-    toast.add({ title: 'Work started', description: 'You can now submit your deliverable when ready.', color: 'success' })
-    await load(); emit('changed')
-  } catch (e) {
-    toast.add({ title: 'Could not start', description: err(e), color: 'error' })
-  } finally { busy.value = false }
-}
 
 function onFile(e: Event) { file.value = (e.target as HTMLInputElement).files?.[0] ?? null }
 
@@ -139,9 +127,7 @@ const deadline = computed(() => project.value?.deadline_at ? new Date(project.va
 
           <!-- Action bar -->
           <div class="border-t border-stone-200 p-4 dark:border-stone-800">
-            <UButton v-if="canStart" color="primary" block size="lg" class="zc-tap" :loading="busy" icon="i-lucide-play" label="Start work" @click="begin" />
-
-            <template v-else-if="canSubmit">
+            <template v-if="canSubmit">
               <div v-if="showSubmit" class="space-y-3">
                 <UFormField :label="status === 'revision_requested' ? 'Upload your revised deliverable' : 'Upload your deliverable'">
                   <input type="file" class="block w-full text-sm text-stone-500 file:mr-3 file:rounded-lg file:border-0 file:bg-stone-100 file:px-3 file:py-2 file:text-sm dark:file:bg-stone-800" @change="onFile" >
