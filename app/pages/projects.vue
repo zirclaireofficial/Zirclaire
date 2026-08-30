@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useMe } from '~/features/auth/application/useMe'
 import ProjectFeed from '~/features/projects/ui/ProjectFeed.vue'
+import ProviderWork from '~/features/projects/ui/ProviderWork.vue'
 import MyProjects from '~/features/projects/ui/MyProjects.vue'
 import MyCancellations from '~/features/cancellations/ui/MyCancellations.vue'
 
@@ -16,7 +17,10 @@ const isParty = computed(() => me.value?.role === 'service_provider' || me.value
     <!-- Any cancellation the current user is involved in (both roles) -->
     <MyCancellations v-if="isParty" />
 
-    <ProjectFeed v-if="me?.role === 'service_provider'" />
+    <template v-if="me?.role === 'service_provider'">
+      <ProviderWork />
+      <ProjectFeed />
+    </template>
     <MyProjects v-else-if="me?.role === 'service_requester'" />
 
     <div v-else-if="me?.role === 'admin'" class="flex flex-col items-center gap-3 py-24 text-center">

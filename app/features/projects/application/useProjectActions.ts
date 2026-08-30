@@ -63,5 +63,36 @@ export function useProjectActions() {
     })
   }
 
-  return { createProject, claimPayment, createInvoice, awardApplicant, fundAndLaunch, approveProject }
+  /** Awarded provider begins work: awarded → in_progress. */
+  function startWork(projectId: string) {
+    return authedFetch<{ project: Project }>('/api/projects/start', { method: 'POST', body: { projectId } })
+  }
+
+  /** Awarded provider submits a deliverable (Cloudinary reference already
+   *  uploaded): in_progress|revision_requested → submitted_work. */
+  function submitDeliverable(projectId: string, mediaUrl: string, mediaType?: string | null, note?: string | null) {
+    return authedFetch<{ project: Project }>('/api/projects/submit-deliverable', {
+      method: 'POST', body: { projectId, mediaUrl, mediaType, note },
+    })
+  }
+
+  /** Requester asks for changes on a submission (unlimited rounds). */
+  function requestChanges(projectId: string, note: string) {
+    return authedFetch<{ ok: boolean }>('/api/projects/request-changes', { method: 'POST', body: { projectId, note } })
+  }
+
+  /** Requester accepts the work — closes the project and releases the payout. */
+  function acceptWork(projectId: string) {
+    return authedFetch<{ ok: boolean }>('/api/projects/accept', { method: 'POST', body: { projectId } })
+  }
+
+  /** Signed URL to view the latest deliverable (project party / staff). */
+  async function deliverableUrl(projectId: string): Promise<{ url: string; mediaType: string | null }> {
+    return authedFetch('/api/projects/deliverable-url', { method: 'POST', body: { projectId } })
+  }
+
+  return {
+    createProject, claimPayment, createInvoice, awardApplicant, fundAndLaunch, approveProject,
+    startWork, submitDeliverable, requestChanges, acceptWork, deliverableUrl,
+  }
 }

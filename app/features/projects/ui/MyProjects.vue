@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useProjects } from '~/features/projects/application/useProjects'
+import { useProjectActions } from '~/features/projects/application/useProjectActions'
 import {
   fundingStateOf,
   canResumePayment,
@@ -20,10 +21,54 @@ import CancelProjectButton from '~/features/cancellations/ui/CancelProjectButton
 const CANCELLABLE = ['funded', 'live', 'awarded', 'in_progress', 'submitted_work', 'in_review', 'revision_requested']
 
 const { myProjectsWithPayments } = useProjects()
+const { requestChanges, acceptWork, deliverableUrl } = useProjectActions()
 const toast = useToast()
 
 const projects = ref<ProjectWithPayments[]>([])
 const loading = ref(true)
+
+// SR review state (per project under review).
+const UNDER_REVIEW = ['submitted_work', 'in_review']
+const reviewBusy = ref<string | null>(null)
+const changesFor = ref<string | null>(null) // project id whose "request changes" box is open
+const changeNote = ref('')
+
+async function viewDeliverable(projectId: string) {
+  reviewBusy.value = projectId
+  try {
+    const { url } = await deliverableUrl(projectId)
+    window.open(url, '_blank', 'noopener')
+  } catch (e) {
+    toast.add({ title: 'Could not open the deliverable', description: errMsg(e), color: 'error' })
+  } finally { reviewBusy.value = null }
+}
+async function sendChanges(projectId: string) {
+  const note = changeNote.value.trim()
+  if (!note) return
+  reviewBusy.value = projectId
+  try {
+    await requestChanges(projectId, note)
+    toast.add({ title: 'Changes requested', description: 'Sent back to the provider.', color: 'success' })
+    changesFor.value = null; changeNote.value = ''
+    await load()
+  } catch (e) {
+    toast.add({ title: 'Could not request changes', description: errMsg(e), color: 'error' })
+  } finally { reviewBusy.value = null }
+}
+async function accept(projectId: string) {
+  reviewBusy.value = projectId
+  try {
+    await acceptWork(projectId)
+    toast.add({ title: 'Accepted', description: 'The project is complete and the provider will be paid.', color: 'success' })
+    await load()
+  } catch (e) {
+    toast.add({ title: 'Could not accept', description: errMsg(e), color: 'error' })
+  } finally { reviewBusy.value = null }
+}
+function errMsg(e: unknown) {
+  const x = e as { data?: { statusMessage?: string }; message?: string }
+  return x?.data?.statusMessage ?? x?.message
+}
 
 async function load() {
   try {
@@ -229,6 +274,33 @@ function labelColor(p: ProjectWithPayments) {
         >
           <UIcon name="i-lucide-clock" class="size-3.5 shrink-0" />
           <span>Payment <span class="font-mono">{{ latestClaim(p)?.reference }}</span> is awaiting admin verification.</span>
+        </div>
+
+        <!-- Review the provider's submission (accept / request changes) -->
+        <div v-if="UNDER_REVIEW.includes(p.status)" class="mt-3 rounded-xl border border-primary/30 bg-primary/5 p-3">
+          <div class="flex items-center gap-2 text-sm font-medium">
+            <UIcon name="i-lucide-inbox" class="size-4 text-primary" /> The provider submitted work for review
+          </div>
+          <p class="mt-1 text-xs text-stone-500 dark:text-stone-400">
+            Review it, then accept to release payment — or ask for changes. You can keep chatting below.
+          </p>
+
+          <UButton
+            class="zc-tap mt-2" size="sm" color="neutral" variant="soft" block icon="i-lucide-file-down"
+            :loading="reviewBusy === p.id" label="View submitted work" @click="viewDeliverable(p.id)"
+          />
+
+          <div v-if="changesFor === p.id" class="mt-2 space-y-2">
+            <UTextarea v-model="changeNote" :rows="2" placeholder="What needs to change?" class="w-full" />
+            <div class="flex gap-2">
+              <UButton size="sm" color="neutral" variant="soft" label="Cancel" class="flex-1" @click="changesFor = null" />
+              <UButton size="sm" color="warning" class="flex-1 zc-tap" :loading="reviewBusy === p.id" :disabled="!changeNote.trim()" label="Send changes" @click="sendChanges(p.id)" />
+            </div>
+          </div>
+          <div v-else class="mt-2 grid grid-cols-2 gap-2">
+            <UButton size="sm" color="warning" variant="soft" class="zc-tap" icon="i-lucide-rotate-ccw" label="Request changes" @click="changesFor = p.id; changeNote = ''" />
+            <UButton size="sm" color="primary" class="zc-tap" icon="i-lucide-check" label="Accept & pay" :loading="reviewBusy === p.id" @click="accept(p.id)" />
+          </div>
         </div>
 
         <!-- Message the awarded provider once there is one -->

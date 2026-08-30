@@ -9,23 +9,56 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { notify, notifyRoles } from './notify'
 
-// Auto-complete projects whose 48h post-"mark complete" window has elapsed with
-// no protest. complete_project self-guards (skips any with an open dispute), so
-// this only closes the clean ones. Each creates the provider payout row and
-// notifies master to pay.
+// Iterative-review backstop: a provider submits, and if the requester neither
+// accepts nor asks for changes within a grace period, the work is auto-accepted
+// so the provider isn't left unpaid. A reminder is sent partway through. This is
+// NOT a dispute — normal review (accept / request changes) is the requester's to
+// drive; this only rescues a silent requester.
+const GRACE_DAYS = 7
+const REMIND_DAYS = 3
+
 export async function runCompletionSweep(db: SupabaseClient) {
-  const cutoff = new Date(Date.now() - 48 * 3_600_000).toISOString()
+  const now = Date.now()
+  const graceCut = new Date(now - GRACE_DAYS * 86_400_000).toISOString()
+  const remindCut = new Date(now - REMIND_DAYS * 86_400_000).toISOString()
+  let completed = 0
+  let reminded = 0
+
+  // --- Auto-accept submissions older than the grace period ---
   const { data: due } = await db
     .from('projects')
-    .select('id, title, requester_id')
+    .select('id, title, requester_id, awarded_provider_id, submitted_work_at')
     .eq('status', 'submitted_work')
-    .not('completion_marked_at', 'is', null)
-    .lt('completion_marked_at', cutoff)
+    .not('submitted_work_at', 'is', null)
+    .lt('submitted_work_at', graceCut)
     .limit(200)
-  let completed = 0
-  for (const p of (due ?? []) as Array<{ id: string; title: string; requester_id: string }>) {
-    const { error } = await db.rpc('complete_project', { p_project: p.id, p_actor: p.requester_id })
-    if (error) continue // open dispute / race — leave for a human or next run
+
+  for (const p of (due ?? []) as Array<{ id: string; title: string; requester_id: string; awarded_provider_id: string | null }>) {
+    // Never auto-accept while a cancellation/protest is open on this project.
+    const { count: open } = await db
+      .from('cancellation_requests').select('id', { count: 'exact', head: true })
+      .eq('project_id', p.id).in('status', ['pending_provider', 'in_arbitration', 'awaiting_appeal', 'appealed'])
+    if ((open ?? 0) > 0) continue
+
+    const { error: aErr } = await db.rpc('accept_work', { p_project: p.id, p_reviewer: p.requester_id })
+    if (aErr) continue
+    const { error: cErr } = await db.rpc('clear_project', { p_project: p.id, p_actor: p.requester_id })
+    if (cErr) continue // finished but not cleared (rare) — leave for a human
+
+    if (p.awarded_provider_id) {
+      await notify(db, p.awarded_provider_id, {
+        type: 'work_accepted',
+        title: 'Work auto-accepted',
+        body: `"${p.title}" was auto-accepted after the review window. Your payout is being prepared.`,
+        link: '/projects',
+      })
+    }
+    await notify(db, p.requester_id, {
+      type: 'work_accepted',
+      title: 'Project auto-completed',
+      body: `"${p.title}" completed automatically — you didn't respond within ${GRACE_DAYS} days of the submission.`,
+      link: '/projects',
+    })
     await notifyRoles(db, ['master'], {
       type: 'payout_due',
       title: 'Payout due',
@@ -34,7 +67,30 @@ export async function runCompletionSweep(db: SupabaseClient) {
     })
     completed++
   }
-  return { completed }
+
+  // --- Reminders: submissions past the remind mark, not yet reminded ---
+  const { data: toRemind } = await db
+    .from('projects')
+    .select('id, title, requester_id, submitted_work_at, review_reminded_at')
+    .eq('status', 'submitted_work')
+    .not('submitted_work_at', 'is', null)
+    .lt('submitted_work_at', remindCut)
+    .gte('submitted_work_at', graceCut) // not already past the grace cutoff
+    .limit(200)
+
+  for (const p of (toRemind ?? []) as Array<{ id: string; title: string; requester_id: string; submitted_work_at: string; review_reminded_at: string | null }>) {
+    if (p.review_reminded_at && new Date(p.review_reminded_at) >= new Date(p.submitted_work_at)) continue
+    await notify(db, p.requester_id, {
+      type: 'review_reminder',
+      title: 'A submission is waiting for you',
+      body: `"${p.title}" is awaiting your review. Accept it or request changes — it auto-accepts ${GRACE_DAYS} days after submission.`,
+      link: '/projects',
+    })
+    await db.from('projects').update({ review_reminded_at: new Date().toISOString() }).eq('id', p.id)
+    reminded++
+  }
+
+  return { completed, reminded }
 }
 
 export async function runExpirySweep(db: SupabaseClient) {
