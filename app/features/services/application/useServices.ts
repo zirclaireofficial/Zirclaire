@@ -11,12 +11,13 @@ export function useServices() {
   const repo = createSupabaseServiceRepository(supabase)
   const useCases = createServiceUseCases(repo)
 
-  /** Order a tier. Server creates a pre-awarded, pre-funded project. */
-  function orderTier(tierId: string) {
-    return authedFetch<{ project: { id: string } }>('/api/services/order', {
-      method: 'POST',
-      body: { tierId },
-    })
+  /** Order a tier. Simulator funds instantly; gateway returns a pay URL and the
+   *  order only starts once payment is confirmed. */
+  function orderTier(tierId: string, returnUrl?: string) {
+    return authedFetch<{ mode: string; invoiceUrl?: string; project?: { id: string }; projectId?: string }>(
+      '/api/services/order',
+      { method: 'POST', body: { tierId, returnUrl } },
+    )
   }
 
   return { ...useCases, orderTier }

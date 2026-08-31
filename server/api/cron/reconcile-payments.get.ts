@@ -48,29 +48,35 @@ export default defineEventHandler(async (event) => {
     // hole: fund_project is atomic on status='approved', so it can't double-fund.)
     const { data: rows } = await db
       .from('payments')
-      .select('id, status, toyyibpay_billcode, projects!inner(id, status, title, budget_myr, requester_id, timeline_minutes)')
+      .select('id, status, toyyibpay_billcode, projects!inner(id, status, title, budget_myr, requester_id, timeline_minutes, service_id)')
       .not('toyyibpay_billcode', 'is', null)
       .eq('projects.status', 'approved')
       .limit(100)
     const results: Array<Record<string, unknown>> = []
     for (const r of rows ?? []) {
       const project = (r as unknown as { projects: {
-        id: string; status: string; title: string; budget_myr: number; requester_id: string; timeline_minutes: number | null
+        id: string; status: string; title: string; budget_myr: number; requester_id: string; timeline_minutes: number | null; service_id: string | null
       } }).projects
       if (!project || project.status !== 'approved') continue
       let st
       try { st = await getBillStatus(r.toyyibpay_billcode as string) } catch { continue }
       if (!st.paid) continue
-      // Fund FIRST; only settle the payment if funding succeeded.
-      const { error: fErr } = await db.rpc('fund_project', { p_project: project.id, p_amount: project.budget_myr, p_actor: project.requester_id })
-      if (fErr) { results.push({ project: project.id, funded: false, note: fErr.message }); continue }
-      const mins = project.timeline_minutes ?? 2880
-      await db.rpc('push_project_live', { p_project: project.id, p_deadline: new Date(Date.now() + mins * 60_000).toISOString() })
+      // Fund FIRST; only settle the payment if funding succeeded. Service orders
+      // (provider pre-assigned) go straight to awarded; commissioned go live.
+      if (project.service_id) {
+        const { error: sErr } = await db.rpc('fund_service_order', { p_project: project.id, p_actor: project.requester_id })
+        if (sErr) { results.push({ project: project.id, funded: false, note: sErr.message }); continue }
+      } else {
+        const { error: fErr } = await db.rpc('fund_project', { p_project: project.id, p_amount: project.budget_myr, p_actor: project.requester_id })
+        if (fErr) { results.push({ project: project.id, funded: false, note: fErr.message }); continue }
+        const mins = project.timeline_minutes ?? 2880
+        await db.rpc('push_project_live', { p_project: project.id, p_deadline: new Date(Date.now() + mins * 60_000).toISOString() })
+      }
       await db.from('payments').update({ status: 'verified', paid_at: new Date().toISOString() }).eq('id', r.id)
       await notify(db, project.requester_id, {
         type: 'payment_received',
-        title: 'Payment received',
-        body: `"${project.title}" is funded and now live for providers to apply.`,
+        title: project.service_id ? 'Order confirmed' : 'Payment received',
+        body: project.service_id ? `Your order "${project.title}" is paid — the provider will start.` : `"${project.title}" is funded and now live for providers to apply.`,
         link: '/projects',
       })
       results.push({ project: project.id, funded: true })

@@ -82,26 +82,29 @@ async function fundProjectFromBill(db: SupabaseClient, paymentId: string, projec
   // must NOT flip the payment to 'verified' — leaving it 'claimed' is what lets
   // the reconcile cron (and ToyyibPay's own callback retry) pick it up again.
   if (project.status === 'approved') {
-    const { error: fErr } = await db.rpc('fund_project', {
-      p_project: project.id, p_amount: project.budget_myr, p_actor: project.requester_id,
-    })
-    if (fErr) {
-      console.error('[toyyibpay webhook] fund_project failed', { projectId, err: fErr })
-      // 500 → ToyyibPay retries the callback; payment stays 'claimed' for reconcile.
-      throw createError({ statusCode: 500, statusMessage: 'funding failed, will retry' })
+    if (project.service_id) {
+      // Service order: provider is already assigned — fund and go straight to awarded.
+      const { error: sErr } = await db.rpc('fund_service_order', { p_project: project.id, p_actor: project.requester_id })
+      if (sErr) {
+        console.error('[toyyibpay webhook] fund_service_order failed', { projectId, err: sErr })
+        throw createError({ statusCode: 500, statusMessage: 'funding failed, will retry' })
+      }
+      await notify(db, project.requester_id, { type: 'payment_received', title: 'Order confirmed', body: `Your order "${project.title}" is paid — the provider will start the work.`, link: '/projects' })
+      if (project.awarded_provider_id) {
+        await notify(db, project.awarded_provider_id, { type: 'service_ordered', title: 'New order', body: `You have a new paid order: "${project.title}".`, link: '/projects' })
+      }
+    } else {
+      // Commissioned project: fund, then open for applications.
+      const { error: fErr } = await db.rpc('fund_project', { p_project: project.id, p_amount: project.budget_myr, p_actor: project.requester_id })
+      if (fErr) {
+        console.error('[toyyibpay webhook] fund_project failed', { projectId, err: fErr })
+        throw createError({ statusCode: 500, statusMessage: 'funding failed, will retry' })
+      }
+      const mins = project.timeline_minutes ?? 2880
+      const { error: lErr } = await db.rpc('push_project_live', { p_project: project.id, p_deadline: new Date(Date.now() + mins * 60_000).toISOString() })
+      if (lErr) console.error('[toyyibpay webhook] push_project_live failed (funded, not live)', { projectId, err: lErr })
+      await notify(db, project.requester_id, { type: 'payment_received', title: 'Payment received', body: `"${project.title}" is funded and now live for providers to apply.`, link: '/projects' })
     }
-    const mins = project.timeline_minutes ?? 2880
-    const { error: lErr } = await db.rpc('push_project_live', {
-      p_project: project.id, p_deadline: new Date(Date.now() + mins * 60_000).toISOString(),
-    })
-    if (lErr) console.error('[toyyibpay webhook] push_project_live failed (funded, not live)', { projectId, err: lErr })
-
-    await notify(db, project.requester_id, {
-      type: 'payment_received',
-      title: 'Payment received',
-      body: `"${project.title}" is funded and now live for providers to apply.`,
-      link: '/projects',
-    })
   }
 
   // Funded now, or already funded by a prior/concurrent run. Settle the payment.

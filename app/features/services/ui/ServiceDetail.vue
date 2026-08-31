@@ -18,7 +18,6 @@ const user = useSupabaseUser()
 const toast = useToast()
 
 const selectedTier = ref<ServiceTier | null>(props.service.tiers[0] ?? null)
-const method = ref<'touch_n_go' | 'binance'>('touch_n_go')
 const ordering = ref(false)
 const done = ref(false)
 
@@ -38,7 +37,9 @@ async function order() {
   if (!selectedTier.value) return
   ordering.value = true
   try {
-    await orderTier(selectedTier.value.id)
+    const res = await orderTier(selectedTier.value.id, window.location.href)
+    // Gateway mode: pay first — the order starts only after payment confirms.
+    if (res.invoiceUrl) { window.location.href = res.invoiceUrl; return }
     toast.add({ title: 'Order placed', description: 'Funds are held in escrow. Track it in My projects.', color: 'success' })
     done.value = true
     emit('ordered')
@@ -124,22 +125,9 @@ async function order() {
 
           <!-- Order -->
           <template v-else-if="canOrder">
-            <div>
-              <p class="mb-2 text-sm font-medium">Pay with</p>
-              <div class="grid grid-cols-2 gap-3">
-                <button type="button" class="zc-tap rounded-xl border p-3 text-left transition" :class="method === 'touch_n_go' ? 'border-primary ring-1 ring-primary' : 'border-stone-200 dark:border-stone-800'" @click="method = 'touch_n_go'">
-                  <UIcon name="i-lucide-wallet" class="size-5 text-primary" />
-                  <div class="mt-1 text-sm font-medium">Touch 'n Go</div>
-                </button>
-                <button type="button" class="zc-tap rounded-xl border p-3 text-left transition" :class="method === 'binance' ? 'border-primary ring-1 ring-primary' : 'border-stone-200 dark:border-stone-800'" @click="method = 'binance'">
-                  <UIcon name="i-lucide-coins" class="size-5 text-primary" />
-                  <div class="mt-1 text-sm font-medium">Binance</div>
-                </button>
-              </div>
-            </div>
-            <UButton color="primary" block size="lg" class="zc-tap" :loading="ordering" :disabled="!selectedTier" :label="selectedTier ? `Order · RM ${selectedTier.price_myr}` : 'Select a level'" @click="order" />
+            <UButton color="primary" block size="lg" class="zc-tap" :loading="ordering" :disabled="!selectedTier" :label="selectedTier ? `Pay · RM ${selectedTier.price_myr}` : 'Select a level'" @click="order" />
             <p class="flex items-center justify-center gap-1.5 text-center text-xs text-stone-400">
-              <UIcon name="i-lucide-lock" class="size-3" /> Funds held in escrow until you accept the work. Simulated — no real charge.
+              <UIcon name="i-lucide-lock" class="size-3" /> You pay first; funds are held in escrow until you accept the work.
             </p>
           </template>
 
