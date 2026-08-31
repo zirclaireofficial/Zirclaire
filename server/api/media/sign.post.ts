@@ -22,7 +22,13 @@ export default defineEventHandler(async (event) => {
   // Purpose-specific authorization.
   const providerPurposes = ['post', 'deliverable', 'royalty-file', 'royalty-cover']
   const gated = [...providerPurposes, 'project-attachment']
-  if (gated.includes(purpose)) {
+  if (purpose === 'payout-proof') {
+    // Proof of a manual payout — staff only.
+    const profile = await getCallerProfile(event)
+    if (profile.role !== 'admin' && profile.role !== 'master') {
+      throw createError({ statusCode: 403, statusMessage: 'Staff only' })
+    }
+  } else if (gated.includes(purpose)) {
     const profile = await getCallerProfile(event)
     if (profile.kyc_status !== 'approved') {
       throw createError({ statusCode: 403, statusMessage: 'Account not approved' })

@@ -24,6 +24,16 @@ const FLAG_LABEL: Record<string, string> = {
   unconfirmed_payment: 'Unconfirmed payment',
   stranded_claimed: 'Stranded extra payment',
 }
+// Plain-language meaning + what to do, shown on each flagged row.
+const FLAG_HELP: Record<string, string> = {
+  paid_not_funded: 'The requester paid, but the project never went live. Run the reconcile, or fund it manually if the payment is confirmed.',
+  overpaid: 'More money came in than the budget — likely the requester paid twice. Refund the surplus shown below.',
+  amount_mismatch: "The budget, the payment, and the escrow don't all agree. Check the payments below to see where the difference is.",
+  funded_no_payment: 'The project is funded but has no gateway payment behind it (a manual/simulated fund). Verify it was meant to be funded.',
+  unconfirmed_payment: 'A bill exists but we haven’t confirmed it was paid. Use Re-check to ask ToyyibPay, or run Deep re-check.',
+  stranded_claimed: 'An extra bill is sitting on an already-funded project. Re-check it: if Paid, it’s a double-charge to refund; if Failed, ignore it.',
+}
+const showHelp = ref(false)
 
 const report = ref<Report | null>(null)
 const loading = ref(true)
@@ -85,12 +95,40 @@ const sevColor = (s: string) => (s === 'error' ? 'error' : s === 'warn' ? 'warni
       <div>
         <h1 class="zc-title font-serif text-2xl leading-tight">Payment reconciliation</h1>
         <p class="mt-1 text-sm text-stone-500 dark:text-stone-400">
-          Every project's budget vs. its payments vs. escrow. Anything out of line is flagged.
+          A health check on the money. For each project it compares three numbers that should always match, and flags any that don't.
+          <button class="font-medium text-primary hover:underline" @click="showHelp = !showHelp">{{ showHelp ? 'Hide' : 'How does this work?' }}</button>
         </p>
       </div>
       <div class="flex shrink-0 items-center gap-2">
         <UButton icon="i-lucide-search-check" color="primary" variant="soft" size="sm" :loading="loading && deep" label="Deep re-check" @click="deepCheck" />
         <UButton icon="i-lucide-refresh-cw" color="neutral" variant="soft" size="sm" :loading="loading && !deep" label="Refresh" @click="load" />
+      </div>
+    </div>
+
+    <!-- How this works -->
+    <div v-if="showHelp" class="space-y-3 rounded-xl border border-stone-200 bg-stone-50 p-4 text-sm dark:border-stone-800 dark:bg-stone-800/40">
+      <div>
+        <p class="font-medium">The three numbers on every project</p>
+        <ul class="mt-1 space-y-1 text-stone-600 dark:text-stone-300">
+          <li><span class="font-medium">Budget</span> — what the project costs.</li>
+          <li><span class="font-medium">Verified paid</span> — money we've confirmed the requester actually paid.</li>
+          <li><span class="font-medium">Held in escrow</span> — money currently recorded as held for the project.</li>
+        </ul>
+        <p class="mt-1 text-stone-500 dark:text-stone-400">When everything is healthy these agree. A flag means one of them is off.</p>
+      </div>
+      <div>
+        <p class="font-medium">What the flags mean</p>
+        <ul class="mt-1 space-y-1 text-stone-600 dark:text-stone-300">
+          <li v-for="(help, key) in FLAG_HELP" :key="key">
+            <span class="font-medium">{{ FLAG_LABEL[key] }}:</span> {{ help }}
+          </li>
+        </ul>
+      </div>
+      <div>
+        <p class="font-medium">Deep re-check</p>
+        <p class="mt-1 text-stone-600 dark:text-stone-300">
+          Normal load uses what's in the database (fast). <span class="font-medium">Deep re-check</span> asks ToyyibPay the live status of every unconfirmed ("claimed") bill — that's what catches hidden double-payments the database can't see on its own.
+        </p>
       </div>
     </div>
 
@@ -157,6 +195,11 @@ const sevColor = (s: string) => (s === 'error' ? 'error' : s === 'warn' ? 'warni
               </UBadge>
               <UBadge v-if="!r.flags.length" color="success" variant="soft" size="sm">In line</UBadge>
             </div>
+            <ul v-if="r.flags.length" class="mt-2 space-y-1 text-xs text-stone-500 dark:text-stone-400">
+              <li v-for="f in r.flags" :key="f" class="flex gap-1.5">
+                <UIcon name="i-lucide-info" class="mt-0.5 size-3 shrink-0" /><span>{{ FLAG_HELP[f] }}</span>
+              </li>
+            </ul>
           </div>
           <UButton
             :icon="expanded === r.id ? 'i-lucide-chevron-up' : 'i-lucide-chevron-down'"

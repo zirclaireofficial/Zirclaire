@@ -148,6 +148,14 @@ const deadline = computed(() => project.value?.deadline_at ? new Date(project.va
               <UIcon name="i-lucide-clock" class="mr-1 inline size-4" />
               Submitted — awaiting the requester's confirmation.
             </div>
+
+            <div v-else-if="status === 'closed'" class="rounded-xl bg-success/10 p-3 text-center text-sm text-success">
+              <UIcon name="i-lucide-check-circle" class="mr-1 inline size-4" />
+              Completed — your payout is being processed.
+            </div>
+            <div v-else-if="status === 'cancelled'" class="rounded-xl bg-stone-50 p-3 text-center text-sm text-stone-500 dark:bg-stone-800/40">
+              <UIcon name="i-lucide-x-circle" class="mr-1 inline size-4" /> This project was cancelled.
+            </div>
           </div>
         </template>
 

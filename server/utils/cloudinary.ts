@@ -29,6 +29,8 @@ export const MEDIA_PURPOSES = {
   // Direct-message attachments — private; served via a participant-gated
   // signed URL (see /api/messages/attachment-url).
   'message-attachment': { folder: 'zirclaire/messages',            private: true  },
+  // Proof of a manual payout (bank/e-wallet screenshot) — private, staff only.
+  'payout-proof':       { folder: 'zirclaire/payout-proofs',       private: true  },
 } as const
 
 export type MediaPurpose = keyof typeof MEDIA_PURPOSES
