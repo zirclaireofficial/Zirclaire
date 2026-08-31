@@ -3,7 +3,7 @@
 // directly (95%). If a provider is on it, open the consent + arbitration flow.
 import { serviceClient } from '../../utils/auth'
 import { requireProjectOwner } from '../../utils/projects'
-import { notify } from '../../utils/notify'
+import { notify, notifyRoles } from '../../utils/notify'
 
 export default defineEventHandler(async (event) => {
   const { projectId, reason } = await readBody(event)
@@ -20,6 +20,11 @@ export default defineEventHandler(async (event) => {
       p_project: projectId, p_reason: reason, p_actor: profile.id,
     })
     if (error) throw createError({ statusCode: 400, statusMessage: error.message })
+    await notifyRoles(db, ['master'], {
+      type: 'refund_due', title: 'Refund due',
+      body: `"${project.title}" was withdrawn — a 95% refund to the requester is ready to send.`,
+      link: '/master/refunds',
+    })
     return { direct: true }
   }
 

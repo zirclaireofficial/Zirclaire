@@ -33,8 +33,13 @@ export default defineEventHandler(async (event) => {
     await notify(db, r.requested_by, {
       type: 'cancellation_resolved',
       title: 'Cancellation approved',
-      body: `The provider agreed to cancel "${title}". 95% has been refunded to you.`,
+      body: `The provider agreed to cancel "${title}". A 95% refund is being processed.`,
       link: '/projects',
+    })
+    await notifyRoles(db, ['master'], {
+      type: 'refund_due', title: 'Refund due',
+      body: `"${title}" was cancelled — a 95% refund to the requester is ready to send.`,
+      link: '/master/refunds',
     })
   } else {
     await notify(db, r.requested_by, {

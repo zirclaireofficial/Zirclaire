@@ -21,6 +21,7 @@ const items = computed(() =>
         ...(isMaster.value ? [
           { to: '/master', icon: 'i-lucide-shield', label: 'Master console' },
           { to: '/master/payouts', icon: 'i-lucide-hand-coins', label: 'Payouts' },
+          { to: '/master/refunds', icon: 'i-lucide-undo-2', label: 'Refunds' },
           { to: '/master/audit', icon: 'i-lucide-scale', label: 'Payment audit' },
         ] : []),
         // KYC, funding and reports are queues reached from the dashboard —

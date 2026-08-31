@@ -4,6 +4,7 @@
 const items = [[
   { label: 'Master console', icon: 'i-lucide-shield', to: '/master' },
   { label: 'Payouts', icon: 'i-lucide-hand-coins', to: '/master/payouts' },
+  { label: 'Refunds', icon: 'i-lucide-undo-2', to: '/master/refunds' },
   { label: 'Payment audit', icon: 'i-lucide-scale', to: '/master/audit' },
   { label: 'Dashboard', icon: 'i-lucide-layout-dashboard', to: '/admin' },
   { label: 'Feed', icon: 'i-lucide-home', to: '/' },

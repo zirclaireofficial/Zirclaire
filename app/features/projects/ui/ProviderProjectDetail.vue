@@ -3,9 +3,12 @@
 // requester, and the actions to drive the work forward (start, submit).
 import { useProjectActions } from '~/features/projects/application/useProjectActions'
 import { useMessaging } from '~/features/messaging/application/useMessaging'
+import { useCancellations, userStatusLabel } from '~/features/cancellations/application/useCancellations'
+import type { CancellationRequest } from '~/features/cancellations/application/useCancellations'
 import { useMediaUpload } from '~/shared/lib/useMediaUpload'
 import type { Database } from '~/shared/types/database'
 import MessageThread from '~/features/messaging/ui/MessageThread.vue'
+import DisputeChat from '~/features/cancellations/ui/DisputeChat.vue'
 
 const props = defineProps<{ projectId: string }>()
 const emit = defineEmits<{ close: []; changed: [] }>()
@@ -14,8 +17,15 @@ const supabase = useSupabaseClient<Database>()
 const user = useSupabaseUser()
 const { submitDeliverable } = useProjectActions()
 const { openProjectThread } = useMessaging()
+const { forProject, respond, appeal } = useCancellations()
 const { upload } = useMediaUpload()
 const toast = useToast()
+
+// Any open cancellation the requester raised on this project.
+const cancellation = ref<CancellationRequest | null>(null)
+const OPEN_CANCEL = ['pending_provider', 'in_arbitration', 'awaiting_appeal', 'appealed']
+const appealOpen = ref(false)
+const appealReason = ref('')
 
 const currentUserId = computed(() => (user.value as { sub?: string } | null)?.sub ?? '')
 
@@ -37,12 +47,14 @@ const submitted = computed(() => ['submitted_work', 'in_review'].includes(status
 async function load() {
   loading.value = true
   try {
-    const [{ data: p }, thread] = await Promise.all([
+    const [{ data: p }, thread, cancel] = await Promise.all([
       supabase.from('projects').select('*').eq('id', props.projectId).maybeSingle(),
       openProjectThread(props.projectId).catch(() => null),
+      forProject(props.projectId).catch(() => null),
     ])
     project.value = (p as Row) ?? null
     conversationId.value = thread?.conversation?.id ?? null
+    cancellation.value = cancel && OPEN_CANCEL.includes(cancel.status) ? cancel : null
   } catch (e) {
     toast.add({ title: 'Could not load the project', description: (e as { message?: string })?.message, color: 'error' })
   } finally {
@@ -65,6 +77,35 @@ async function submit() {
     await load(); emit('changed')
   } catch (e) {
     toast.add({ title: 'Could not submit', description: err(e), color: 'error' })
+  } finally { busy.value = false }
+}
+
+async function respondCancel(accept: boolean) {
+  if (!cancellation.value) return
+  busy.value = true
+  try {
+    await respond(cancellation.value.id, accept)
+    toast.add({
+      title: accept ? 'Cancellation accepted' : 'Cancellation declined',
+      description: accept ? 'The project will be cancelled and the requester refunded.' : 'Zirclaire will review it.',
+      color: accept ? 'success' : 'neutral',
+    })
+    await load(); emit('changed')
+  } catch (e) {
+    toast.add({ title: 'Could not respond', description: err(e), color: 'error' })
+  } finally { busy.value = false }
+}
+
+async function submitAppeal() {
+  if (!cancellation.value || !appealReason.value.trim()) return
+  busy.value = true
+  try {
+    await appeal(cancellation.value.id, appealReason.value.trim())
+    toast.add({ title: 'Appeal submitted', description: 'Zirclaire will take a final look.', color: 'success' })
+    appealOpen.value = false; appealReason.value = ''
+    await load()
+  } catch (e) {
+    toast.add({ title: 'Could not appeal', description: err(e), color: 'error' })
   } finally { busy.value = false }
 }
 
@@ -108,6 +149,49 @@ const deadline = computed(() => project.value?.deadline_at ? new Date(project.va
               <ul class="mt-1 list-inside list-decimal space-y-0.5">
                 <li v-for="(r, i) in project.requirements" :key="i">{{ r }}</li>
               </ul>
+            </div>
+          </div>
+
+          <!-- Cancellation raised by the requester -->
+          <div v-if="cancellation" class="border-b border-stone-100 bg-amber-50/60 p-4 dark:border-stone-800 dark:bg-amber-950/20">
+            <div class="flex items-center justify-between gap-2">
+              <h3 class="flex items-center gap-1.5 text-sm font-medium">
+                <UIcon name="i-lucide-x-circle" class="size-4 text-amber-600" /> Cancellation requested
+              </h3>
+              <UBadge :color="(userStatusLabel(cancellation).color as any)" variant="soft" size="sm">{{ userStatusLabel(cancellation).label }}</UBadge>
+            </div>
+            <p class="mt-1.5 text-xs text-stone-600 dark:text-stone-300"><span class="font-medium">Reason:</span> {{ cancellation.reason }}</p>
+
+            <!-- Pending your response: accept or decline -->
+            <div v-if="cancellation.status === 'pending_provider'" class="mt-3 flex gap-2">
+              <UButton color="primary" size="sm" class="flex-1 zc-tap" label="Accept cancellation" :loading="busy" @click="respondCancel(true)" />
+              <UButton color="neutral" variant="soft" size="sm" class="flex-1 zc-tap" label="Decline" :loading="busy" @click="respondCancel(false)" />
+            </div>
+            <p v-if="cancellation.status === 'pending_provider'" class="mt-1.5 text-[11px] text-stone-400">
+              Accepting cancels the project and refunds the requester. Declining sends it to Zirclaire for review.
+            </p>
+
+            <!-- Appeal window -->
+            <div v-else-if="cancellation.status === 'awaiting_appeal'" class="mt-3">
+              <div v-if="!appealOpen">
+                <p class="mb-2 text-xs text-stone-500 dark:text-stone-400">A decision has been made. If you disagree, you can appeal for a final review.</p>
+                <UButton color="primary" variant="soft" size="sm" label="Appeal decision" @click="appealOpen = true" />
+              </div>
+              <div v-else class="space-y-2">
+                <UTextarea v-model="appealReason" :rows="2" placeholder="Why are you appealing?" class="w-full" />
+                <div class="flex gap-2">
+                  <UButton color="primary" size="sm" label="Submit appeal" :loading="busy" @click="submitAppeal" />
+                  <UButton color="neutral" variant="ghost" size="sm" label="Cancel" @click="appealOpen = false" />
+                </div>
+              </div>
+            </div>
+
+            <!-- Private line to Zirclaire while under review -->
+            <div v-if="['in_arbitration', 'awaiting_appeal', 'appealed'].includes(cancellation.status)" class="mt-3">
+              <p class="mb-1.5 flex items-center gap-1 text-xs font-medium text-stone-500 dark:text-stone-400">
+                <UIcon name="i-lucide-shield" class="size-3.5" /> Zirclaire Review Team
+              </p>
+              <DisputeChat :request-id="cancellation.id" mode="user" />
             </div>
           </div>
 

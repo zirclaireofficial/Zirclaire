@@ -2,7 +2,7 @@
 // Master's ruling on an appeal — final and binding. Executes the refund
 // immediately if approved.
 import { serviceClient, requireMaster } from '../../utils/auth'
-import { notify } from '../../utils/notify'
+import { notify, notifyRoles } from '../../utils/notify'
 
 export default defineEventHandler(async (event) => {
   const { requestId, decision, reason } = await readBody(event)
@@ -31,10 +31,17 @@ export default defineEventHandler(async (event) => {
     type: 'cancellation_resolved',
     title: approved ? 'Cancellation approved' : 'Cancellation declined',
     body: approved
-      ? `Your appeal succeeded — "${title}" is cancelled and 95% has been refunded.`
+      ? `Your appeal succeeded — "${title}" is cancelled and a 95% refund is being processed.`
       : `After final review, the cancellation of "${title}" was declined; the project continues.`,
     link: '/projects',
   })
+  if (approved) {
+    await notifyRoles(db, ['master'], {
+      type: 'refund_due', title: 'Refund due',
+      body: `"${title}" was cancelled on final review — a 95% refund to the requester is ready to send.`,
+      link: '/master/refunds',
+    })
+  }
   if (r.provider_id) {
     await notify(db, r.provider_id, {
       type: 'cancellation_resolved',

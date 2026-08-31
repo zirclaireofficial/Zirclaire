@@ -118,8 +118,13 @@ export async function runExpirySweep(db: SupabaseClient) {
       await notify(db, p.requester_id, {
         type: 'project_expired',
         title: 'Project expired',
-        body: `"${p.title}" passed its deadline with no submission. 95% has been refunded to you.`,
+        body: `"${p.title}" passed its deadline with no submission. A 95% refund is being processed.`,
         link: '/projects',
+      })
+      await notifyRoles(db, ['master'], {
+        type: 'refund_due', title: 'Refund due',
+        body: `"${p.title}" auto-expired — a 95% refund to the requester is ready to send.`,
+        link: '/master/refunds',
       })
       summary.autoRefunded++
     } catch {
@@ -179,10 +184,17 @@ export async function runCancellationFinalizer(db: SupabaseClient) {
       type: 'cancellation_resolved',
       title: approved ? 'Cancellation approved' : 'Cancellation declined',
       body: approved
-        ? `Your request to cancel "${title}" was approved. 95% has been refunded.`
+        ? `Your request to cancel "${title}" was approved. A 95% refund is being processed.`
         : `Your request to cancel "${title}" was declined; the project continues.`,
       link: '/projects',
     })
+    if (approved) {
+      await notifyRoles(db, ['master'], {
+        type: 'refund_due', title: 'Refund due',
+        body: `"${title}" was cancelled on review — a 95% refund to the requester is ready to send.`,
+        link: '/master/refunds',
+      })
+    }
     if (row.provider_id) {
       await notify(db, row.provider_id, {
         type: 'cancellation_resolved',
