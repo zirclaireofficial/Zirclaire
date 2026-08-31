@@ -3,6 +3,7 @@
 // appears as "Zirclaire Review Team"). For staff it's one named party's channel.
 import { useCancellations } from '../application/useCancellations'
 import { useMediaUpload } from '~/shared/lib/useMediaUpload'
+import { useMediaViewer } from '~/shared/lib/useMediaViewer'
 import { attachmentTypeOf } from '~/features/messaging/domain'
 import type { DisputeMessage } from '../application/useCancellations'
 
@@ -15,6 +16,7 @@ const props = defineProps<{
 
 const { messages, sendMessage, attachmentUrl } = useCancellations()
 const { upload } = useMediaUpload()
+const { open: openMedia } = useMediaViewer()
 const supabase = useSupabaseClient()
 
 const MAX_MB = 15
@@ -89,7 +91,7 @@ async function openAttachment(m: DisputeMessage) {
   openingId.value = m.id
   try {
     const { url } = await attachmentUrl(m.id)
-    window.open(url, '_blank', 'noopener')
+    openMedia(url, { type: m.attachment_type, name: m.attachment_name ?? 'attachment' })
   } catch (e) {
     const err = e as { data?: { statusMessage?: string }; message?: string }
     useToast().add({ title: 'Could not open attachment', description: err?.data?.statusMessage ?? err?.message, color: 'error' })

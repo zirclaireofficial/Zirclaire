@@ -4,10 +4,12 @@
 // checked server-side).
 
 import { useRoyalties } from '~/features/royalties/application/useRoyalties'
+import { useMediaViewer } from '~/shared/lib/useMediaViewer'
 import { workTypeLabel } from '~/features/royalties/domain'
 import type { PurchasedItem } from '~/features/royalties/domain'
 
 const { myLibrary, downloadUrl } = useRoyalties()
+const { download: saveFile } = useMediaViewer()
 const toast = useToast()
 
 const items = ref<PurchasedItem[]>([])
@@ -28,7 +30,7 @@ async function download(it: PurchasedItem) {
   busy.value = it.item_id
   try {
     const url = await downloadUrl(it.item_id)
-    window.open(url, '_blank')
+    await saveFile(url, it.title || 'work')
   } catch (e) {
     const err = e as { data?: { statusMessage?: string }; message?: string }
     toast.add({ title: 'Could not get the file', description: err?.data?.statusMessage ?? err?.message, color: 'error' })

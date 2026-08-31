@@ -3,5 +3,6 @@
     <NuxtLayout>
       <NuxtPage />
     </NuxtLayout>
+    <ShellMediaViewer />
   </UApp>
 </template>

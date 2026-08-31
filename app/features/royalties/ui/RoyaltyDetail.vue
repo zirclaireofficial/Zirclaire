@@ -4,6 +4,7 @@
 // approved first. Buying reuses the simulated Touch 'n Go / Binance choice.
 
 import { useRoyalties } from '~/features/royalties/application/useRoyalties'
+import { useMediaViewer } from '~/shared/lib/useMediaViewer'
 import { useMe } from '~/features/auth/application/useMe'
 import { usePublicMedia } from '~/shared/lib/media'
 import { workTypeLabel, royaltyCommission, creatorPayout } from '~/features/royalties/domain'
@@ -13,6 +14,7 @@ const props = defineProps<{ item: StoreItem }>()
 const emit = defineEmits<{ close: []; purchased: [] }>()
 
 const { purchase, downloadUrl } = useRoyalties()
+const { download: saveFile } = useMediaViewer()
 const { me } = useMe()
 const { thumbUrl } = usePublicMedia()
 const user = useSupabaseUser()
@@ -48,7 +50,7 @@ async function download() {
   downloading.value = true
   try {
     const url = await downloadUrl(props.item.id)
-    window.open(url, '_blank')
+    await saveFile(url, props.item.title || 'work')
   } catch (e) {
     const err = e as { data?: { statusMessage?: string }; message?: string }
     toast.add({ title: 'Could not get the file', description: err?.data?.statusMessage ?? err?.message, color: 'error' })

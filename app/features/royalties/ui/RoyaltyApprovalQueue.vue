@@ -4,6 +4,7 @@
 
 import { useRoyalties, useRoyaltyModeration } from '~/features/royalties/application/useRoyalties'
 import { useKycAdmin } from '~/features/kyc/application/useKycAdmin'
+import { useMediaViewer } from '~/shared/lib/useMediaViewer'
 import { usePublicMedia } from '~/shared/lib/media'
 import { workTypeLabel } from '~/features/royalties/domain'
 import type { PendingItem } from '~/features/royalties/domain'
@@ -74,11 +75,11 @@ async function confirmReject(it: PendingItem) {
 }
 
 // Vet the actual file — reuses the admin signed-media route (private assets).
-const fileUrl = ref<string | null>(null)
+const { download: saveFile } = useMediaViewer()
 async function viewFile(it: PendingItem) {
   try {
-    fileUrl.value = await signedMedia(it.file_url)
-    window.open(fileUrl.value, '_blank')
+    const url = await signedMedia(it.file_url)
+    await saveFile(url, it.title || 'work')
   } catch {
     toast.add({ title: 'Could not open the file', color: 'error' })
   }

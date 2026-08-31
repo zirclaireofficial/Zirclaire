@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useProjects } from '~/features/projects/application/useProjects'
 import { useProjectActions } from '~/features/projects/application/useProjectActions'
+import { useMediaViewer } from '~/shared/lib/useMediaViewer'
 import {
   fundingStateOf,
   canResumePayment,
@@ -22,6 +23,7 @@ const CANCELLABLE = ['funded', 'live', 'awarded', 'in_progress', 'submitted_work
 
 const { myProjectsWithPayments } = useProjects()
 const { requestChanges, acceptWork, deliverableUrl } = useProjectActions()
+const { open: openMedia } = useMediaViewer()
 const toast = useToast()
 
 const projects = ref<ProjectWithPayments[]>([])
@@ -37,8 +39,8 @@ const chatFor = ref<{ id: string; title: string } | null>(null) // open project 
 async function viewDeliverable(projectId: string) {
   reviewBusy.value = projectId
   try {
-    const { url } = await deliverableUrl(projectId)
-    window.open(url, '_blank', 'noopener')
+    const { url, mediaType } = await deliverableUrl(projectId)
+    openMedia(url, { type: mediaType === 'image' ? 'image' : 'file', name: 'deliverable' })
   } catch (e) {
     toast.add({ title: 'Could not open the deliverable', description: errMsg(e), color: 'error' })
   } finally { reviewBusy.value = null }

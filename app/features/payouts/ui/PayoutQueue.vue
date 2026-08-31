@@ -5,6 +5,7 @@
 //   Paid    — the history, with the reference, date, and proof on file.
 import { authedFetch } from '~/shared/lib/authedFetch'
 import { useMediaUpload } from '~/shared/lib/useMediaUpload'
+import { useMediaViewer } from '~/shared/lib/useMediaViewer'
 
 interface PayoutRow {
   id: string
@@ -22,6 +23,7 @@ interface PayoutRow {
 
 const supabase = useSupabaseClient()
 const { upload } = useMediaUpload()
+const { showImage } = useMediaViewer()
 const toast = useToast()
 
 const tab = ref<'pending' | 'paid'>('pending')
@@ -83,7 +85,7 @@ async function viewProof(r: PayoutRow) {
   proofBusy.value = r.id
   try {
     const { url } = await authedFetch<{ url: string }>('/api/payouts/proof-url', { method: 'POST', body: { payoutId: r.id } })
-    window.open(url, '_blank', 'noopener')
+    showImage(url, `Proof — ${r.projects?.title ?? 'payout'}`) // image → lightbox; if it's a PDF, the viewer downloads it
   } catch (e) {
     toast.add({ title: 'Could not open proof', description: (e as { data?: { statusMessage?: string } })?.data?.statusMessage, color: 'error' })
   } finally { proofBusy.value = null }

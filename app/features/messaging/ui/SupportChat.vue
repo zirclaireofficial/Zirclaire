@@ -5,6 +5,7 @@
 
 import { useMessaging } from '~/features/messaging/application/useMessaging'
 import { useMediaUpload } from '~/shared/lib/useMediaUpload'
+import { useMediaViewer } from '~/shared/lib/useMediaViewer'
 import { ticketLabel, attachmentTypeOf } from '~/features/messaging/domain'
 import type { SupportTicketThread, Message } from '~/features/messaging/domain'
 
@@ -12,6 +13,7 @@ const emit = defineEmits<{ back: [] }>()
 
 const { myTickets, supportSend, attachmentUrl, botReply, subscribe } = useMessaging()
 const { upload } = useMediaUpload()
+const { open: openMedia } = useMediaViewer()
 const user = useSupabaseUser()
 const toast = useToast()
 
@@ -138,7 +140,7 @@ async function openAttachment(m: Message) {
   openingId.value = m.id
   try {
     const { url } = await attachmentUrl(m.id)
-    window.open(url, '_blank', 'noopener')
+    openMedia(url, { type: m.attachment.type, name: m.attachment.name ?? 'attachment' })
   } catch (e) {
     const err = e as { data?: { statusMessage?: string }; message?: string }
     toast.add({ title: 'Could not open attachment', description: err?.data?.statusMessage ?? err?.message, color: 'error' })
