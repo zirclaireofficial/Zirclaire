@@ -40,19 +40,6 @@ watch(user, () => load(), { immediate: true })
             </span>
             <UIcon name="i-lucide-chevron-right" class="size-5 text-stone-400" />
           </NuxtLink>
-          <NuxtLink
-            to="/royalties/publish"
-            class="zc-tap flex items-center justify-between rounded-xl border border-stone-200 p-4 transition hover:border-primary/50 dark:border-stone-800"
-          >
-            <span class="flex items-center gap-3">
-              <UIcon name="i-lucide-book-open-text" class="size-5 text-primary" />
-              <span>
-                <span class="block text-sm font-medium">Publish a work</span>
-                <span class="block text-xs text-stone-500 dark:text-stone-400">Sell a novel, research or journal</span>
-              </span>
-            </span>
-            <UIcon name="i-lucide-chevron-right" class="size-5 text-stone-400" />
-          </NuxtLink>
         </div>
       </template>
       <div v-else class="flex flex-col items-center gap-2 py-24 text-center">

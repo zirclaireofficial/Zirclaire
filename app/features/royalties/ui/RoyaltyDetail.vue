@@ -21,7 +21,6 @@ const user = useSupabaseUser()
 const toast = useToast()
 
 const owned = ref(props.item.owned)
-const method = ref<'touch_n_go' | 'binance'>('touch_n_go')
 const buying = ref(false)
 const downloading = ref(false)
 
@@ -107,34 +106,11 @@ async function download() {
             This is your work. You can download it from your library.
           </p>
 
-          <!-- Can buy -->
+          <!-- Can buy (any approved member — requester or provider) -->
           <template v-else-if="canBuy">
-            <div>
-              <p class="mb-2 text-sm font-medium">Pay with</p>
-              <div class="grid grid-cols-2 gap-3">
-                <button
-                  type="button"
-                  class="zc-tap rounded-xl border p-3 text-left transition"
-                  :class="method === 'touch_n_go' ? 'border-primary ring-1 ring-primary' : 'border-stone-200 dark:border-stone-800'"
-                  @click="method = 'touch_n_go'"
-                >
-                  <UIcon name="i-lucide-wallet" class="size-5 text-primary" />
-                  <div class="mt-1 text-sm font-medium">Touch 'n Go</div>
-                </button>
-                <button
-                  type="button"
-                  class="zc-tap rounded-xl border p-3 text-left transition"
-                  :class="method === 'binance' ? 'border-primary ring-1 ring-primary' : 'border-stone-200 dark:border-stone-800'"
-                  @click="method = 'binance'"
-                >
-                  <UIcon name="i-lucide-coins" class="size-5 text-primary" />
-                  <div class="mt-1 text-sm font-medium">Binance</div>
-                </button>
-              </div>
-            </div>
             <UButton color="primary" block size="lg" class="zc-tap" :loading="buying" :label="`Buy for RM ${item.price_myr}`" @click="buy" />
             <p class="flex items-center justify-center gap-1.5 text-center text-xs text-stone-400">
-              <UIcon name="i-lucide-lock" class="size-3" /> Simulated payment — no real charge.
+              <UIcon name="i-lucide-lock" class="size-3" /> Secure payment. Buy once, download any time.
             </p>
           </template>
 
