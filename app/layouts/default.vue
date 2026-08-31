@@ -7,6 +7,16 @@ watch(user, () => load(), { immediate: true })
 const isAdmin = computed(() => me.value?.role === 'admin' || me.value?.role === 'master')
 const isMaster = computed(() => me.value?.role === 'master')
 const isSuspended = computed(() => me.value?.is_suspended === true)
+// Friendly role label — small, for the person's own reference.
+const roleLabel = computed(() => {
+  switch (me.value?.role) {
+    case 'service_requester': return 'Requester'
+    case 'service_provider': return 'Provider'
+    case 'admin': return 'Admin'
+    case 'master': return 'Master'
+    default: return ''
+  }
+})
 </script>
 
 <template>
@@ -28,8 +38,10 @@ const isSuspended = computed(() => me.value?.is_suspended === true)
         >
           <NuxtLink :to="isMaster ? '/master' : isAdmin ? '/admin' : '/'" class="zc-tap flex items-center gap-2.5">
             <ShellLogo :size="42" />
-            <span class="font-serif text-2xl tracking-tight">Zirclaire<span class="text-primary">.</span></span>
-            <UBadge v-if="isAdmin" color="primary" variant="soft" size="sm" class="ml-0.5">{{ isMaster ? 'Master' : 'Admin' }}</UBadge>
+            <span class="flex flex-col leading-none">
+              <span class="font-serif text-2xl tracking-tight">Zirclaire<span class="text-primary">.</span></span>
+              <span v-if="user && roleLabel" class="mt-0.5 text-[10px] font-medium uppercase tracking-wide text-stone-400">{{ roleLabel }}</span>
+            </span>
           </NuxtLink>
           <div class="flex items-center gap-1">
             <ShellThemeToggle />

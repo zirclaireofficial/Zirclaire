@@ -9,6 +9,9 @@ watch(user, () => load(), { immediate: true })
 // Master is above admin; until it has its own console it rides the admin one.
 const isAdmin = computed(() => me.value?.role === 'admin' || me.value?.role === 'master')
 const isMaster = computed(() => me.value?.role === 'master')
+const roleLabel = computed(() =>
+  me.value?.role === 'service_requester' ? 'Requester'
+    : me.value?.role === 'service_provider' ? 'Provider' : '')
 
 const items = computed(() =>
   isAdmin.value
@@ -54,7 +57,8 @@ function isActive(to: string) {
       <ShellLogo :size="48" />
       <span class="font-serif text-2xl tracking-tight">Zirclaire<span class="text-primary">.</span></span>
     </NuxtLink>
-    <p v-if="isAdmin" class="zc-eyebrow mb-4 px-2">Admin console</p>
+    <p v-if="isAdmin" class="zc-eyebrow mb-4 px-2">{{ isMaster ? 'Master console' : 'Admin console' }}</p>
+    <p v-else-if="roleLabel" class="zc-eyebrow mb-4 px-2">{{ roleLabel }}</p>
     <div v-else class="mb-4" />
 
     <nav class="flex flex-1 flex-col gap-1">
