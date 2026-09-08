@@ -6,7 +6,7 @@ import PostList from '~/features/social/ui/PostList.vue'
 
 // The feed is public, so it's worth being findable.
 useSeoMeta({
-  title: 'Zirclaire — a community of verified professionals',
+  title: 'Zirclaire — Where verified professionals turn skills into business',
   description:
     'Browse work from verified service providers on Zirclaire. Every project is escrow-backed and every member is identity-verified.',
 })
