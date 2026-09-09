@@ -5,7 +5,7 @@
 
 import { useSocial } from '~/features/social/application/useSocial'
 import { usePublicMedia } from '~/shared/lib/media'
-import { canInteract, canDeleteComment } from '~/features/social/domain'
+import { canInteract, canDeleteComment, contactInfoError } from '~/features/social/domain'
 import type { FeedComment, FeedPost } from '~/features/social/domain'
 import ReportDialog from './ReportDialog.vue'
 
@@ -44,6 +44,8 @@ onMounted(load)
 
 async function send() {
   if (!body.value.trim() || sending.value) return
+  const contactErr = contactInfoError(body.value)
+  if (contactErr) { toast.add({ title: 'Not allowed', description: contactErr, color: 'error' }); return }
   sending.value = true
   try {
     await postComment(props.post.id, body.value)

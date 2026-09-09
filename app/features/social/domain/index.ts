@@ -21,6 +21,25 @@ export function isCommentPublishable(body: string): boolean {
 }
 
 /**
+ * Keep deals on-platform: no links, no phone numbers in the community.
+ * Returns a user-facing error message, or null if the text is clean. Mirrors
+ * the database trigger (migration 53) so users get instant feedback.
+ */
+export function contactInfoError(text: string): string | null {
+  const t = text || ''
+  if (/(https?:\/\/|www\.)/i.test(t)
+    || /[a-z0-9_-]+\.(com|net|org|io|co|me|ly|app|xyz|info|biz|gg|link|site|shop|store|my|dev|online|ai|us|uk|in)(\/|\?|\b)/i.test(t)) {
+    return "Links aren't allowed in the community — keep conversations on Zirclaire."
+  }
+  // Any digit token with 8 or more digits looks like a phone number.
+  const tokens = t.match(/[+(]?\d[\d\s().+-]{6,}\d/g) || []
+  if (tokens.some((tok) => (tok.replace(/\D/g, '').length >= 8))) {
+    return "Phone numbers aren't allowed in the community — keep contact on Zirclaire."
+  }
+  return null
+}
+
+/**
  * Who may delete what. Authors delete their own content; admins remove
  * anything, but through the server (a different lever), never from here.
  */

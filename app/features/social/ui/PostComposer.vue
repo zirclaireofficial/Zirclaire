@@ -5,7 +5,7 @@
 import { useSocial } from '~/features/social/application/useSocial'
 import { useMediaUpload } from '~/shared/lib/useMediaUpload'
 import { useMe } from '~/features/auth/application/useMe'
-import { MAX_POST_MEDIA, isPostPublishable } from '~/features/social/domain'
+import { MAX_POST_MEDIA, isPostPublishable, contactInfoError } from '~/features/social/domain'
 
 const emit = defineEmits<{ published: [] }>()
 
@@ -53,6 +53,8 @@ onBeforeUnmount(() => previews.value.forEach((u) => URL.revokeObjectURL(u)))
 
 async function submit() {
   if (!canPost.value || posting.value) return
+  const contactErr = contactInfoError(body.value)
+  if (contactErr) { toast.add({ title: 'Not allowed', description: contactErr, color: 'error' }); return }
   posting.value = true
   try {
     const uploaded = await Promise.all(
