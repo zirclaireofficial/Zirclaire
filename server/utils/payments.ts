@@ -9,13 +9,18 @@
 // so the UI can show a clear "Sandbox / Simulated" badge — testers must never
 // think real money moved when it didn't.
 
-export type PaymentMode = 'toyyibpay' | 'xendit' | 'simulator'
+export type PaymentMode = 'billplz' | 'toyyibpay' | 'xendit' | 'simulator'
 
 export function paymentMode(): PaymentMode {
   const p = process.env.PAYMENTS_PROVIDER
+  if (p === 'billplz') return 'billplz'
   if (p === 'toyyibpay') return 'toyyibpay'
   if (p === 'xendit') return 'xendit'
   return 'simulator'
+}
+
+export function isBillplz(): boolean {
+  return paymentMode() === 'billplz'
 }
 
 export function isToyyibpay(): boolean {

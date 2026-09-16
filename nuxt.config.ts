@@ -65,11 +65,13 @@ export default defineNuxtConfig({
       //   'sandbox'   -> real gateway in test mode (ToyyibPay dev / Xendit test)
       //   'live'      -> real gateway in production (real money)
       paymentsMode:
-        process.env.PAYMENTS_PROVIDER === 'toyyibpay'
-          ? (process.env.TOYYIBPAY_ENV === 'production' ? 'live' : 'sandbox')
-          : process.env.PAYMENTS_PROVIDER === 'xendit'
-            ? (process.env.XENDIT_SECRET_KEY?.startsWith('xnd_production') ? 'live' : 'sandbox')
-            : 'simulator',
+        process.env.PAYMENTS_PROVIDER === 'billplz'
+          ? (process.env.BILLPLZ_ENV === 'production' ? 'live' : 'sandbox')
+          : process.env.PAYMENTS_PROVIDER === 'toyyibpay'
+            ? (process.env.TOYYIBPAY_ENV === 'production' ? 'live' : 'sandbox')
+            : process.env.PAYMENTS_PROVIDER === 'xendit'
+              ? (process.env.XENDIT_SECRET_KEY?.startsWith('xnd_production') ? 'live' : 'sandbox')
+              : 'simulator',
     },
   },
 

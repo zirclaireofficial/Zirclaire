@@ -5,9 +5,9 @@
 //   simulator mode -> funds + launches instantly (fake money), clearly labelled.
 import { serviceClient, getCallerProfile } from '../../utils/auth'
 import { requireProjectOwner } from '../../utils/projects'
-import { isXendit, isToyyibpay, paymentMode } from '../../utils/payments'
+import { isXendit, isBillplz, isToyyibpay, paymentMode } from '../../utils/payments'
 import { createInvoice, getInvoice } from '../../utils/xendit'
-import { createBill, getBillStatus, billPayUrl } from '../../utils/toyyibpay'
+import { createGatewayBill, getGatewayBillStatus, gatewayCallbackPath, gatewayPayUrl } from '../../utils/gateway'
 
 export default defineEventHandler(async (event) => {
   const { projectId, returnUrl } = await readBody(event)
@@ -38,8 +38,8 @@ export default defineEventHandler(async (event) => {
     return { mode: 'simulator' as const, funded: true, project: data }
   }
 
-  // ---- ToyyibPay: create a bill; funding waits for the verified callback ----
-  if (isToyyibpay()) {
+  // ---- Gateway (Billplz / ToyyibPay): create a bill; funding waits for the callback ----
+  if (isBillplz() || isToyyibpay()) {
     // Idempotency: reuse an open (unpaid, not-failed) bill for this project.
     const { data: open } = await db
       .from('payments')
@@ -51,9 +51,9 @@ export default defineEventHandler(async (event) => {
       .limit(1)
       .maybeSingle()
     if (open?.toyyibpay_billcode) {
-      const st = await getBillStatus(open.toyyibpay_billcode).catch(() => null)
+      const st = await getGatewayBillStatus(open.toyyibpay_billcode).catch(() => null)
       if (st && !st.paid && st.status !== '3') {
-        return { mode: paymentMode(), invoiceUrl: billPayUrl(open.toyyibpay_billcode), invoiceId: open.toyyibpay_billcode, reused: true }
+        return { mode: paymentMode(), invoiceUrl: gatewayPayUrl(open.toyyibpay_billcode), invoiceId: open.toyyibpay_billcode, reused: true }
       }
     }
 
@@ -61,17 +61,16 @@ export default defineEventHandler(async (event) => {
     const ref = `zc-fund-${projectId}-${Date.now()}`
     const payer = await getCallerProfile(event) // the requester (owner)
     // Send the payer to our return page, which confirms the payment and funds
-    // the project on the spot (ToyyibPay appends ?billcode=&status_id= itself).
-    const bill = await createBill({
+    // the project on the spot (the gateway appends its own bill id to the URL).
+    const bill = await createGatewayBill({
       name: 'Zirclaire Project',
       description: `Fund project ${String(project.title).slice(0, 60)}`,
       amountMYR: amount,
       externalRef: ref,
       returnUrl: `${origin}/payment/return`,
-      callbackUrl: `${origin}/api/webhooks/toyyibpay`,
-      payerName: payer.full_name,
-      payerEmail: payer.email,
-      payerPhone: payer.phone,
+      callbackUrl: `${origin}${gatewayCallbackPath()}`,
+      email: payer.email,
+      phone: payer.phone,
     })
 
     await db.from('payments').insert({
@@ -79,11 +78,11 @@ export default defineEventHandler(async (event) => {
       payer_id: project.requester_id,
       amount_myr: amount,
       reference: ref,
-      toyyibpay_billcode: bill.billCode,
+      toyyibpay_billcode: bill.billId, // generic gateway bill id
       status: 'claimed', // becomes 'verified' when the callback is verified
     })
 
-    return { mode: paymentMode(), invoiceUrl: bill.payUrl, invoiceId: bill.billCode }
+    return { mode: paymentMode(), invoiceUrl: bill.payUrl, invoiceId: bill.billId }
   }
 
   // ---- Idempotency: reuse an existing unpaid invoice ----

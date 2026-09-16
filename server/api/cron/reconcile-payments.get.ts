@@ -14,10 +14,10 @@
 //        3. fund_project is atomic (WHERE status='approved'), so a concurrent
 //           webhook or re-run can never double-fund.
 import { serviceClient } from '../../utils/auth'
-import { isXendit, isToyyibpay } from '../../utils/payments'
+import { isXendit, isBillplz, isToyyibpay } from '../../utils/payments'
 import { getInvoice } from '../../utils/xendit'
-import { getBillStatus } from '../../utils/toyyibpay'
-import { notify } from '../../utils/notify'
+import { getGatewayBillStatus } from '../../utils/gateway'
+import { fundPaidProject } from '../../utils/funding'
 import { runExpirySweep, runCancellationFinalizer, runCompletionSweep } from '../../utils/expiry'
 
 export default defineEventHandler(async (event) => {
@@ -37,49 +37,31 @@ export default defineEventHandler(async (event) => {
   // (B) Mature cancellation decisions past their 48h appeal window — always runs.
   const cancellations = await runCancellationFinalizer(db)
 
-  // (C) ToyyibPay reconciliation — recover any bill paid but not funded (lost
-  // callback). Same safety as the webhook: verify with ToyyibPay, fund only if
-  // paid, fund_project is atomic on status='approved'.
-  if (isToyyibpay()) {
-    // Recover ANY still-approved project that has a ToyyibPay bill — regardless
-    // of the payment row's status. (A prior bug could flip a payment to
-    // 'verified' while funding failed, which the old 'claimed'-only filter
-    // would never revisit. Keying off the PROJECT being 'approved' closes that
-    // hole: fund_project is atomic on status='approved', so it can't double-fund.)
+  // (C) Gateway reconciliation — recover any bill paid but not funded (lost
+  // callback). Verify with the gateway; fund only if paid. fund_project /
+  // fund_service_order are atomic on status='approved', so no double-fund.
+  if (isBillplz() || isToyyibpay()) {
+    // Any still-approved project that has a gateway bill — regardless of the
+    // payment row's status.
     const { data: rows } = await db
       .from('payments')
-      .select('id, status, toyyibpay_billcode, projects!inner(id, status, title, budget_myr, requester_id, timeline_minutes, service_id)')
+      .select('id, status, toyyibpay_billcode, projects!inner(id, status)')
       .not('toyyibpay_billcode', 'is', null)
       .eq('projects.status', 'approved')
       .limit(100)
     const results: Array<Record<string, unknown>> = []
     for (const r of rows ?? []) {
-      const project = (r as unknown as { projects: {
-        id: string; status: string; title: string; budget_myr: number; requester_id: string; timeline_minutes: number | null; service_id: string | null
-      } }).projects
+      const project = (r as unknown as { projects: { id: string; status: string } }).projects
       if (!project || project.status !== 'approved') continue
       let st
-      try { st = await getBillStatus(r.toyyibpay_billcode as string) } catch { continue }
+      try { st = await getGatewayBillStatus(r.toyyibpay_billcode as string) } catch { continue }
       if (!st.paid) continue
-      // Fund FIRST; only settle the payment if funding succeeded. Service orders
-      // (provider pre-assigned) go straight to awarded; commissioned go live.
-      if (project.service_id) {
-        const { error: sErr } = await db.rpc('fund_service_order', { p_project: project.id, p_actor: project.requester_id })
-        if (sErr) { results.push({ project: project.id, funded: false, note: sErr.message }); continue }
-      } else {
-        const { error: fErr } = await db.rpc('fund_project', { p_project: project.id, p_amount: project.budget_myr, p_actor: project.requester_id })
-        if (fErr) { results.push({ project: project.id, funded: false, note: fErr.message }); continue }
-        const mins = project.timeline_minutes ?? 2880
-        await db.rpc('push_project_live', { p_project: project.id, p_deadline: new Date(Date.now() + mins * 60_000).toISOString() })
+      try {
+        await fundPaidProject(db, project.id, r.id as string)
+        results.push({ project: project.id, funded: true })
+      } catch (e) {
+        results.push({ project: project.id, funded: false, note: (e as { message?: string })?.message })
       }
-      await db.from('payments').update({ status: 'verified', paid_at: new Date().toISOString() }).eq('id', r.id)
-      await notify(db, project.requester_id, {
-        type: 'payment_received',
-        title: project.service_id ? 'Order confirmed' : 'Payment received',
-        body: project.service_id ? `Your order "${project.title}" is paid — the provider will start.` : `"${project.title}" is funded and now live for providers to apply.`,
-        link: '/projects',
-      })
-      results.push({ project: project.id, funded: true })
     }
     return { expiry, completions, cancellations, checked: (rows ?? []).length, recovered: results.filter((x) => x.funded).length, results }
   }

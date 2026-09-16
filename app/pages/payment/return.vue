@@ -5,7 +5,10 @@
 import { authedFetch } from '~/shared/lib/authedFetch'
 
 const route = useRoute()
-const billCode = computed(() => String(route.query.billcode ?? route.query.billCode ?? ''))
+// ToyyibPay returns ?billcode=..., Billplz returns ?billplz[id]=...
+const billCode = computed(() => String(
+  route.query.billcode ?? route.query.billCode ?? route.query['billplz[id]'] ?? '',
+))
 const backTo = computed(() => {
   const to = route.query.to
   return typeof to === 'string' && to.startsWith('/') ? to : '/projects'

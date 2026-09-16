@@ -4,7 +4,7 @@
 //                 finalized only when the webhook confirms payment.
 import { serviceClient, getCallerProfile } from '../../utils/auth'
 import { paymentMode, isGatewayMode } from '../../utils/payments'
-import { createBill, getBillStatus, billPayUrl } from '../../utils/toyyibpay'
+import { createGatewayBill, getGatewayBillStatus, gatewayCallbackPath, gatewayPayUrl } from '../../utils/gateway'
 import { completeRoyaltyPurchase } from '../../utils/royalty'
 
 export default defineEventHandler(async (event) => {
@@ -43,28 +43,27 @@ export default defineEventHandler(async (event) => {
     .not('toyyibpay_billcode', 'is', null)
     .order('created_at', { ascending: false }).limit(1).maybeSingle()
   if (open?.toyyibpay_billcode) {
-    const st = await getBillStatus(open.toyyibpay_billcode).catch(() => null)
+    const st = await getGatewayBillStatus(open.toyyibpay_billcode).catch(() => null)
     if (st && !st.paid && st.status !== '3') {
-      return { mode: paymentMode(), invoiceUrl: billPayUrl(open.toyyibpay_billcode), reused: true }
+      return { mode: paymentMode(), invoiceUrl: gatewayPayUrl(open.toyyibpay_billcode), reused: true }
     }
   }
 
   const origin = getRequestURL(event).origin
   const ref = `zc-roy-${itemId}-${Date.now()}`
-  const bill = await createBill({
+  const bill = await createGatewayBill({
     name: 'Zirclaire Work',
     description: `Buy ${String(item.title).slice(0, 55)}`,
     amountMYR: Number(item.price_myr),
     externalRef: ref,
-    returnUrl: typeof returnUrl === 'string' ? returnUrl : `${origin}/royalties`,
-    callbackUrl: `${origin}/api/webhooks/toyyibpay`,
-    payerName: profile.full_name,
-    payerEmail: profile.email,
-    payerPhone: profile.phone,
+    returnUrl: `${origin}/royalties/library`,
+    callbackUrl: `${origin}${gatewayCallbackPath()}`,
+    email: profile.email,
+    phone: profile.phone,
   })
   await db.from('royalty_payments').insert({
     item_id: itemId, buyer_id: profile.id, amount_myr: item.price_myr,
-    toyyibpay_billcode: bill.billCode, reference: ref, status: 'pending',
+    toyyibpay_billcode: bill.billId, reference: ref, status: 'pending',
   })
   return { mode: paymentMode(), invoiceUrl: bill.payUrl }
 })

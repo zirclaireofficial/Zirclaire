@@ -5,7 +5,7 @@
 //                 (webhook / return handler) — the buyer pays FIRST.
 import { serviceClient, getCallerProfile } from '../../utils/auth'
 import { isGatewayMode, paymentMode } from '../../utils/payments'
-import { createBill } from '../../utils/toyyibpay'
+import { createGatewayBill, gatewayCallbackPath } from '../../utils/gateway'
 
 export default defineEventHandler(async (event) => {
   const profile = await getCallerProfile(event)
@@ -31,16 +31,15 @@ export default defineEventHandler(async (event) => {
   const origin = getRequestURL(event).origin
   const amount = Number(project.budget_myr)
   const ref = `zc-svc-${project.id}-${Date.now()}`
-  const bill = await createBill({
+  const bill = await createGatewayBill({
     name: 'Zirclaire Service',
     description: `Order ${String(project.title).slice(0, 55)}`,
     amountMYR: amount,
     externalRef: ref,
     returnUrl: `${origin}/payment/return`,
-    callbackUrl: `${origin}/api/webhooks/toyyibpay`,
-    payerName: profile.full_name,
-    payerEmail: profile.email,
-    payerPhone: profile.phone,
+    callbackUrl: `${origin}${gatewayCallbackPath()}`,
+    email: profile.email,
+    phone: profile.phone,
   })
 
   await db.from('payments').insert({
@@ -48,7 +47,7 @@ export default defineEventHandler(async (event) => {
     payer_id: profile.id,
     amount_myr: amount,
     reference: ref,
-    toyyibpay_billcode: bill.billCode,
+    toyyibpay_billcode: bill.billId, // generic gateway bill id
     status: 'claimed', // becomes 'verified' when the callback is verified
   })
 
